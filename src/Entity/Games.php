@@ -3,11 +3,26 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\GamesRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GamesRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    shortName: 'games',
+    operations: [
+        new Get(uriTemplate: 'games/{id}'),
+        new GetCollection(uriTemplate: 'games'),
+        new Post(uriTemplate: 'games'),
+        new Patch(uriTemplate: 'games/{id}'),
+        new Delete(uriTemplate: 'games/{id}'),
+    ]
+)]
 class Games
 {
     #[ORM\Id]
