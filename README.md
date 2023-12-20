@@ -1,10 +1,12 @@
 # Ultima
 Video game digital distribution service
 
+To run containers with application
 ~~~shell
 docker compose up -d
 ~~~
 
+To stop containers
 ~~~shell
 docker compose down
 ~~~
