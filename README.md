@@ -9,3 +9,7 @@ docker compose up -d
 docker compose down
 ~~~
 
+To clean dokcer images and containers
+~~~shell
+docker system prune -af
+~~~
