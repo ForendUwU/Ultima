@@ -1,0 +1,20 @@
+<phpunit colors="true">
+    <testsuites>
+        <testsuite name="Manager test suites">
+            <directory>./Tests/Manager</directory>
+        </testsuite>
+    </testsuites>
+    <logging>
+        <log type="coverage-html"
+             target="./log/codeCoverage"
+             lowUpperBound="40"
+             highLowerBound="75"
+             showUncoveredFiles="false"/>
+    </logging>
+    <filter>
+        <!--        files with at least one line executed appears in report-->
+        <whitelist addUncoveredFilesFromWhitelist="false">
+            <directory suffix=".php">./Manager</directory>
+        </whitelist>
+    </filter>
+</phpunit>
