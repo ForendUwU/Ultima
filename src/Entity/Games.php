@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Odm\Filter\RangeFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -11,6 +14,8 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Repository\GamesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Boolean;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GamesRepository::class)]
 #[ApiResource(
@@ -31,13 +36,20 @@ class Games
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[ApiFilter(SearchFilter::class, strategy: 'partial')]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 50, minMessage: 'Min size for name is 2', maxMessage: 'Max size for name is 50')]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 10, max: 250, minMessage: 'Min size for description is 10', maxMessage: 'Max size for description is 250')]
     private ?string $description = null;
 
     #[ORM\Column]
-    private ?float $price = null;
+    #[ApiFilter(RangeFilter::class)]
+    #[Assert\GreaterThanOrEqual(0)]
+    private ?float $price = 0;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
