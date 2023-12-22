@@ -50,7 +50,7 @@ ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 COPY --from=composer_upstream --link /composer /usr/bin/composer
 
-HEALTHCHECK --start-period=60s --retries=3 CMD curl -f http://localhost || exit 1
+HEALTHCHECK --start-period=60s --retries=3 CMD curl -f http://localhost/ || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 
 # Dev FrankenPHP image
