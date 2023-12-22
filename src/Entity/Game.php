@@ -16,6 +16,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GamesRepository::class)]
@@ -27,7 +28,10 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(),
         new Patch(),
         new Delete(),
-    ]
+    ],
+    normalizationContext: [
+        'groups' => ['game:read']
+    ],
 )]
 #[UniqueEntity(fields: ['title'], message: 'Game with this title already exists')]
 class Game
@@ -35,28 +39,34 @@ class Game
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['game:read', 'purchasedGame:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50, minMessage: 'Min size for title is 2', maxMessage: 'Max size for title is 50')]
+    #[Groups(['game:read', 'purchasedGame:read', 'user:read'])]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 10, max: 250, minMessage: 'Min size for description is 10', maxMessage: 'Max size for description is 250')]
+    #[Groups(['game:read'])]
     private ?string $description = null;
 
     #[ORM\Column]
     #[ApiFilter(RangeFilter::class)]
     #[Assert\GreaterThanOrEqual(0)]
+    #[Groups(['game:read'])]
     private ?float $price = 0;
 
     #[ORM\Column]
+    #[Groups(['game:read'])]
     private ?\DateTimeImmutable $publishedAt;
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: PurchasedGame::class)]
+    #[Groups(['game:read'])]
     private Collection $purchasedGames;
 
     public function __construct()

@@ -20,31 +20,35 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Post(),
         new Patch(),
         new Delete(),
-    ]
+    ],
+    normalizationContext: [
+        'groups' => ['purchasedGame:read']
+    ],
 )]
 class PurchasedGame
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'purchasedGame:read', 'game:read'])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'purchasedGame:read'])]
     private ?float $hoursOfPlaying;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'purchasedGame:read'])]
     private ?\DateTimeImmutable $boughtAt;
 
     #[ORM\ManyToOne(inversedBy: 'purchasedGames')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['purchasedGame:read'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'purchasedGames')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'purchasedGame:read'])]
     private ?Game $game = null;
 
     public function __construct()
