@@ -13,22 +13,26 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Repository\GamesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use phpDocumentor\Reflection\Types\Boolean;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GamesRepository::class)]
 #[ApiResource(
-    shortName: 'games',
+    shortName: 'Game',
     operations: [
-        new Get(uriTemplate: 'games/{id}'),
-        new GetCollection(uriTemplate: 'games'),
-        new Post(uriTemplate: 'games'),
-        new Patch(uriTemplate: 'games/{id}'),
-        new Delete(uriTemplate: 'games/{id}'),
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Patch(),
+        new Delete(),
     ]
 )]
-class Games
+#[UniqueEntity(fields: ['title'], message: 'Game with this title already exists')]
+class Game
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -38,8 +42,8 @@ class Games
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 50, minMessage: 'Min size for name is 2', maxMessage: 'Max size for name is 50')]
-    private ?string $name = null;
+    #[Assert\Length(min: 2, max: 50, minMessage: 'Min size for title is 2', maxMessage: 'Max size for title is 50')]
+    private ?string $title = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
@@ -52,24 +56,30 @@ class Games
     private ?float $price = 0;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?\DateTimeImmutable $publishedAt;
 
-    #[ORM\Column]
-    private ?bool $isPublished = null;
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: PurchasedGame::class)]
+    private Collection $purchasedGames;
+
+    public function __construct()
+    {
+        $this->publishedAt = new \DateTimeImmutable();
+        $this->purchasedGames = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getTitle(): ?string
     {
-        return $this->name;
+        return $this->title;
     }
 
-    public function setName(string $name): static
+    public function setTitle(string $title): static
     {
-        $this->name = $name;
+        $this->title = $title;
 
         return $this;
     }
@@ -98,26 +108,37 @@ class Games
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getPublishedAt(): ?\DateTimeImmutable
     {
-        return $this->createdAt;
+        return $this->publishedAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    /**
+     * @return Collection<int, PurchasedGame>
+     */
+    public function getPurchasedGames(): Collection
     {
-        $this->createdAt = $createdAt;
+        return $this->purchasedGames;
+    }
+
+    public function addPurchasedGame(PurchasedGame $purchasedGame): static
+    {
+        if (!$this->purchasedGames->contains($purchasedGame)) {
+            $this->purchasedGames->add($purchasedGame);
+            $purchasedGame->setGame($this);
+        }
 
         return $this;
     }
 
-    public function getIsPublished(): ?bool
+    public function removePurchasedGame(PurchasedGame $purchasedGame): static
     {
-        return $this->isPublished;
-    }
-
-    public function setIsPublished(bool $isPublished): static
-    {
-        $this->isPublished = $isPublished;
+        if ($this->purchasedGames->removeElement($purchasedGame)) {
+            // set the owning side to null (unless already changed)
+            if ($purchasedGame->getGame() === $this) {
+                $purchasedGame->setGame(null);
+            }
+        }
 
         return $this;
     }

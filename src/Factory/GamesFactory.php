@@ -2,30 +2,30 @@
 
 namespace App\Factory;
 
-use App\Entity\Games;
+use App\Entity\Game;
 use App\Repository\GamesRepository;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
 
 /**
- * @extends ModelFactory<Games>
+ * @extends ModelFactory<Game>
  *
- * @method        Games|Proxy                     create(array|callable $attributes = [])
- * @method static Games|Proxy                     createOne(array $attributes = [])
- * @method static Games|Proxy                     find(object|array|mixed $criteria)
- * @method static Games|Proxy                     findOrCreate(array $attributes)
- * @method static Games|Proxy                     first(string $sortedField = 'id')
- * @method static Games|Proxy                     last(string $sortedField = 'id')
- * @method static Games|Proxy                     random(array $attributes = [])
- * @method static Games|Proxy                     randomOrCreate(array $attributes = [])
+ * @method        Game|Proxy                     create(array|callable $attributes = [])
+ * @method static Game|Proxy                     createOne(array $attributes = [])
+ * @method static Game|Proxy                     find(object|array|mixed $criteria)
+ * @method static Game|Proxy                     findOrCreate(array $attributes)
+ * @method static Game|Proxy                     first(string $sortedField = 'id')
+ * @method static Game|Proxy                     last(string $sortedField = 'id')
+ * @method static Game|Proxy                     random(array $attributes = [])
+ * @method static Game|Proxy                     randomOrCreate(array $attributes = [])
  * @method static GamesRepository|RepositoryProxy repository()
- * @method static Games[]|Proxy[]                 all()
- * @method static Games[]|Proxy[]                 createMany(int $number, array|callable $attributes = [])
- * @method static Games[]|Proxy[]                 createSequence(iterable|callable $sequence)
- * @method static Games[]|Proxy[]                 findBy(array $attributes)
- * @method static Games[]|Proxy[]                 randomRange(int $min, int $max, array $attributes = [])
- * @method static Games[]|Proxy[]                 randomSet(int $number, array $attributes = [])
+ * @method static Game[]|Proxy[]                 all()
+ * @method static Game[]|Proxy[]                 createMany(int $number, array|callable $attributes = [])
+ * @method static Game[]|Proxy[]                 createSequence(iterable|callable $sequence)
+ * @method static Game[]|Proxy[]                 findBy(array $attributes)
+ * @method static Game[]|Proxy[]                 randomRange(int $min, int $max, array $attributes = [])
+ * @method static Game[]|Proxy[]                 randomSet(int $number, array $attributes = [])
  */
 final class GamesFactory extends ModelFactory
 {
@@ -61,12 +61,12 @@ final class GamesFactory extends ModelFactory
     protected function initialize(): self
     {
         return $this
-            // ->afterInstantiate(function(Games $games): void {})
+            // ->afterInstantiate(function(Game $games): void {})
         ;
     }
 
     protected static function getClass(): string
     {
-        return Games::class;
+        return Game::class;
     }
 }
