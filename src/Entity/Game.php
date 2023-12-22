@@ -66,7 +66,7 @@ class Game
     private ?\DateTimeImmutable $publishedAt;
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: PurchasedGame::class)]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'game:write'])]
     private Collection $purchasedGames;
 
     public function __construct()

@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -25,6 +27,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
         'groups' => ['purchasedGame:read']
     ],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['user.login' => 'partial'])]
 class PurchasedGame
 {
     #[ORM\Id]
@@ -48,7 +51,7 @@ class PurchasedGame
 
     #[ORM\ManyToOne(inversedBy: 'purchasedGames')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['user:read', 'purchasedGame:read'])]
+    #[Groups(['user:read', 'purchasedGame:read', 'user:write'])]
     private ?Game $game = null;
 
     public function __construct()

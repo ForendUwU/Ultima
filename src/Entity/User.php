@@ -92,7 +92,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email]
     private ?string $email = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PurchasedGame::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PurchasedGame::class, cascade: ['persist'])]
     #[Groups(['user:read', 'user:write'])]
     private Collection $purchasedGames;
 
