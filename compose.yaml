@@ -35,10 +35,6 @@ services:
         protocol: udp
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
-
-###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-15}-alpine
     environment:
@@ -50,14 +46,26 @@ services:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+  frontend:
+    build:
+      context: frontend
+      target: development
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/src:/code/src
+      - /project/node_modules
+    networks:
+      - react-spring
+    depends_on:
+      - php
+    expose:
+      - 3306
+      - 33060
 
 volumes:
   caddy_data:
   caddy_config:
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
-
-###> doctrine/doctrine-bundle ###
   database_data:
-###< doctrine/doctrine-bundle ###
+networks:
+  react-spring: {}
