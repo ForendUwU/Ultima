@@ -9,6 +9,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -40,6 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -89,10 +92,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email]
     private ?string $email = null;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PurchasedGame::class)]
+    #[Groups(['user:read', 'user:write'])]
+    private Collection $purchasedGames;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->balance = 0;
+        $this->purchasedGames = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -226,6 +234,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PurchasedGame>
+     */
+    public function getPurchasedGames(): Collection
+    {
+        return $this->purchasedGames;
+    }
+
+    public function addPurchasedGame(PurchasedGame $purchasedGame): static
+    {
+        if (!$this->purchasedGames->contains($purchasedGame)) {
+            $this->purchasedGames->add($purchasedGame);
+            $purchasedGame->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePurchasedGame(PurchasedGame $purchasedGame): static
+    {
+        if ($this->purchasedGames->removeElement($purchasedGame)) {
+            // set the owning side to null (unless already changed)
+            if ($purchasedGame->getUser() === $this) {
+                $purchasedGame->setUser(null);
+            }
+        }
 
         return $this;
     }

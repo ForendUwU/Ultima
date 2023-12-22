@@ -4,10 +4,10 @@ namespace App\Factory;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * @extends ModelFactory<User>
@@ -35,8 +35,9 @@ final class UserFactory extends ModelFactory
      *
      * @todo inject services if required
      */
-    public function __construct(private UserPasswordHasherInterface $passwordHasher)
-    {
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {
         parent::__construct();
     }
 
@@ -49,10 +50,10 @@ final class UserFactory extends ModelFactory
     {
         return [
             'balance' => self::faker()->randomFloat(),
-            'created_at' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime()),
-            'login' => self::faker()->text(8),
-            'nickname' => self::faker()->text(9),
-            'password' => 'password',
+            'email' => self::faker()->text(255),
+            'login' => self::faker()->text(180),
+            'nickname' => self::faker()->text(255),
+            'password' => self::faker()->text(),
             'roles' => [],
         ];
     }

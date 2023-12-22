@@ -12,6 +12,8 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Repository\GamesRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -54,9 +56,13 @@ class Game
     #[ORM\Column]
     private ?\DateTimeImmutable $publishedAt;
 
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: PurchasedGame::class)]
+    private Collection $purchasedGames;
+
     public function __construct()
     {
         $this->publishedAt = new \DateTimeImmutable();
+        $this->purchasedGames = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -103,5 +109,35 @@ class Game
     public function getPublishedAt(): ?\DateTimeImmutable
     {
         return $this->publishedAt;
+    }
+
+    /**
+     * @return Collection<int, PurchasedGame>
+     */
+    public function getPurchasedGames(): Collection
+    {
+        return $this->purchasedGames;
+    }
+
+    public function addPurchasedGame(PurchasedGame $purchasedGame): static
+    {
+        if (!$this->purchasedGames->contains($purchasedGame)) {
+            $this->purchasedGames->add($purchasedGame);
+            $purchasedGame->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removePurchasedGame(PurchasedGame $purchasedGame): static
+    {
+        if ($this->purchasedGames->removeElement($purchasedGame)) {
+            // set the owning side to null (unless already changed)
+            if ($purchasedGame->getGame() === $this) {
+                $purchasedGame->setGame(null);
+            }
+        }
+
+        return $this;
     }
 }
