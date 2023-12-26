@@ -1,13 +1,13 @@
 # Development environment override
 services:
-  php:
+  backend-php:
     build:
-      context: .
+      context: backend
       target: frankenphp_dev
     volumes:
-      - ./:/app
-      - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./frankenphp/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
+      - ./backend:/app
+      - ./backend/frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./backend/frankenphp/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
       # If you develop on Mac or Windows you can remove the vendor/ directory
       #  from the bind-mount for better performance by enabling the next line:
       #- /app/vendor
@@ -20,11 +20,6 @@ services:
       - host.docker.internal:host-gateway
     tty: true
 
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
-
-###> doctrine/doctrine-bundle ###
   database:
     ports:
       - "5432"
-###< doctrine/doctrine-bundle ###

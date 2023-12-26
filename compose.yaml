@@ -1,5 +1,5 @@
 services:
-  php:
+  backend-php:
     image: ${IMAGES_PREFIX:-}app-php
     restart: unless-stopped
     environment:
@@ -46,7 +46,7 @@ services:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
-  frontend:
+  frontend-react:
     build:
       context: frontend
       target: development
@@ -58,7 +58,7 @@ services:
     networks:
       - react-spring
     depends_on:
-      - php
+      - backend-php
     expose:
       - 3306
       - 33060
