@@ -96,11 +96,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'user:write'])]
     private Collection $purchasedGames;
 
+    #[ORM\OneToMany(mappedBy: 'ownedBy', targetEntity: Token::class)]
+    private Collection $tokens;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->balance = 0;
         $this->purchasedGames = new ArrayCollection();
+        $this->tokens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -262,6 +266,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($purchasedGame->getUser() === $this) {
                 $purchasedGame->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Token>
+     */
+    public function getTokens(): Collection
+    {
+        return $this->tokens;
+    }
+
+    public function addToken(Token $token): static
+    {
+        if (!$this->tokens->contains($token)) {
+            $this->tokens->add($token);
+            $token->setOwnedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeToken(Token $token): static
+    {
+        if ($this->tokens->removeElement($token)) {
+            // set the owning side to null (unless already changed)
+            if ($token->getOwnedBy() === $this) {
+                $token->setOwnedBy(null);
             }
         }
 

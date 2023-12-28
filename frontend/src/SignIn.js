@@ -30,44 +30,56 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-async function loginUser(credentials) {
-    return fetch("https://localhost:80/api/games", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        //body: JSON.stringify(credentials),
-    }).then((data) => data.json());
-}
-
 export default function Signin() {
     const classes = useStyles();
-    const [username, setUserName] = useState();
-    const [password, setPassword] = useState();
+    const [showError, setShowError] = React.useState(false)
+    const [showSuccess, setShowSuccess] = React.useState(false)
+    const [authorized, setAuthorized] = React.useState(false)
+    const [nickname, setNickname] = React.useState()
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        let response;
-        response = await fetch(`https://localhost:80/api/games`)
-        const backendHtmlString = await response.text()
+        let { login, password } = document.forms[0];
 
-        console.log(backendHtmlString)
-        // if ("accessToken" in response) {
-        //     swal("Success", response.message, "success", {
-        //         buttons: false,
-        //         timer: 2000,
-        //     }).then((value) => {
-        //         localStorage.setItem("accessToken", response["accessToken"]);
-        //         localStorage.setItem("user", JSON.stringify(response["user"]));
-        //         window.location.href = "/profile";
-        //     });
-        // } else {
-        //     swal("Failed", response.message, "error");
-        // }
-    };
+        const response = await fetch('https://localhost/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                login: login.value,
+                password: password.value
+            })
+        });
 
-    async function getGames() {
-        let response = await fetch("http://localhost:80/api/games");
+        const data = await response.json();
+
+        if (!response.ok) {
+            setShowError(true);
+            setShowSuccess(false);
+            console.log(data);
+        }else{
+            const response1 = await fetch('https://localhost/api/users/' + data, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            let get = await response1.json();
+            setNickname(get['nickname']);
+
+            setAuthorized(true);
+            setShowError(false);
+            setShowSuccess(true);
+        }
+
+        //login.value = '';
+        //password.value = '';
+        //emit('user-authenticated', userIri);
+    }
+
+    const getGames = async () => {
+        let response = await fetch("https://localhost/api/games");
 
         if (response.ok) {
             await response.json();
@@ -75,7 +87,6 @@ export default function Signin() {
             alert("HTTP-Error: " + response.status);
         }
     }
-
 
     return (
         <Grid container className={classes.root}>
@@ -89,18 +100,17 @@ export default function Signin() {
                     <Typography component="h1" variant="h5">
                         Sign in
                     </Typography>
-                    <button onClick={getGames}>GET GAMES</button>
 
-                    <form className={classes.form} noValidate onSubmit={getGames}>
+                    <button onClick={getGames}>getGam</button>
+                    <form className={classes.form} noValidate onSubmit={handleSubmit}>
                         <TextField
                             variant="outlined"
                             margin="normal"
                             required
                             fullWidth
-                            id="email"
-                            name="email"
-                            label="Email Address"
-                            onChange={(e) => setUserName(e.target.value)}
+                            id="login"
+                            name="login"
+                            label="Login"
                         />
                         <TextField
                             variant="outlined"
@@ -111,7 +121,6 @@ export default function Signin() {
                             name="password"
                             label="Password"
                             type="password"
-                            onChange={(e) => setPassword(e.target.value)}
                         />
                         <Button
                             type="submit"
@@ -123,6 +132,58 @@ export default function Signin() {
                             Sign In
                         </Button>
                     </form>
+                </div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}>
+                    {showError ?
+                        <Paper
+                            square={false}
+                            style={{
+                                marginTop: 5 + '%',
+                                width: 50 + '%',
+                                textAlign: 'center',
+                                backgroundColor: 'red'
+                            }}>
+                            Error
+                        </Paper>
+                        : null}
+                </div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}>
+                    {showSuccess ?
+                        <Paper
+                            square={false}
+                            style={{
+                                marginTop: 5 + '%',
+                                width: 50 + '%',
+                                textAlign: 'center',
+                                backgroundColor: 'green'
+                            }}>
+                            Success
+                        </Paper>
+                        : null}
+                </div>
+
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                }}>
+                    {authorized ?
+                        <Paper
+                            square={false}
+                            style={{
+                                marginTop: 10 + '%',
+                                width: 50 + '%',
+                                textAlign: 'center',
+                                backgroundColor: 'green'
+                            }}>
+                            Welcome { nickname }
+                        </Paper>
+                        : null}
                 </div>
             </Grid>
         </Grid>
