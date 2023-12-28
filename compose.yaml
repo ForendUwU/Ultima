@@ -1,7 +1,7 @@
 services:
   backend-php:
     image: ${IMAGES_PREFIX:-}app-php
-    restart: unless-stopped
+    restart: always
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
@@ -34,12 +34,8 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
-    healthcheck:
-      test: curl --fail http://localhost || exit 1
-      interval: 3s
-      retries: 3
-      start_period: 20s
-      timeout: 10s
+    depends_on:
+      - database
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
   database:
@@ -69,6 +65,7 @@ services:
       - react-spring
     depends_on:
       - backend-php
+      - database
     expose:
       - 33060
 
