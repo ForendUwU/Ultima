@@ -52,13 +52,13 @@ export default function Signin() {
             })
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const data = await response.json();
             setShowError(true);
             setShowSuccess(false);
+            console.log(data);
         }else{
-            const data = await response.json();
-
             const response1 = await fetch('https://localhost/api/users/' + data, {
                 method: 'GET',
                 headers: {

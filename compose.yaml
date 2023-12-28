@@ -1,7 +1,7 @@
 services:
   backend-php:
     image: ${IMAGES_PREFIX:-}app-php
-    restart: always
+    restart: on-failure
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, php:80
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
@@ -40,7 +40,7 @@ services:
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
   database:
     image: mysql:8.0
-    restart: always
+    restart: on-failure
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -53,6 +53,7 @@ services:
       - ./mysql:/var/lib/mysql
 
   frontend-react:
+    restart: on-failure
     build:
       context: frontend
       target: development
