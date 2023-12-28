@@ -19,12 +19,6 @@ services:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway
     tty: true
-    healthcheck:
-      test: curl --fail http://localhost || exit 1
-      interval: 3s
-      retries: 3
-      start_period: 20s
-      timeout: 10s
 
   database:
     ports:

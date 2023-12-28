@@ -34,10 +34,15 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
+    healthcheck:
+      test: curl --fail http://localhost || exit 1
+      interval: 3s
+      retries: 3
+      start_period: 20s
+      timeout: 10s
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
   database:
-    container_name: database
     image: mysql:8.0
     restart: always
     command: --default-authentication-plugin=mysql_native_password
