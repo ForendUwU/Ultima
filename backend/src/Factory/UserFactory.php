@@ -51,9 +51,9 @@ final class UserFactory extends ModelFactory
         return [
             'balance' => self::faker()->randomFloat(),
             'email' => self::faker()->text(255),
-            'login' => self::faker()->text(180),
-            'nickname' => self::faker()->text(255),
-            'password' => self::faker()->text(),
+            'login' => self::faker()->text(6).rand(0,9999),
+            'nickname' => self::faker()->text(6),
+            'password' => 'password',
             'roles' => [],
         ];
     }
