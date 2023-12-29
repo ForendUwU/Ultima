@@ -25,7 +25,7 @@ or
 docker exec -it ultima_php_1 bash
 ~~~
 
-To run tests
+To set up test databse and fixtures
 ~~~shell
 php bin/console doctrine:database:create --env=test
 php bin/console doctrine:schema:update --env=test --force
@@ -39,4 +39,9 @@ Careful, database "db_test" will be purged. Do you want to continue? (yes/no) [n
 say
 ~~~shell
 yes
+~~~
+
+To run tests
+~~~shell
+php bin/phpunit
 ~~~
