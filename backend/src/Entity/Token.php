@@ -57,7 +57,7 @@ class Token
             'id' => $ownedBy->getId(),
             'login' => $ownedBy->getLogin(),
             'email' => $ownedBy->getEmail(),
-            //TODO change role
+            //TODO change role .
             'role' => $ownedBy->getRoles()
         ];
 
