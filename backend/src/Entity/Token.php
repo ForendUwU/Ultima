@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\TokenRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Firebase\JWT\JWT;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TokenRepository::class)]
 class Token
@@ -18,13 +20,24 @@ class Token
     private ?User $ownedBy = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $expiresAt = null;
+    private ?\DateTimeImmutable $expiresAt;
 
-    #[ORM\Column(length: 68)]
-    private ?string $token = null;
+    #[ORM\Column(nullable: false)]
+    #[Groups(['user:read'])]
+    private string $token;
 
     #[ORM\Column]
     private array $scopes = [];
+
+    private const PRIVATE_KEY = 'WHFZQGXm#k$mBzX]A0f(=g^GbcFz5,~zUQY:$kGdEvu((%s*EmSRQFJ[/#qW^';
+
+    private const ALGORITHM = 'HS256';
+
+    public function __construct()
+    {
+        $expireTime = new \DateTimeImmutable();
+        $this->expiresAt = $expireTime->modify('+1 day');
+    }
 
     public function getId(): ?int
     {
@@ -39,6 +52,16 @@ class Token
     public function setOwnedBy(?User $ownedBy): static
     {
         $this->ownedBy = $ownedBy;
+
+        $payload = [
+            'id' => $ownedBy->getId(),
+            'login' => $ownedBy->getLogin(),
+            'email' => $ownedBy->getEmail(),
+            //TODO change role
+            'role' => $ownedBy->getRoles()
+        ];
+
+        $this->token = JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
 
         return $this;
     }
@@ -77,5 +100,10 @@ class Token
         $this->scopes = $scopes;
 
         return $this;
+    }
+
+    public function isValid(): bool
+    {
+        return $this->expiresAt === null || $this->expiresAt > new \DateTimeImmutable();
     }
 }

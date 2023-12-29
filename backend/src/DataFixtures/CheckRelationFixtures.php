@@ -2,10 +2,9 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Game;
-use App\Entity\User;
 use App\Factory\GameFactory;
 use App\Factory\PurchasedGameFactory;
+use App\Factory\TokenFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -30,13 +29,19 @@ class CheckRelationFixtures extends Fixture
                 'password' => 'password'.$i,
                 'roles' => [],
             ]);
-        }
-        for ($j = 0; $j < 2; $j++)
-        {
-            PurchasedGameFactory::createOne([
-                'user' => $manager->getRepository(User::class)->findOneBy(['login' => 'login0']),
-                'game' => $manager->getRepository(Game::class)->findOneBy(['title' => 'Game'.$j]),
-            ]);
+
+            PurchasedGameFactory::createMany(1, function(){
+                return [
+                    'user' => UserFactory::random(),
+                    'game' => GameFactory::random(),
+                ];
+            });
+
+            TokenFactory::createMany(1, function(){
+                return [
+                    'ownedBy' => UserFactory::random()
+                ];
+            });
         }
         $manager->flush();
     }

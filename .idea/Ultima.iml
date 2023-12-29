@@ -224,6 +224,7 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/zenstruck/assert" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/zenstruck/callback" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/zenstruck/foundry" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/firebase/php-jwt" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
