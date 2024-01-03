@@ -39,6 +39,14 @@ final class GameFactory extends ModelFactory
         parent::__construct();
     }
 
+    public function generator(): \Generator
+    {
+        for ($i = 0; $i < 1000; $i++)
+        {
+            yield $i;
+        }
+    }
+
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
      *
@@ -49,7 +57,7 @@ final class GameFactory extends ModelFactory
         return [
             'description' => self::faker()->text(255),
             'price' => self::faker()->randomFloat(),
-            'title' => self::faker()->text(255),
+            'title' => 'Game'.rand(0, 999),
         ];
     }
 
