@@ -6,14 +6,14 @@ use App\Entity\Game;
 use App\Factory\GameFactory;
 use App\Factory\UserFactory;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 class GamesResourceTest extends WebTestCase
 {
-    use ResetDatabase;
+    //use ResetDatabase;
 
     protected KernelBrowser $client;
     protected EntityManager $manager;
@@ -24,6 +24,27 @@ class GamesResourceTest extends WebTestCase
         $this->manager = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
+        $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
+        $tool = new SchemaTool($this->manager);
+        $tool->dropSchema($metaData);
+        $tool->createSchema($metaData);
+    }
+
+    private function authorize(): void
+    {
+        $user = UserFactory::createOne([
+            'login' => 'test_login',
+            'password' => 'pass'
+        ]);
+
+        $this->client->jsonRequest(
+            'POST',
+            'https://localhost/login',
+            [
+                'login' => $user->getLogin(),
+                'password' => $user->getPassword()
+            ]
+        );
     }
 
     public function testGetGamesCollection(): void
@@ -31,7 +52,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->request(
             'GET',
-        'https://localhost/api/games'
+            'https://localhost/api/games'
         );
 
         $response = $this->client->getResponse();
@@ -49,22 +70,9 @@ class GamesResourceTest extends WebTestCase
         ]);
     }
 
-    public function testCreateNewGame(): void
+    public function testCreateNewGameSuccess(): void
     {
-        UserFactory::createOne([
-            'login' => 'test_login',
-            'password' => 'pass'
-        ]);
-
-        $this->client->jsonRequest(
-            'POST',
-            'https://localhost/login',
-            [
-                'login' => 'test_login',
-                'password' => 'pass'
-            ]
-        );
-
+        $this->authorize();
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/games',
@@ -89,6 +97,59 @@ class GamesResourceTest extends WebTestCase
             'publishedAt',
             'purchasedGames'
         ]);
+    }
+
+    public function testCreateNewGameUnauthorized(): void
+    {
+        $this->client->jsonRequest(
+            'POST',
+            'https://localhost/api/games',
+            [
+                'title' => 'test_game',
+                'description' => 'test_description',
+                'price' => 99,
+                'purchasedGames' => []
+            ]
+        );
+
+        $response = $this->client->getResponse();
+        $decodedResponse = json_decode($response->getContent(), true);
+
+        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+        $this->assertArrayHasKey('detail', $decodedResponse);
+        $this->assertEquals(
+            'Full authentication is required to access this resource.',
+            $decodedResponse['detail']
+        );
+    }
+
+    public function testCreateNewGameInvalidInput(): void
+    {
+        $this->authorize();
+        $this->client->jsonRequest(
+            'POST',
+            'https://localhost/api/games',
+            [
+                "title" => 123,
+                "description" => 123,
+                "price" => 0,
+                "purchasedGames" => []
+            ]
+        );
+
+        $response = $this->client->getResponse();
+        $decodedResponse = json_decode($response->getContent(), true);
+
+        //dump($decodedResponse);
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+        $this->assertArrayHasKey('detail', $decodedResponse);
+        $this->assertEquals(
+            'The type of the "title" attribute must be "string", "integer" given.',
+            $decodedResponse['detail']
+        );
     }
 
     public function testGetGame(): void

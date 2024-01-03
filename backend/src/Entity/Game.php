@@ -25,8 +25,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new Get(),
         new GetCollection(),
-        //new Post(security: 'is_granted("ROLE_USER")'),
-        new Post(),
+        new Post(
+            security: 'is_granted("ROLE_USER")'
+        ),
+        //new Post(),
         new Patch(),
         new Delete(),
     ],
