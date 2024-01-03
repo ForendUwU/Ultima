@@ -43,5 +43,5 @@ yes
 
 To run tests
 ~~~shell
-php bin/phpunit
+php bin/phpunit --process-isolation
 ~~~
