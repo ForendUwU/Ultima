@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Game;
+use App\Entity\User;
 use App\Factory\GameFactory;
 use App\Factory\UserFactory;
 use Doctrine\ORM\EntityManager;
@@ -13,8 +14,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GamesResourceTest extends WebTestCase
 {
-    //use ResetDatabase;
-
     protected KernelBrowser $client;
     protected EntityManager $manager;
 
@@ -32,7 +31,7 @@ class GamesResourceTest extends WebTestCase
 
     private function authorize(): void
     {
-        $user = UserFactory::createOne([
+        UserFactory::createOne([
             'login' => 'test_login',
             'password' => 'pass'
         ]);
@@ -41,8 +40,8 @@ class GamesResourceTest extends WebTestCase
             'POST',
             'https://localhost/login',
             [
-                'login' => $user->getLogin(),
-                'password' => $user->getPassword()
+                'login' => 'test_login',
+                'password' => 'pass'
             ]
         );
     }
@@ -127,6 +126,7 @@ class GamesResourceTest extends WebTestCase
     public function testCreateNewGameInvalidInput(): void
     {
         $this->authorize();
+        dump($this->manager->getRepository(User::class)->findAll());
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/games',
@@ -141,7 +141,7 @@ class GamesResourceTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        //dump($decodedResponse);
+        dump($decodedResponse);
 
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertJson($response->getContent());
