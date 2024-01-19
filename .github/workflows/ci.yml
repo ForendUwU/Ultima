@@ -53,13 +53,13 @@ jobs:
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:database:create
       -
         name: Run migrations
-        run: docker compose exec -T ultima-backend-php-1 php bin/console -e test doctrine:migrations:migrate --no-interaction
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:migrations:migrate --no-interaction
       -
         name: Run PHPUnit
-        run: docker compose exec -T ultima-backend-php-1 php bin/phpunit
+        run: docker exec -i ultima-backend-php-1 php bin/phpunit
       -
         name: Doctrine Schema Validator
-        run: docker compose exec -T ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
