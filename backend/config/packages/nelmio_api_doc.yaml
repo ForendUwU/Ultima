@@ -1,0 +1,20 @@
+nelmio_api_doc:
+    areas:
+        path_patterns:
+            - ^/api(?!/doc|/docs|/\.well-known|/{index}|/contexts|/errors/{status}|/validation_errors/{id}$)
+    documentation:
+        servers:
+            - url: https://localhost/
+              description: API over HTTPS
+        info:
+            title: My App
+            description: This is an awesome app!
+            version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - Bearer: []
