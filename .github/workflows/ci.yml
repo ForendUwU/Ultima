@@ -71,10 +71,8 @@ jobs:
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
       -
         name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        uses: kitabisa/sonarqube-action@v1.2.1
+            
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
