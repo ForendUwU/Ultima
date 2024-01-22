@@ -61,6 +61,7 @@ jobs:
         name: Doctrine Schema Validator
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
   build:
+    needs: tests
     name: Build
     runs-on: ubuntu-latest
     permissions: read-all
