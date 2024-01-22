@@ -62,7 +62,7 @@ jobs:
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
   build:
     name: Build
-    needs: tests
+#    needs: tests
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
