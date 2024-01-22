@@ -64,6 +64,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     permissions: read-all
+    dependencies:
+      - tests
     steps:
       - uses: actions/checkout@v2
         with:
