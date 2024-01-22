@@ -44,13 +44,6 @@ jobs:
           timeout_minutes: 1
           max_attempts: 3
           command: docker compose up --wait
-#      - name: Setup PHP with Xdebug
-#        uses: shivammathur/setup-php@v2
-#        with:
-#          php-version: '8.1'
-#          coverage: xdebug
-#      - name: Install dependencies with composer
-#        run: composer update --no-ansi --no-interaction --no-progress
       -
         name: Check HTTP reachability
         run: curl -v -o /dev/null http://localhost
@@ -70,9 +63,9 @@ jobs:
         name: Doctrine Schema Validator
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
       -
-        name: SonarQube Scan
-        uses: kitabisa/sonarqube-action@v1.2.1
-            
+        name: Official SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2.0.1
+
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
