@@ -19,6 +19,8 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -42,6 +44,13 @@ jobs:
           timeout_minutes: 1
           max_attempts: 3
           command: docker compose up --wait
+      - name: Setup PHP with Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: xdebug
+      - name: Install dependencies with composer
+        run: composer update --no-ansi --no-interaction --no-progress
       -
         name: Check HTTP reachability
         run: curl -v -o /dev/null http://localhost
@@ -56,23 +65,16 @@ jobs:
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:migrations:migrate --no-interaction
       -
         name: Run PHPUnit
-        run: docker exec -i ultima-backend-php-1 php bin/phpunit --process-isolation
+        run: docker exec -i ultima-backend-php-1 php bin/phpunit --process-isolation --coverage-clover=coverage.xml
       -
         name: Doctrine Schema Validator
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
-  build:
-    name: Build
-#    needs: tests
-    runs-on: ubuntu-latest
-    permissions: read-all
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      -
+        name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
