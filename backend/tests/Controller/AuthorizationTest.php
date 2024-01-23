@@ -30,9 +30,12 @@ class AuthorizationTest extends WebTestCase
         $testGame = new Game();
         $testGame->setTitle('Test Game');
         $testGame->setDescription('Test Description');
-        $testGame->setPrice('9.99');
-        $this->assertNotNull($testGame);
+        $testGame->setPrice(9.99);
+
         $this->assertNotNull($testGame->getPublishedAt());
         $this->assertNotNull($testGame->getPurchasedGames());
+        $this->assertEquals('Test Game', $testGame->getTitle());
+        $this->assertEquals('Test Description', $testGame->getDescription());
+        $this->assertEquals(9.99, $testGame->getPrice());
     }
 }
