@@ -62,11 +62,6 @@ jobs:
       -
         name: Doctrine Schema Validator
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
-      -
-        name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   lint:
     name: Docker Lint
@@ -80,3 +75,16 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ./backend/Dockerfile
+
+  sonarQube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run PHPUnit
+        run: docker exec -i ultima-backend-php-1 php bin/phpunit --process-isolation --coverage-clover=coverage.xml
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
