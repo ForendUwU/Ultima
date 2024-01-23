@@ -17,9 +17,20 @@ class AuthorizationTest extends WebTestCase
 
     }
 
-    public function testCreateGameEntity(): void
+    public function testCreateEmptyGameEntity(): void
     {
         $testGame = new Game();
+        $this->assertNotNull($testGame);
+        $this->assertNotNull($testGame->getPublishedAt());
+        $this->assertNotNull($testGame->getPurchasedGames());
+    }
+
+    public function testCreateNotEmptyGameEntity(): void
+    {
+        $testGame = new Game();
+        $testGame->setTitle('Test Game');
+        $testGame->setDescription('Test Description');
+        $testGame->setPrice('9.99');
         $this->assertNotNull($testGame);
         $this->assertNotNull($testGame->getPublishedAt());
         $this->assertNotNull($testGame->getPurchasedGames());
