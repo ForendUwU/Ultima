@@ -26,11 +26,11 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(uriTemplate: 'api/games/{id}'),
         new GetCollection(uriTemplate: 'api/games'),
         new Post(
+            uriTemplate: 'api/games',
             security: 'is_granted("ROLE_USER")'
         ),
-        //new Post(),
-        new Patch(),
-        new Delete(),
+        new Patch(uriTemplate: 'api/games/{id}'),
+        new Delete(uriTemplate: 'api/games/{id}',),
     ],
     normalizationContext: [
         'groups' => ['game:read']
