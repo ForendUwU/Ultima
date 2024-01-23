@@ -63,6 +63,11 @@ jobs:
         name: Doctrine Schema Validator
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
       -
+        name: fix code coverage paths
+        working-directory: ./backend
+        run: |
+          sed -i 's/\/home\/runner\/work\/Ultima\/Ultima\//\/github\/workspace\//g' coverage.xml
+      -
         name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
