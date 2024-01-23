@@ -23,14 +23,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     shortName: 'Game',
     operations: [
-        new Get(),
-        new GetCollection(),
+        new Get(uriTemplate: 'api/games/{id}'),
+        new GetCollection(uriTemplate: 'api/games'),
         new Post(
+            uriTemplate: 'api/games',
             security: 'is_granted("ROLE_USER")'
         ),
-        //new Post(),
-        new Patch(),
-        new Delete(),
+        new Patch(uriTemplate: 'api/games/{id}'),
+        new Delete(uriTemplate: 'api/games/{id}',),
     ],
     normalizationContext: [
         'groups' => ['game:read']
@@ -54,7 +54,12 @@ class Game
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Assert\Length(min: 10, max: 250, minMessage: 'Min size for description is 10', maxMessage: 'Max size for description is 250')]
+    #[Assert\Length(
+        min: 10,
+        max: 250,
+        minMessage: 'Min size for description is 10',
+        maxMessage: 'Max size for description is 250'
+    )]
     #[Groups(['game:read'])]
     private ?string $description = null;
 
@@ -144,11 +149,11 @@ class Game
 
     public function removePurchasedGame(PurchasedGame $purchasedGame): static
     {
-        if ($this->purchasedGames->removeElement($purchasedGame)) {
-            // set the owning side to null (unless already changed)
-            if ($purchasedGame->getGame() === $this) {
-                $purchasedGame->setGame(null);
-            }
+        if (
+            $this->purchasedGames->removeElement($purchasedGame)
+            && $purchasedGame->getGame() === $this
+        ) {
+            $purchasedGame->setGame(null);
         }
 
         return $this;
