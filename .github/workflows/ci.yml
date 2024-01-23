@@ -19,6 +19,8 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -41,7 +43,7 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          command: docker compose up --wait
+          command: XDEBUG_MODE=coverage docker compose up --wait
       -
         name: Check HTTP reachability
         run: curl -v -o /dev/null http://localhost
@@ -50,20 +52,22 @@ jobs:
         run: curl -vk -o /dev/null https://localhost
       -
         name: Create test database
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:database:create
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:database:create
       -
         name: Run migrations
-        if: false # Remove this line if Doctrine Migrations is installed
-        run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:migrations:migrate --no-interaction
       -
         name: Run PHPUnit
-        if: false # Remove this line if PHPUnit is installed
-        run: docker compose exec -T php bin/phpunit
+        run: docker exec -i ultima-backend-php-1 php bin/phpunit --process-isolation --coverage-clover=coverage.xml
       -
         name: Doctrine Schema Validator
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:schema:validate
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
+      -
+        name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest

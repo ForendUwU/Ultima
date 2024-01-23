@@ -37,7 +37,7 @@ class GamesResourceTest extends WebTestCase
 
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/login',
+            'https://localhost/api/login',
             [
                 'login' => 'test_login',
                 'password' => 'pass'
@@ -50,7 +50,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/games'
+            'https://localhost/games'
         );
 
         $response = $this->client->getResponse();
@@ -73,7 +73,7 @@ class GamesResourceTest extends WebTestCase
         $this->authorize();
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 'title' => 'test_game',
                 'description' => 'test_description',
@@ -101,7 +101,7 @@ class GamesResourceTest extends WebTestCase
     {
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 'title' => 'test_game',
                 'description' => 'test_description',
@@ -127,7 +127,7 @@ class GamesResourceTest extends WebTestCase
         $this->authorize();
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 "title" => 123,
                 "description" => 123,
@@ -153,7 +153,7 @@ class GamesResourceTest extends WebTestCase
         $this->authorize();
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 'title' => 'Game0',
                 'description' => 'test_description',
@@ -164,7 +164,7 @@ class GamesResourceTest extends WebTestCase
 
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 'title' => 'Game0',
                 'description' => 'test_description',
@@ -191,7 +191,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/games/1'
+            'https://localhost/games/1'
         );
 
         $response = $this->client->getResponse();
@@ -214,7 +214,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/games/6'
+            'https://localhost/games/6'
         );
 
         $response = $this->client->getResponse();
@@ -230,7 +230,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'DELETE',
-            'https://localhost/api/games/5'
+            'https://localhost/games/5'
         );
 
         $response = $this->client->getResponse();
@@ -245,7 +245,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'DELETE',
-            'https://localhost/api/games/6'
+            'https://localhost/games/6'
         );
 
         $response = $this->client->getResponse();
@@ -260,7 +260,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'PATCH',
-            'https://localhost/api/games/5',
+            'https://localhost/games/5',
             [
                 'title' => 'Test_game'
             ],
@@ -282,7 +282,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'PATCH',
-            'https://localhost/api/games/5',
+            'https://localhost/games/5',
             [
                 "title" => 123,
             ],
@@ -308,7 +308,7 @@ class GamesResourceTest extends WebTestCase
         GameFactory::createMany(5);
         $this->client->jsonRequest(
             'PATCH',
-            'https://localhost/api/games/6',
+            'https://localhost/games/6',
             [
                 'title' => 'Test_game'
             ],
@@ -330,7 +330,7 @@ class GamesResourceTest extends WebTestCase
         $this->authorize();
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 'title' => 'Game0',
                 'description' => 'test_description',
@@ -340,7 +340,7 @@ class GamesResourceTest extends WebTestCase
         );
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/games',
+            'https://localhost/games',
             [
                 'title' => 'Game1',
                 'description' => 'test_description',
@@ -351,7 +351,7 @@ class GamesResourceTest extends WebTestCase
 
         $this->client->jsonRequest(
             'PATCH',
-            'https://localhost/api/games/2',
+            'https://localhost/games/2',
             [
                 'title' => 'Game0',
             ],
