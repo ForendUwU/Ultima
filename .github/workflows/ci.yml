@@ -43,7 +43,7 @@ jobs:
         with:
           timeout_minutes: 1
           max_attempts: 3
-          command: docker compose up --wait
+          command: XDEBUG_MODE=coverage docker compose up --wait
       -
         name: Check HTTP reachability
         run: curl -v -o /dev/null http://localhost
