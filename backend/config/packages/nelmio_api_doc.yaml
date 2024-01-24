@@ -7,8 +7,8 @@ nelmio_api_doc:
             - url: https://localhost/
               description: API over HTTPS
         info:
-            title: My App
-            description: This is an awesome app!
+            title: Ultima API
+            description: Perfect description
             version: 1.0.0
         components:
             securitySchemes:
