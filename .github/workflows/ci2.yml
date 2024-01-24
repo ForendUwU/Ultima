@@ -18,6 +18,10 @@ jobs:
       - name: Install dependencies with composer
         working-directory: ./backend
         run: composer update --no-ansi --no-interaction --no-progress
+      - name: Create test database
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:database:create
+      - name: Run migrations
+        run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:migrations:migrate --no-interaction
       - name: Run tests with phpunit/phpunit
         working-directory: ./backend
         run: php bin/phpunit --coverage-clover=coverage.xml
