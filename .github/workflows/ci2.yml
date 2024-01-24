@@ -17,6 +17,7 @@ jobs:
           php-version: '8.1'
           coverage: xdebug
       - name: Install dependencies with composer
+        working-directory: ./backend
         run: composer update --no-ansi --no-interaction --no-progress
       - name: Run tests with phpunit/phpunit
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
