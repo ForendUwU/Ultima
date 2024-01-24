@@ -20,7 +20,7 @@ jobs:
         run: composer update --no-ansi --no-interaction --no-progress
       - name: Run tests with phpunit/phpunit
         working-directory: ./backend
-        run: php bin/phpunit --coverage-clover=coverage.xml --no-configuration --no-extensions
+        run: php bin/phpunit --coverage-clover=coverage.xml
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
