@@ -19,7 +19,7 @@ class TokenUnitTest extends TestCase
 
     public function testCreateNotEmptyToken()
     {
-        $testToken = new Token();
+        $testToken = new Token(); //Best comment
 
         $testToken->setOwnedBy(new User());
         $testToken->setToken('Test token');

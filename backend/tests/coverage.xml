@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1706099869">
-  <project timestamp="1706099869">
+<coverage generated="1706105752">
+  <project timestamp="1706105752">
     <file name="/app/src/Controller/AuthorizationController.php">
       <class name="App\Controller\AuthorizationController" namespace="global">
         <metrics complexity="3" methods="2" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="8" coveredstatements="4" elements="10" coveredelements="4"/>
