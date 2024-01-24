@@ -7,11 +7,8 @@ use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
-class UserUnitTests extends TestCase
+class UserUnitTest extends TestCase
 {
-    protected KernelBrowser $client;
-    protected EntityManager $manager;
-
     public function testCreateEmptyUserEntity(): void
     {
         $testUser = new User();
