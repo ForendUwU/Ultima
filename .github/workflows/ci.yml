@@ -58,11 +58,12 @@ jobs:
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:migrations:migrate --no-interaction
       -
         name: Run PHPUnit
-        run: docker exec -i ultima-backend-php-1 php bin/phpunit --process-isolation --coverage-clover=coverage.xml --log-junit=report.xml
+        run: docker exec -i ultima-backend-php-1 php -d xdebug.mode=coverage bin/phpunit --coverage-clover=coverage.xml --log-junit=report.xml
       -
         name: Doctrine Schema Validator
         run: docker exec -i ultima-backend-php-1 php bin/console -e test doctrine:schema:validate
-      - name: SonarQube Scan
+      -
+        name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
