@@ -1,7 +1,6 @@
 name: build
 on:
   - pull_request
-  - push
 jobs:
   coverage:
     name: Coverage
@@ -17,13 +16,9 @@ jobs:
           php-version: '8.2'
           coverage: xdebug
       - name: Install dependencies with composer
-        working-directory: ./backend
         run: composer update --no-ansi --no-interaction --no-progress
-      - name: Install PHPUnit and run tests
-        uses: php-actions/phpunit@v3
-        with:
-          php_extensions: "xdebug"
-          coverage_clover: "backend/coverage.xml"
+      - name: Run tests with phpunit/phpunit
+        run: php bin/phpunit --coverage-clover=coverage.xml
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
         env:
