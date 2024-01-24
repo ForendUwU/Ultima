@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Setup PHP with Xdebug
@@ -16,6 +16,8 @@ jobs:
         with:
           php-version: '8.2'
           coverage: xdebug
+      - name: Install PHPUnit
+        uses: php-actions/phpunit@v3
       - name: Install dependencies with composer
         working-directory: ./backend
         run: composer update --no-ansi --no-interaction --no-progress
