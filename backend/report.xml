@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="" tests="21" assertions="75" errors="0" warnings="0" failures="0" skipped="0" time="11.226951">
+    <testsuite name="Project Test Suite" tests="21" assertions="75" errors="0" warnings="0" failures="0" skipped="0" time="11.226951">
+      <testsuite name="App\Tests\GamesResourceTest" file="/app/tests/GamesResourceTest.php" tests="13" assertions="44" errors="0" warnings="0" failures="0" skipped="0" time="11.193670">
+        <testcase name="testGetGamesCollection" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="48" assertions="3" time="1.086651"/>
+        <testcase name="testPostNewGameSuccess" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="71" assertions="3" time="0.848286"/>
+        <testcase name="testPostNewGameUnauthorized" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="100" assertions="4" time="0.761247"/>
+        <testcase name="testPostNewGameInvalidInput" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="125" assertions="4" time="0.801465"/>
+        <testcase name="testPostNewUnprocessableEntity" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="152" assertions="5" time="0.927188"/>
+        <testcase name="testGetGameSuccess" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="190" assertions="3" time="0.762727"/>
+        <testcase name="testGetGameResourceNotFound" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="213" assertions="3" time="0.897621"/>
+        <testcase name="testDeleteGameSuccess" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="229" assertions="2" time="0.820554"/>
+        <testcase name="testDeleteGameResourceNotFound" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="244" assertions="2" time="0.817693"/>
+        <testcase name="testPatchGameSuccess" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="259" assertions="3" time="0.841382"/>
+        <testcase name="testPatchGameInvalidInput" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="281" assertions="4" time="0.827468"/>
+        <testcase name="testPatchGameResourceNotFound" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="307" assertions="3" time="0.830526"/>
+        <testcase name="testPatchNewUnprocessableEntity" class="App\Tests\GamesResourceTest" classname="App.Tests.GamesResourceTest" file="/app/tests/GamesResourceTest.php" line="329" assertions="5" time="0.970865"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\GameUnitTest" file="/app/tests/Unit/Entity/GameUnitTest.php" tests="2" assertions="8" errors="0" warnings="0" failures="0" skipped="0" time="0.008127">
+        <testcase name="testCreateEmptyGameEntity" class="App\Tests\Unit\Entity\GameUnitTest" classname="App.Tests.Unit.Entity.GameUnitTest" file="/app/tests/Unit/Entity/GameUnitTest.php" line="12" assertions="3" time="0.004050"/>
+        <testcase name="testCreateNotEmptyGameEntity" class="App\Tests\Unit\Entity\GameUnitTest" classname="App.Tests.Unit.Entity.GameUnitTest" file="/app/tests/Unit/Entity/GameUnitTest.php" line="20" assertions="5" time="0.004077"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" tests="2" assertions="5" errors="0" warnings="0" failures="0" skipped="0" time="0.008027">
+        <testcase name="testCreateEmptyPurchasedGame" class="App\Tests\Unit\Entity\PurchasedGameTest" classname="App.Tests.Unit.Entity.PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" line="12" assertions="3" time="0.003350"/>
+        <testcase name="testCreateNotEmptyPurchasedGame" class="App\Tests\Unit\Entity\PurchasedGameTest" classname="App.Tests.Unit.Entity.PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" line="21" assertions="2" time="0.004677"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\TokenUnitTest" file="/app/tests/Unit/Entity/TokenUnitTest.php" tests="2" assertions="5" errors="0" warnings="0" failures="0" skipped="0" time="0.008501">
+        <testcase name="testCreateEmptyToken" class="App\Tests\Unit\Entity\TokenUnitTest" classname="App.Tests.Unit.Entity.TokenUnitTest" file="/app/tests/Unit/Entity/TokenUnitTest.php" line="12" assertions="2" time="0.003335"/>
+        <testcase name="testCreateNotEmptyToken" class="App\Tests\Unit\Entity\TokenUnitTest" classname="App.Tests.Unit.Entity.TokenUnitTest" file="/app/tests/Unit/Entity/TokenUnitTest.php" line="20" assertions="3" time="0.005166"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\UserUnitTest" file="/app/tests/Unit/Entity/UserUnitTest.php" tests="2" assertions="13" errors="0" warnings="0" failures="0" skipped="0" time="0.008626">
+        <testcase name="testCreateEmptyUserEntity" class="App\Tests\Unit\Entity\UserUnitTest" classname="App.Tests.Unit.Entity.UserUnitTest" file="/app/tests/Unit/Entity/UserUnitTest.php" line="12" assertions="6" time="0.004417"/>
+        <testcase name="testCreateNotEmptyUserEntity" class="App\Tests\Unit\Entity\UserUnitTest" classname="App.Tests.Unit.Entity.UserUnitTest" file="/app/tests/Unit/Entity/UserUnitTest.php" line="23" assertions="7" time="0.004208"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
