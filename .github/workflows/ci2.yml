@@ -18,9 +18,8 @@ jobs:
       - name: Install dependencies with composer
         working-directory: ./backend
         run: composer update --no-ansi --no-interaction --no-progress
-      - name: Install PHPUnit
-        run: composer require --dev phpunit/phpunit ^9.6
       - name: Run tests with phpunit/phpunit
+        working-directory: ./backend
         run: php app/bin/phpunit --coverage-clover=coverage.xml
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
