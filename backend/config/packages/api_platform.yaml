@@ -1,4 +1,5 @@
 api_platform:
+    enable_docs: false
     title: Ultima API
     version: 0.0.2
     formats:

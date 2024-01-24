@@ -65,7 +65,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     #[Groups(['user:read', 'user:write'])]
     #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 20, minMessage: 'Min size for nickname is 2', maxMessage: 'Max size for nickname is 20')]
+    #[Assert\Length(
+        min: 2,
+        max: 20,
+        minMessage: 'Min size for nickname is 2',
+        maxMessage: 'Max size for nickname is 20'
+    )]
     private ?string $nickname = null;
 
     #[ORM\Column]
@@ -74,12 +79,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\Length(min: 2, max: 20, minMessage: 'Min size for first name is 2', maxMessage: 'Max size for first name is 20')]
+    #[Assert\Length(
+        min: 2,
+        max: 20,
+        minMessage: 'Min size for first name is 2',
+        maxMessage: 'Max size for first name is 20'
+    )]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\Length(min: 2, max: 20, minMessage: 'Min size for last name is 2', maxMessage: 'Max size for last name is 20')]
+    #[Assert\Length(
+        min: 2,
+        max: 20,
+        minMessage: 'Min size for last name is 2',
+        maxMessage: 'Max size for last name is 20'
+    )]
     private ?string $lastName = null;
 
     #[ORM\Column]
@@ -262,11 +277,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removePurchasedGame(PurchasedGame $purchasedGame): static
     {
-        if ($this->purchasedGames->removeElement($purchasedGame)) {
-            // set the owning side to null (unless already changed)
-            if ($purchasedGame->getUser() === $this) {
-                $purchasedGame->setUser(null);
-            }
+        if (
+            $this->purchasedGames->removeElement($purchasedGame)
+            && $purchasedGame->getUser() === $this
+        ) {
+            $purchasedGame->setUser(null);
         }
 
         return $this;
@@ -292,11 +307,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeToken(Token $token): static
     {
-        if ($this->tokens->removeElement($token)) {
-            // set the owning side to null (unless already changed)
-            if ($token->getOwnedBy() === $this) {
-                $token->setOwnedBy(null);
-            }
+        if (
+            $this->tokens->removeElement($token)
+            && $token->getOwnedBy() === $this
+        ) {
+            $token->setOwnedBy(null);
         }
 
         return $this;

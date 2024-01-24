@@ -4,6 +4,7 @@ namespace App\Factory;
 
 use App\Entity\Game;
 use App\Repository\GamesRepository;
+use Random\RandomException;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
@@ -29,16 +30,6 @@ use Zenstruck\Foundry\RepositoryProxy;
  */
 final class GameFactory extends ModelFactory
 {
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     public function generator(): \Generator
     {
         for ($i = 0; $i < 1000; $i++)
@@ -51,13 +42,14 @@ final class GameFactory extends ModelFactory
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
      *
      * @todo add your default values here
+     * @throws RandomException
      */
     protected function getDefaults(): array
     {
         return [
             'description' => self::faker()->text(255),
             'price' => self::faker()->randomFloat(),
-            'title' => 'Game'.rand(0, 999),
+            'title' => 'Game'.random_int(0, 999),
         ];
     }
 
