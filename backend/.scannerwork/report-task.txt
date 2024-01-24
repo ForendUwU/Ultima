@@ -2,5 +2,5 @@ projectKey=Ultima
 serverUrl=http://localhost:9000
 serverVersion=10.3.0.82913
 dashboardUrl=http://localhost:9000/dashboard?id=Ultima
-ceTaskId=AY072hKn0nyWgdPSzdyb
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AY072hKn0nyWgdPSzdyb
+ceTaskId=AY079LvY0nyWgdPSzdyc
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AY079LvY0nyWgdPSzdyc
