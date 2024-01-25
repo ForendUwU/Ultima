@@ -1,6 +1,7 @@
-projectKey=Ultima
-serverUrl=http://localhost:9000
-serverVersion=10.3.0.82913
-dashboardUrl=http://localhost:9000/dashboard?id=Ultima
-ceTaskId=AY079LvY0nyWgdPSzdyc
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AY079LvY0nyWgdPSzdyc
+organization=nikita-perepelov-org
+projectKey=ForendUwU_Ultima
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.52135
+dashboardUrl=https://sonarcloud.io/dashboard?id=ForendUwU_Ultima
+ceTaskId=AY0_WWE2gBT3KyPm7K7P
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AY0_WWE2gBT3KyPm7K7P
