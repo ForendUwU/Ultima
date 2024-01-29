@@ -63,6 +63,6 @@ export SONAR_SCANNER_OPTS="-server"
 
 To use SonarScanner
 ~~~shell
-sonnar scanner
+sonar-scanner
 ~~~
 
