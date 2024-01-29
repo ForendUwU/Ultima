@@ -46,6 +46,11 @@ To run tests
 php bin/phpunit --process-isolation
 ~~~
 
+To run tests with coverage and report
+~~~shell
+php -d xdebug.mode=coverage bin/phpunit --process-isolation --coverage-clover=tests/coverage.xml --log-junit=tests/report.xml
+~~~
+
 To download SonarScanner
 ~~~shell
 export SONAR_SCANNER_VERSION=5.0.1.3006
@@ -54,5 +59,10 @@ curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarso
 unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
 export PATH=$SONAR_SCANNER_HOME/bin:$PATH
 export SONAR_SCANNER_OPTS="-server"
+~~~
+
+To use SonarScanner
+~~~shell
+sonnar scanner
 ~~~
 
