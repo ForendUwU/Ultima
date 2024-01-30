@@ -26,6 +26,6 @@ when@test:
         password_hashers:
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 1
+                cost: 4
                 time_cost: 1
-                memory_cost: 1
+                memory_cost: 4
