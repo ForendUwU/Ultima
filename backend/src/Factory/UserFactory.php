@@ -4,8 +4,6 @@ namespace App\Factory;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Random\RandomException;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
@@ -31,9 +29,13 @@ use Zenstruck\Foundry\RepositoryProxy;
  */
 final class UserFactory extends ModelFactory
 {
-    public function __construct(
-        private UserPasswordHasherInterface $passwordHasher
-    ) {
+    /**
+     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
+     *
+     * @todo inject services if required
+     */
+    public function __construct()
+    {
         parent::__construct();
     }
 
@@ -41,16 +43,15 @@ final class UserFactory extends ModelFactory
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
      *
      * @todo add your default values here
-     * @throws RandomException
      */
     protected function getDefaults(): array
     {
         return [
             'balance' => self::faker()->randomFloat(),
             'email' => self::faker()->text(255),
-            'login' => self::faker()->text(6).random_int(0,9999),
-            'nickname' => self::faker()->text(6),
-            'password' => 'password',
+            'login' => self::faker()->text(180),
+            'nickname' => self::faker()->text(255),
+            'password' => self::faker()->text(),
             'roles' => [],
         ];
     }
@@ -61,13 +62,8 @@ final class UserFactory extends ModelFactory
     protected function initialize(): self
     {
         return $this
-            ->afterInstantiate(function(User $user): void {
-                $user->setPassword($this->passwordHasher->hashPassword(
-                    $user,
-                    $user->getPassword()
-                ));
-            })
-            ;
+            // ->afterInstantiate(function(User $user): void {})
+        ;
     }
 
     protected static function getClass(): string

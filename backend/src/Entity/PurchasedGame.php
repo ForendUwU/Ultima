@@ -16,12 +16,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: PurchasedGameRepository::class)]
 #[ApiResource(
-    options: [
-        new Get(),
-        new GetCollection(),
-        new Post(),
-        new Patch(),
-        new Delete(),
+    shortName: 'Purchased Game',
+    operations: [
+        new Get(uriTemplate: 'api/purchased-games/{id}'),
+        new GetCollection(uriTemplate: 'api/purchased-games'),
+        new Post(uriTemplate: 'api/purchased-games'),
+        new Patch(uriTemplate: 'api/purchased-games/{id}'),
+        new Delete(uriTemplate: 'api/purchased-games/{id}'),
     ],
     normalizationContext: [
         'groups' => ['purchasedGame:read']

@@ -3,4 +3,4 @@ api_platform:
     type: api_platform
 
     #UI for api_platform
-    #prefix:
+    #prefix: /api

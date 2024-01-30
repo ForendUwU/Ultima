@@ -16,5 +16,6 @@ nelmio_api_doc:
                     type: http
                     scheme: bearer
                     bearerFormat: JWT
+                    in: header
         security:
             - Bearer: []

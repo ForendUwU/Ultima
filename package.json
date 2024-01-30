@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ForendUwU/Ultima/issues"
   },
-  "homepage": "https://github.com/ForendUwU/Ultima#readme"
+  "homepage": "https://github.com/ForendUwU/Ultima#readme",
+  "dependencies": {
+    "react-bootstrap": "^2.10.0"
+  }
 }

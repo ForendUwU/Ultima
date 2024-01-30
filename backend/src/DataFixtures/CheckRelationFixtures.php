@@ -4,7 +4,6 @@ namespace App\DataFixtures;
 
 use App\Factory\GameFactory;
 use App\Factory\PurchasedGameFactory;
-use App\Factory\TokenFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -34,12 +33,6 @@ class CheckRelationFixtures extends Fixture
                 return [
                     'user' => UserFactory::random(),
                     'game' => GameFactory::random(),
-                ];
-            });
-
-            TokenFactory::createMany(1, function(){
-                return [
-                    'ownedBy' => UserFactory::random()
                 ];
             });
         }

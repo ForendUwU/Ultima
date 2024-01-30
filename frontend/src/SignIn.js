@@ -7,31 +7,31 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-import { makeStyles } from "@mui/styles";
+// import { makeStyles } from "@mui/styles";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        height: "100vh",
-    },
-    image: {
-        backgroundImage: "url(https://source.unsplash.com/random)",
-        backgroundSize: "cover",
-    },
-    paper: {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-    avatar: {
-        backgroundColor: theme.palette,
-    },
-    form: {
-        width: "100%",
-    },
-}));
+// const useStyles = makeStyles((theme) => ({
+//     root: {
+//         height: "100vh",
+//     },
+//     image: {
+//         backgroundImage: "url(https://source.unsplash.com/random)",
+//         backgroundSize: "cover",
+//     },
+//     paper: {
+//         display: "flex",
+//         flexDirection: "column",
+//         alignItems: "center",
+//     },
+//     avatar: {
+//         backgroundColor: theme.palette,
+//     },
+//     form: {
+//         width: "100%",
+//     },
+// }));
 
 export default function Signin() {
-    const classes = useStyles();
+//    const classes = useStyles();
     const [showError, setShowError] = React.useState(false)
     const [showSuccess, setShowSuccess] = React.useState(false)
     const [authorized, setAuthorized] = React.useState(false)
@@ -89,12 +89,24 @@ export default function Signin() {
     }
 
     return (
-        <Grid container className={classes.root}>
+        <Grid
+            container
+            //className={classes.root}
+        >
             <CssBaseline />
-            <Grid item xs={false} md={7} className={classes.image} />
+            <Grid
+                item
+                xs={false}
+                md={7}
+                //className={classes.image}
+            />
             <Grid item xs={12} md={5} component={Paper} elevation={6} square>
-                <div className={classes.paper}>
-                    <Avatar className={classes.avatar}>
+                <div
+                    //className={classes.paper}
+                >
+                    <Avatar
+                        //className={classes.avatar}
+                    >
                         <LockOutlinedIcon/>
                     </Avatar>
                     <Typography component="h1" variant="h5">
@@ -102,7 +114,11 @@ export default function Signin() {
                     </Typography>
 
                     <button onClick={getGames}>getGam</button>
-                    <form className={classes.form} noValidate onSubmit={handleSubmit}>
+                    <form
+                        //className={classes.form}
+                        noValidate
+                        onSubmit={handleSubmit}
+                    >
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -127,7 +143,7 @@ export default function Signin() {
                             fullWidth
                             variant="contained"
                             color="primary"
-                            className={classes.submit}
+                            //className={classes.submit}
                         >
                             Sign In
                         </Button>

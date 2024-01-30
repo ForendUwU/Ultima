@@ -25,10 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new Get(uriTemplate: 'api/games/{id}'),
         new GetCollection(uriTemplate: 'api/games'),
-        new Post(
-            uriTemplate: 'api/games',
-            security: 'is_granted("ROLE_USER")'
-        ),
+        new Post(uriTemplate: 'api/games'),
         new Patch(uriTemplate: 'api/games/{id}'),
         new Delete(uriTemplate: 'api/games/{id}',),
     ],
@@ -43,7 +40,7 @@ class Game
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['game:read', 'purchasedGame:read', 'user:read'])]
-    private ?int $id = null;
+    private ?int $id = 0;
 
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]

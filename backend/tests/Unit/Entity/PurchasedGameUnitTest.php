@@ -5,9 +5,9 @@ namespace App\Tests\Unit\Entity;
 use App\Entity\Game;
 use App\Entity\PurchasedGame;
 use App\Entity\User;
-use Monolog\Test\TestCase;
+use PHPUnit\Framework\TestCase;
 
-class PurchasedGameTest extends TestCase
+class PurchasedGameUnitTest extends TestCase
 {
     public function testCreateEmptyPurchasedGame(): void
     {
@@ -16,6 +16,7 @@ class PurchasedGameTest extends TestCase
         $this->assertNotNull($testPurchasedGame);
         $this->assertNotNull($testPurchasedGame->getBoughtAt());
         $this->assertNotNull($testPurchasedGame->getHoursOfPlaying());
+        $this->assertNull($testPurchasedGame->getId());
     }
 
     public function testCreateNotEmptyPurchasedGame()
@@ -24,8 +25,10 @@ class PurchasedGameTest extends TestCase
 
         $testPurchasedGame->setUser(new User());
         $testPurchasedGame->setGame(new Game());
+        $testPurchasedGame->setHoursOfPlaying(4);
 
         $this->assertNotNull($testPurchasedGame->getUser());
         $this->assertNotNull($testPurchasedGame->getGame());
+        $this->assertEquals(4, $testPurchasedGame->getHoursOfPlaying());
     }
 }
