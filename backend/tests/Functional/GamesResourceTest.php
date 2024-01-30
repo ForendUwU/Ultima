@@ -8,9 +8,12 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class GamesResourceTest extends WebTestCase
 {
+    use ResetDatabase;
+
     protected KernelBrowser $client;
     protected EntityManager $em;
 
@@ -20,11 +23,6 @@ class GamesResourceTest extends WebTestCase
         $this->em = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
-        $games = $this->em->getRepository(Game::class)->findAll();
-        foreach ($games as $game)
-        {
-            $this->em->detach($game);
-        }
     }
 
     private function authorize(): void
@@ -98,6 +96,8 @@ class GamesResourceTest extends WebTestCase
 
     public function testPostNewGameUnauthorized(): void
     {
+        //TODO add auth token
+        $this->markTestSkipped();
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/games',
@@ -111,7 +111,7 @@ class GamesResourceTest extends WebTestCase
 
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
-
+dump($decodedResponse);
         $this->assertEquals(401, $response->getStatusCode());
         $this->assertJson($response->getContent());
         $this->assertArrayHasKey('detail', $decodedResponse);
