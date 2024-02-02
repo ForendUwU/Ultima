@@ -62,7 +62,6 @@ class AuthorizationController extends AbstractController
         )
     )]
     #[Tag('Authorization')]
-    //#[Security(name: "Bearer")]
     public function login(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
@@ -74,12 +73,24 @@ class AuthorizationController extends AbstractController
      */
     #[Route(
         "/api/logout",
-        name: 'app_logout',
         methods: ['POST']
     )]
     #[Tag('Authorization')]
-    public function logout(User $user): void
+    public function logout(Request $request): ?JsonResponse
     {
-        $user = null;
+        $data = json_decode($request->getContent(), true);
+        return $this->authorizationService->logout($data);
+    }
+
+    #[Route(
+        "/api/register",
+        name: 'app_register',
+        methods: ['POST']
+    )]
+    #[Tag('Authorization')]
+    public function register(Request $request): ?JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        return $this->authorizationService->register($data);
     }
 }

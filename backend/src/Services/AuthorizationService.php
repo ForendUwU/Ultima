@@ -28,6 +28,7 @@ class AuthorizationService
 
         return JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
     }
+
     public function login($data): JsonResponse
     {
         if (!$data['login'] || !$data['password']) {
@@ -36,7 +37,6 @@ class AuthorizationService
                 'message' => 'Missing credentials',
             ], Response::HTTP_BAD_REQUEST);
         }
-
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $data['login']]);
 
         if (!$user) {
@@ -54,6 +54,8 @@ class AuthorizationService
         }
 
         $token = $this->createToken($user);
+        $user->setToken($token);
+        $this->em->flush();
 
         return new JsonResponse([
             'result' => 'success',
@@ -61,16 +63,65 @@ class AuthorizationService
         ]);
     }
 
-    public function register($request): JsonResponse
+    public function register($data): JsonResponse
     {
         $newUser = new User();
-        $data = json_decode($request->getContent(), true);
-        if ($data['login'] || $data['password']){
+        if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
             return new JsonResponse([
                 'result' => 'fail',
-                'message' => 'missing credentials',
+                'message' => 'Missing data',
             ], 401);
         }
-        return new JsonResponse(['result' => 'success']);
+
+        $newUser->setLogin($data['login']);
+        $newUser->setPassword($data['password']);
+        $newUser->setEmail($data['email']);
+        $newUser->setNickname($data['nickname']);
+
+        $token = $this->createToken($newUser);
+        $newUser->setToken($token);
+        $newUser->setRoles(['ROLE_USER']);
+
+        $this->em->persist($newUser);
+        $this->em->flush();
+
+        return new JsonResponse([
+            'result' => 'success',
+            'token' => $token
+        ]);
+    }
+
+    public function logout($data): JsonResponse
+    {
+        if (!$data['userId']) {
+            return new JsonResponse([
+                'result' => 'fail',
+                'message' => 'Missing user id',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['id' => $data['userId']]);
+
+        if (!$user) {
+            return new JsonResponse([
+                'result' => 'fail',
+                'message' => 'User does not exist',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$user->getToken()){
+            return new JsonResponse([
+                'result' => 'fail',
+                'message' => 'User already unauthorized',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $user->setToken(null);
+        $this->em->flush();
+
+        return new JsonResponse([
+            'result' => 'success',
+            'message' => 'Logout successfully',
+        ], Response::HTTP_OK);
     }
 }

@@ -10,12 +10,12 @@ nelmio_api_doc:
             title: Ultima API
             description: Perfect description
             version: 1.0.0
-        components:
-            securitySchemes:
-                Bearer:
-                    type: http
-                    scheme: bearer
-                    bearerFormat: JWT
-                    in: header
-        security:
-            - Bearer: []
+#        components:
+#            securitySchemes:
+#                Bearer:
+#                    type: http
+#                    scheme: bearer
+#                    bearerFormat: JWT
+#                    in: header
+#        security:
+#            - Bearer: []

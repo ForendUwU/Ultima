@@ -24,7 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new Get(uriTemplate: 'api/user/{id}'),
         new GetCollection(uriTemplate: 'api/user'),
-        new Post(uriTemplate: 'api/user/{id}'),
+        new Post(uriTemplate: 'api/user'),
         new Patch(uriTemplate: 'api/user/{id}'),
         new Delete(uriTemplate: 'api/user/{id}'),
     ],

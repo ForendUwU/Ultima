@@ -24,7 +24,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     shortName: 'Game',
     operations: [
         new Get(uriTemplate: 'api/games/{id}'),
-        new GetCollection(uriTemplate: 'api/games'),
+        new GetCollection(
+            uriTemplate: 'api/games',
+            security: "is_granted('ROLE_USER')"
+        ),
         new Post(uriTemplate: 'api/games'),
         new Patch(uriTemplate: 'api/games/{id}'),
         new Delete(uriTemplate: 'api/games/{id}',),
