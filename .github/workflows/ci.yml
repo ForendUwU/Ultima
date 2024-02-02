@@ -71,8 +71,6 @@ jobs:
             -Dsonar.organization=nikita-perepelov-org
             -Dsonar.tests=backend/tests
             -Dsonar.sources=backend/src
-            -Dsonar.php.coverage.reportPaths=backend/tests/coverage.xml
-            -Dsonar.php.tests.reportPaths=backend/tests/report.xml
             -Dsonar.sourceEncoding=UTF-8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
