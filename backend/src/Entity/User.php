@@ -19,14 +19,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(name: 'user')]
 #[ApiResource(
     operations: [
-        new Get(),
-        new GetCollection(),
-        new Post(),
-        new Patch(),
-        new Delete(),
+        new Get(uriTemplate: 'api/user/{id}'),
+        new GetCollection(uriTemplate: 'api/user'),
+        new Post(uriTemplate: 'api/user'),
+        new Patch(uriTemplate: 'api/user/{id}'),
+        new Delete(uriTemplate: 'api/user/{id}'),
     ],
     normalizationContext: [
         'groups' => ['user:read']
@@ -43,7 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['user:read', 'purchasedGame:read'])]
-    private ?int $id = null;
+    private ?int $id = 0;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Groups(['user:read', 'user:write'])]
@@ -111,15 +111,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'user:write'])]
     private Collection $purchasedGames;
 
-    #[ORM\OneToMany(mappedBy: 'ownedBy', targetEntity: Token::class)]
-    private Collection $tokens;
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:write'])]
+    private ?string $token = null;
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->balance = 0;
         $this->purchasedGames = new ArrayCollection();
-        $this->tokens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -287,32 +287,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Token>
-     */
-    public function getTokens(): Collection
+    public function getToken(): ?string
     {
-        return $this->tokens;
+        return $this->token;
     }
 
-    public function addToken(Token $token): static
+    public function setToken(?string $token): static
     {
-        if (!$this->tokens->contains($token)) {
-            $this->tokens->add($token);
-            $token->setOwnedBy($this);
-        }
-
-        return $this;
-    }
-
-    public function removeToken(Token $token): static
-    {
-        if (
-            $this->tokens->removeElement($token)
-            && $token->getOwnedBy() === $this
-        ) {
-            $token->setOwnedBy(null);
-        }
+        $this->token = $token;
 
         return $this;
     }

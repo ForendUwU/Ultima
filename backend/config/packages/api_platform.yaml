@@ -2,6 +2,7 @@ api_platform:
     enable_docs: false
     title: Ultima API
     version: 0.0.2
+    show_webby: true
     formats:
         json: ['application/json']
         jsonld: ['application/ld+json']
@@ -17,7 +18,7 @@ api_platform:
     event_listeners_backward_compatibility_layer: false
     keep_legacy_inflector: false
     swagger:
-        api_keys:
+       api_keys:
             access_token:
                 name: Authorization
                 type: header

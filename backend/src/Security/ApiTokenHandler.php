@@ -2,31 +2,31 @@
 
 namespace App\Security;
 
-use App\Repository\TokenRepository;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\AccessToken\AccessTokenHandlerInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 
 class ApiTokenHandler implements AccessTokenHandlerInterface
 {
-    public function __construct(private TokenRepository $tokenRepository)
+    public function __construct(private EntityManagerInterface $em)
     {
 
     }
-    public function getUserBadgeFrom(#[\SensitiveParameter] string $accessToken): UserBadge
+    public function getUserBadgeFrom(string $accessToken): UserBadge
     {
-        $token = $this->tokenRepository->findOneBy(['token' => $accessToken]);
-        if (!$token)
+        $user = $this->em->getRepository(User::class)->findOneBy(['token' => $accessToken]);
+        if (!$user)
         {
             throw new BadCredentialsException();
         }
 
-        if (!$token->isValid())
-        {
-            throw new CustomUserMessageAuthenticationException('Token expired');
-        }
+//        if (!$user->getToken())
+//        {
+//            throw new CustomUserMessageAuthenticationException('Token expired');
+//        }
 
-        return new UserBadge($token->getOwnedBy()->getUserIdentifier());
+        return new UserBadge($user->getLogin());
     }
 }

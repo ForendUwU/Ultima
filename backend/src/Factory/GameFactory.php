@@ -30,18 +30,7 @@ use Zenstruck\Foundry\RepositoryProxy;
  */
 final class GameFactory extends ModelFactory
 {
-    public function generator(): \Generator
-    {
-        for ($i = 0; $i < 1000; $i++)
-        {
-            yield $i;
-        }
-    }
-
     /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
      * @throws RandomException
      */
     protected function getDefaults(): array
@@ -53,9 +42,6 @@ final class GameFactory extends ModelFactory
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     protected function initialize(): self
     {
         return $this

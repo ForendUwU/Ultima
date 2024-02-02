@@ -265,6 +265,13 @@
       <path value="$PROJECT_DIR$/backend/vendor/nelmio/api-doc-bundle" />
       <path value="$PROJECT_DIR$/backend/vendor/zircote/swagger-php" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/options-resolver" />
+      <path value="$PROJECT_DIR$/backend/vendor/crysalead/dir" />
+      <path value="$PROJECT_DIR$/backend/vendor/rogervila/php-sonarqube-scanner" />
+      <path value="$PROJECT_DIR$/backend/vendor/danieljharvey/php-git-branch" />
+      <path value="$PROJECT_DIR$/backend/vendor/danieljharvey/file-wrapper" />
+      <path value="$PROJECT_DIR$/backend/vendor/tivie/php-os-detector" />
+      <path value="$PROJECT_DIR$/backend/vendor/smorken/ext-http" />
+      <path value="$PROJECT_DIR$/backend/vendor/smorken/sanitizer" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />

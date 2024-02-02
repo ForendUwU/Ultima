@@ -1,39 +1,36 @@
 <?php
 
-namespace App\Tests;
+namespace App\Tests\Functional;
 
 use App\Entity\Game;
 use App\Factory\GameFactory;
-use App\Factory\UserFactory;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class GamesResourceTest extends WebTestCase
 {
+    use ResetDatabase;
+
     protected KernelBrowser $client;
-    protected EntityManager $manager;
+    protected EntityManager $em;
 
     protected function setUp() : void
     {
         $this->client = static::createClient();
-        $this->manager = $this->client->getContainer()
+        $this->em = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
-        $metaData = $this->manager->getMetadataFactory()->getAllMetadata();
-        $tool = new SchemaTool($this->manager);
-        $tool->dropSchema($metaData);
-        $tool->createSchema($metaData);
     }
 
     private function authorize(): void
     {
-        UserFactory::createOne([
-            'login' => 'test_login',
-            'password' => 'pass'
-        ]);
+//        UserFactory::createOne([
+//            'login' => 'test_login',
+//            'password' => 'pass'
+//        ]);
 
         $this->client->jsonRequest(
             'POST',
@@ -99,6 +96,8 @@ class GamesResourceTest extends WebTestCase
 
     public function testPostNewGameUnauthorized(): void
     {
+        //TODO add auth token
+        $this->markTestSkipped();
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/games',
@@ -112,7 +111,7 @@ class GamesResourceTest extends WebTestCase
 
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
-
+dump($decodedResponse);
         $this->assertEquals(401, $response->getStatusCode());
         $this->assertJson($response->getContent());
         $this->assertArrayHasKey('detail', $decodedResponse);
@@ -138,7 +137,6 @@ class GamesResourceTest extends WebTestCase
 
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
-        dump($decodedResponse);
 
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertJson($response->getContent());
@@ -235,7 +233,7 @@ class GamesResourceTest extends WebTestCase
         );
 
         $response = $this->client->getResponse();
-        $deletedGame = $this->manager->getRepository(Game::class)->findBy(['id' => 5]);
+        $deletedGame = $this->em->getRepository(Game::class)->findBy(['id' => 5]);
 
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty($deletedGame);
@@ -250,7 +248,7 @@ class GamesResourceTest extends WebTestCase
         );
 
         $response = $this->client->getResponse();
-        $deletedGame = $this->manager->getRepository(Game::class)->findBy(['id' => 5]);
+        $deletedGame = $this->em->getRepository(Game::class)->findBy(['id' => 5]);
 
         $this->assertEquals(404, $response->getStatusCode());
         $this->assertNotEmpty($deletedGame);

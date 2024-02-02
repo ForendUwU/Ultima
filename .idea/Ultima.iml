@@ -229,8 +229,14 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nelmio/api-doc-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/options-resolver" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/zircote/swagger-php" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/public/bundles" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/var" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor" />
+      <excludeFolder url="file://$MODULE_DIR$/mysql" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="bootstrap" level="application" />
   </component>
 </module>
