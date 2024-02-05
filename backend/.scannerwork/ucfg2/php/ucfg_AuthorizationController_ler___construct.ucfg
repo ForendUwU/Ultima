@@ -1,17 +1,0 @@
-
-3app\controller\authorizationcontroller::__constructX
-N/home/nikita/Desktop/Ultima/backend/src/Controller/AuthorizationController.php ("1*Ì
-1
-AuthorizationController.php†
-ƒ
- (
-$authorizationService"__id*X
-
-__unknown_file (<
-:
-$authorizationService!app\services\authorizationservice"
- (
-implicit return:F
-  (R:
-$authorizationService!app\services\authorizationserviceB*(
-&app\controller\authorizationcontrollerH

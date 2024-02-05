@@ -1,23 +1,0 @@
-
-%app\entity\purchasedgame::getboughtatJ
-@/home/nikita/Desktop/Ultima/backend/src/Entity/PurchasedGame.phpQ Q("1*ç
-1S S(`
-^
-S S(
-%1"__id*F
-
-__unknown_file (**(
-app\entity\purchasedgame"
-
-boughtAtO
-M
-S S(
-%2datetimeimmutable"__id*"
-
-__unknown_file (
-
-%1"%
-S S(
-
-%2datetimeimmutableB
-app\entity\purchasedgameH

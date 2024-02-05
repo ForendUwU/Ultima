@@ -1,7 +1,0 @@
-organization=nikita-perepelov-org
-projectKey=ForendUwU_Ultima
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.52441
-dashboardUrl=https://sonarcloud.io/dashboard?id=ForendUwU_Ultima
-ceTaskId=AY1omAwHxbdTC6Yia7G9
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AY1omAwHxbdTC6Yia7G9

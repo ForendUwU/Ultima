@@ -1,54 +1,0 @@
-
-"app\datafixtures\appfixtures::loadN
-D/home/nikita/Desktop/Ultima/backend/src/DataFixtures/AppFixtures.php ("1*7
-2
-AppFixtures.php"
- (
-implicit return*ô
-1 ($l
-j
- (
-
-$manager"__id*L
-
-__unknown_file (0
-.
-$manager"doctrine\persistence\objectmanagerì
-ê
- (#
-%1"#app\factory\gamefactory::createmany*7
-
-__unknown_file ("
-app\factory\gamefactory* 
-
-__unknown_file (2
-ì
-ê
- (#
-%2"#app\factory\userfactory::createmany*7
-
-__unknown_file ("
-app\factory\userfactory* 
-
-__unknown_file (2
-•
-¢
- (,
-%3",app\factory\purchasedgamefactory::createmany*@
-
-__unknown_file ($""
- app\factory\purchasedgamefactory* 
-
-__unknown_file (2
-CA
- (
-%4*(
-
-__unknown_file (
-
-
-$manager2flush*
-2::
- (/.
-$manager"doctrine\persistence\objectmanagerB 
-app\datafixtures\appfixturesH
