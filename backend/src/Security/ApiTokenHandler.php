@@ -10,9 +10,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 
 class ApiTokenHandler implements AccessTokenHandlerInterface
 {
-    public function __construct(private EntityManagerInterface $em)
-    {
-
+    public function __construct(
+        private readonly EntityManagerInterface $em
+    ) {
     }
     public function getUserBadgeFrom(string $accessToken): UserBadge
     {

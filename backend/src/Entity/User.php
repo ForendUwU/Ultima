@@ -54,9 +54,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     #[Groups(['user:read', 'user:write'])]
     #[Assert\NotBlank]
@@ -112,7 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $purchasedGames;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read'])]
     private ?string $token = null;
 
     public function __construct()

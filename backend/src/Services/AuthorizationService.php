@@ -13,7 +13,7 @@ class AuthorizationService
     private const PRIVATE_KEY = 'WHFZQGXm#k$mBzX]A0f(=g^GbcFz5,~zUQY:$kGdEvu((%s*EmSRQFJ[/#qW^';
     private const ALGORITHM = 'HS256';
 
-    public function __construct(private EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em)
     { }
 
     public function createToken(User $user): string
@@ -29,14 +29,8 @@ class AuthorizationService
         return JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
     }
 
-    public function login($data): JsonResponse
+    public function login(array $data): JsonResponse
     {
-        if (!$data['login'] || !$data['password']) {
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'Missing credentials',
-            ], Response::HTTP_BAD_REQUEST);
-        }
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $data['login']]);
 
         if (!$user) {
@@ -59,11 +53,12 @@ class AuthorizationService
 
         return new JsonResponse([
             'result' => 'success',
-            'token' => $token
+            'token' => $token,
+            'userId' => $user->getId()
         ]);
     }
 
-    public function register($data): JsonResponse
+    public function register(array $data): JsonResponse
     {
         $newUser = new User();
         if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
@@ -91,7 +86,7 @@ class AuthorizationService
         ]);
     }
 
-    public function logout($data): JsonResponse
+    public function logout(array $data): JsonResponse
     {
         if (!$data['userId']) {
             return new JsonResponse([

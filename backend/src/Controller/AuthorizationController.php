@@ -68,9 +68,6 @@ class AuthorizationController extends AbstractController
         return $this->authorizationService->login($data);
     }
 
-    /**
-     * @throws \Exception
-     */
     #[Route(
         "/api/logout",
         methods: ['POST']
