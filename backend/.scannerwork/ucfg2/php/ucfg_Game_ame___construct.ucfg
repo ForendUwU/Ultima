@@ -1,0 +1,45 @@
+
+app\entity\game::__constructA
+7/home/nikita/Desktop/Ultima/backend/src/Entity/Game.phpO O("1*0
+2
+
+Game.php"
+S S(
+implicit return*ÿ
+1Q Q(6%#
+Q Q(5
+%1"datetimeimmutableV
+T
+Q Q(5
+%2"datetimeimmutable::__construct*"
+
+__unknown_file (
+
+%1Z
+X
+Q Q(5"
+app\entity\game"
+publishedAt"__id*"
+
+__unknown_file (
+
+%1?=
+R  R(5
+%3"+doctrine\common\collections\arraycollectionp
+n
+R  R(5
+%4"8doctrine\common\collections\arraycollection::__construct*"
+
+__unknown_file (
+
+%3]
+[
+R R(5%
+app\entity\game"
+purchasedGames"__id*"
+
+__unknown_file (
+
+%3*
+2B
+app\entity\gameH

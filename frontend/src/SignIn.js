@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -7,33 +7,10 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-// import { makeStyles } from "@mui/styles";
 
-// const useStyles = makeStyles((theme) => ({
-//     root: {
-//         height: "100vh",
-//     },
-//     image: {
-//         backgroundImage: "url(https://source.unsplash.com/random)",
-//         backgroundSize: "cover",
-//     },
-//     paper: {
-//         display: "flex",
-//         flexDirection: "column",
-//         alignItems: "center",
-//     },
-//     avatar: {
-//         backgroundColor: theme.palette,
-//     },
-//     form: {
-//         width: "100%",
-//     },
-// }));
-
-export default function Signin() {
+export default function SignIn() {
 //    const classes = useStyles();
     const [showError, setShowError] = React.useState(false)
-    const [showSuccess, setShowSuccess] = React.useState(false)
     const [authorized, setAuthorized] = React.useState(false)
     const [nickname, setNickname] = React.useState()
 
@@ -41,7 +18,7 @@ export default function Signin() {
         e.preventDefault();
         let { login, password } = document.forms[0];
 
-        const response = await fetch('https://localhost/login', {
+        const response = await fetch('https://localhost/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -50,16 +27,15 @@ export default function Signin() {
                 login: login.value,
                 password: password.value
             })
-        });
+        }); //then
 
         const data = await response.json();
 
         if (!response.ok) {
             setShowError(true);
             setShowSuccess(false);
-            console.log(data);
-        }else{
-            const response1 = await fetch('https://localhost/api/users/' + data, {
+        } else {
+            const response1 = await fetch('https://localhost/api/user/' + data['userId'], {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -72,14 +48,30 @@ export default function Signin() {
             setShowError(false);
             setShowSuccess(true);
         }
-
-        //login.value = '';
-        //password.value = '';
-        //emit('user-authenticated', userIri);
     }
 
     const getGames = async () => {
-        let response = await fetch("https://localhost/api/games");
+        let response = await fetch("https://localhost/api/games", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            await response.json();
+        } else {
+            alert("HTTP-Error: " + response.status);
+        }
+    }
+
+    const logout = async () => {
+        let response = await fetch("https://localhost/api/games", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
         if (response.ok) {
             await response.json();
@@ -89,106 +81,97 @@ export default function Signin() {
     }
 
     return (
-        <Grid
-            container
-            //className={classes.root}
-        >
-            <CssBaseline />
-            <Grid
-                item
-                xs={false}
-                md={7}
-                //className={classes.image}
-            />
-            <Grid item xs={12} md={5} component={Paper} elevation={6} square>
-                <div
-                    //className={classes.paper}
+        <Grid container style={{
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: "hidden"
+        }}>
+            <img src="https://source.unsplash.com/random" style={{
+                position: "absolute",
+                height: "100%",
+                width: "100%",
+                objectFit: "cover",
+                zIndex: -1
+            }} alt="Random Image"/>
+            <Grid item component={Paper} elevation={6} style={{
+                padding: '1%'
+            }}>
+                {/*<Typography variant={'h1'}>*/}
+                {/*    Sign in*/}
+                {/*</Typography>*/}
+
+                <form
+                    noValidate
+                    onSubmit={handleSubmit}
                 >
-                    <Avatar
-                        //className={classes.avatar}
-                    >
-                        <LockOutlinedIcon/>
-                    </Avatar>
-                    <Typography component="h1" variant="h5">
-                        Sign in
-                    </Typography>
+                    <div style={{marginLeft: "1%"}}>Login</div>
+                    <input
+                        style={{
+                            marginRight: "2%",
+                            marginTop: "2%",
+                            marginBottom: "2%",
+                            borderRadius: "5px",
+                            borderColor: "rgba(25,118,210,0.5)",
+                            borderStyle: "solid",
+                            placeholder: "text",
+                            width: "100%",
+                            height: "5vh"
+                        }}
+                        required
+                        id="login"
+                        name="login"
+                        type="login"
+                    />
 
-                    <button onClick={getGames}>getGam</button>
-                    <form
-                        //className={classes.form}
-                        noValidate
-                        onSubmit={handleSubmit}
+                    <div style={{marginLeft: "1%"}}>Password</div>
+                    <input
+                        style={{
+                            marginRight: "2%",
+                            marginTop: "2%",
+                            marginBottom: "2%",
+                            borderRadius: "5px",
+                            borderColor: "rgba(25,118,210,0.5)",
+                            borderStyle: "solid",
+                            placeholder: "text",
+                            width: "100%",
+                            height: "5vh"
+                        }}
+                        required
+                        id="password"
+                        name="password"
+                        type="password"
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="outlined"
+                        color="primary"
+                        size="large"
+                        style={{fontSize: "100%"}}
                     >
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="login"
-                            name="login"
-                            label="Login"
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="password"
-                            name="password"
-                            label="Password"
-                            type="password"
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            //className={classes.submit}
-                        >
-                            Sign In
-                        </Button>
-                    </form>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                }}>
-                    {showError ?
-                        <Paper
-                            square={false}
-                            style={{
-                                marginTop: 5 + '%',
-                                width: 50 + '%',
-                                textAlign: 'center',
-                                backgroundColor: 'red'
-                            }}>
-                            Error
-                        </Paper>
-                        : null}
-                </div>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                }}>
-                    {showSuccess ?
-                        <Paper
-                            square={false}
-                            style={{
-                                marginTop: 5 + '%',
-                                width: 50 + '%',
-                                textAlign: 'center',
-                                backgroundColor: 'green'
-                            }}>
-                            Success
-                        </Paper>
-                        : null}
-                </div>
+                        Sign In
+                    </Button>
+                </form>
+                {showError &&
+                    <Paper
+                        square={false}
+                        style={{
+                            marginTop: 5 + '%',
+                            width: 50 + '%',
+                            textAlign: 'center',
+                            backgroundColor: 'red'
+                        }}>
+                        Error
+                    </Paper>
+                }
 
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
                 }}>
-                    {authorized ?
+                    {authorized &&
                         <Paper
                             square={false}
                             style={{
@@ -199,7 +182,7 @@ export default function Signin() {
                             }}>
                             Welcome { nickname }
                         </Paper>
-                        : null}
+                    }
                 </div>
             </Grid>
         </Grid>
