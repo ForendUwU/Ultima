@@ -33,7 +33,6 @@ export default function SignIn() {
 
         if (!response.ok) {
             setShowError(true);
-            setShowSuccess(false);
         } else {
             const response1 = await fetch('https://localhost/api/user/' + data['userId'], {
                 method: 'GET',
@@ -46,7 +45,6 @@ export default function SignIn() {
 
             setAuthorized(true);
             setShowError(false);
-            setShowSuccess(true);
         }
     }
 
