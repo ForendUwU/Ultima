@@ -23,9 +23,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     shortName: 'Game',
     operations: [
-        new Get(uriTemplate: 'api/games/{id}'),
+        new Get(
+            uriTemplate: 'api/games/{id}',
+            security: 'is_granted(["ROLE_USER"])'
+        ),
         new GetCollection(
-            uriTemplate: 'api/games'
+            uriTemplate: 'api/games',
         ),
         new Post(uriTemplate: 'api/games'),
         new Patch(uriTemplate: 'api/games/{id}'),

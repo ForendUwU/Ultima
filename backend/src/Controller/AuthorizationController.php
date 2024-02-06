@@ -2,8 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,8 +17,11 @@ use App\Services\AuthorizationService;
 class AuthorizationController extends AbstractController
 {
 
-    public function __construct(private AuthorizationService $authorizationService)
-    { }
+    public function __construct(
+        private readonly AuthorizationService $authorizationService
+    ) {
+
+    }
 
     #[Route(
         "/api/login",
@@ -62,10 +63,30 @@ class AuthorizationController extends AbstractController
         )
     )]
     #[Tag('Authorization')]
-    public function login(Request $request): Response
+    public function login(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $this->authorizationService->login($data);
+
+        if (!$data['login'] || !$data['password']){
+            return new JsonResponse(
+                [
+                    'content' => [
+                        'result' => 'fail',
+                        'message' => 'Missing data'
+                    ],
+                ],
+                Response::HTTP_UNAUTHORIZED
+            );
+        }
+
+        $result = $this->authorizationService->login($data['login'], $data['password']);
+
+        return new JsonResponse(
+            [
+                $result['content']
+            ],
+            $result['code']
+        );
     }
 
     #[Route(
@@ -76,7 +97,25 @@ class AuthorizationController extends AbstractController
     public function logout(Request $request): ?JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $this->authorizationService->logout($data);
+
+        if (!$data['userId']) {
+            return new JsonResponse(
+                [
+                    'content' => [
+                        'message' => 'Missing user id'
+                    ],
+                ],
+                Response::HTTP_BAD_REQUEST);
+        }
+
+        $result = $this->authorizationService->logout($data['userId']);
+
+        return new JsonResponse(
+            [
+                $result['content']
+            ],
+            $result['code']
+        );
     }
 
     #[Route(
@@ -85,9 +124,35 @@ class AuthorizationController extends AbstractController
         methods: ['POST']
     )]
     #[Tag('Authorization')]
-    public function register(Request $request): ?JsonResponse
+    public function registration(Request $request): ?JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        return $this->authorizationService->register($data);
+
+        if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
+            return new JsonResponse(
+                [
+                    'content' => [
+                        'message' => 'Missing data'
+                    ],
+                ],
+                Response::HTTP_UNAUTHORIZED
+            );
+        }
+
+        $result = $this->authorizationService->registration(
+            $data['login'],
+            $data['password'],
+            $data['email'],
+            $data['nickname']
+        );
+
+        return new JsonResponse(
+            [
+                'content' => [
+                    'token' => $result['token']
+                ]
+            ],
+            $result['code']
+        );
     }
 }

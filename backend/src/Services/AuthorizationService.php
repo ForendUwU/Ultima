@@ -13,8 +13,11 @@ class AuthorizationService
     private const PRIVATE_KEY = 'WHFZQGXm#k$mBzX]A0f(=g^GbcFz5,~zUQY:$kGdEvu((%s*EmSRQFJ[/#qW^';
     private const ALGORITHM = 'HS256';
 
-    public function __construct(private readonly EntityManagerInterface $em)
-    { }
+    public function __construct(
+        private readonly EntityManagerInterface $em
+    ) {
+
+    }
 
     public function createToken(User $user): string
     {
@@ -29,49 +32,49 @@ class AuthorizationService
         return JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
     }
 
-    public function login(array $data): JsonResponse
+    public function login(string $login, string $password): array
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $data['login']]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $login]);
 
         if (!$user) {
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'This user does not exist'
-            ], Response::HTTP_BAD_REQUEST);
+            return array(
+                'content' => [
+                    'message' => 'This user does not exist',
+                ],
+                'code' => Response::HTTP_BAD_REQUEST
+            );
         }
 
-        if ($user->getPassword() !== $data['password']){
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'Wrong login or password'
-            ], Response::HTTP_UNAUTHORIZED);
+        if ($user->getPassword() !== $password){
+            return array(
+                'content' => [
+                    'message' => 'Wrong login or password',
+                ],
+                'code' => Response::HTTP_UNAUTHORIZED
+            );
         }
 
         $token = $this->createToken($user);
         $user->setToken($token);
         $this->em->flush();
 
-        return new JsonResponse([
-            'result' => 'success',
-            'token' => $token,
-            'userId' => $user->getId()
-        ]);
+        return array(
+            'content' => [
+                'token' => $token,
+                'userId' => $user->getId()
+            ],
+            'code' => Response::HTTP_OK
+        );
     }
 
-    public function register(array $data): JsonResponse
+    public function registration(string $login, string $password, string $email, string $nickname): array
     {
         $newUser = new User();
-        if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'Missing data',
-            ], 401);
-        }
 
-        $newUser->setLogin($data['login']);
-        $newUser->setPassword($data['password']);
-        $newUser->setEmail($data['email']);
-        $newUser->setNickname($data['nickname']);
+        $newUser->setLogin($login);
+        $newUser->setPassword($password);
+        $newUser->setEmail($email);
+        $newUser->setNickname($nickname);
 
         $token = $this->createToken($newUser);
         $newUser->setToken($token);
@@ -80,43 +83,44 @@ class AuthorizationService
         $this->em->persist($newUser);
         $this->em->flush();
 
-        return new JsonResponse([
-            'result' => 'success',
-            'token' => $token
-        ]);
+        return array(
+            'content' => [
+                'token' => $token
+            ],
+            'code' => Response::HTTP_OK
+        );
     }
 
-    public function logout(array $data): JsonResponse
+    public function logout(string $userId): array
     {
-        if (!$data['userId']) {
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'Missing user id',
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $user = $this->em->getRepository(User::class)->findOneBy(['id' => $data['userId']]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['id' => $userId]);
 
         if (!$user) {
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'User does not exist',
-            ], Response::HTTP_BAD_REQUEST);
+            return array(
+                'content' => [
+                    'message' => 'User does not exist'
+                ],
+                'code' => Response::HTTP_BAD_REQUEST
+            );
         }
 
         if (!$user->getToken()){
-            return new JsonResponse([
-                'result' => 'fail',
-                'message' => 'User already unauthorized',
-            ], Response::HTTP_FORBIDDEN);
+            return array(
+                'content' => [
+                    'message' => 'User already unauthorized'
+                ],
+                'code' => Response::HTTP_FORBIDDEN
+            );
         }
 
         $user->setToken(null);
         $this->em->flush();
 
-        return new JsonResponse([
-            'result' => 'success',
-            'message' => 'Logout successfully',
-        ], Response::HTTP_OK);
+        return array(
+            'content' => [
+                'message' => 'Logout successfully'
+            ],
+            'code' => Response::HTTP_OK
+        );
     }
 }
