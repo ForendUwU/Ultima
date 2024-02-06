@@ -8,9 +8,9 @@ import {
 
 import "./App.css";
 
-import SignIn from "./SignIn";
-import Games from "./ReactExercises/WorkingWithAPI";
-import HomePage from "./HomePage"
+import SignIn from "../SignInPage/SignIn";
+import Games from "../ReactExercises/WorkingWithAPI";
+import HomePage from "../HomePage/HomePage"
 
 function App() {
   return (
