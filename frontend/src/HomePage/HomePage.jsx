@@ -1,11 +1,12 @@
 import React, {useEffect} from "react";
-import { Link } from "react-router-dom";
 import Header from "../Components/Header"
-import { Grid, Typography, Container, ImageList, ImageListItem, ImageListItemBar }  from "@mui/material";
+import Error from "../Components/Error"
+import { Container, ImageList, ImageListItem, ImageListItemBar }  from "@mui/material";
 
 export default function HomePage() {
     const [games, setGames] = React.useState();
     const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
 
     useEffect(() => {
         fetch('https://localhost/api/games', {
@@ -21,12 +22,16 @@ export default function HomePage() {
             }
         }).then(decodedResponse => {
             setGames(decodedResponse);
+        }).catch(error => {
+            console.error(error);
+            setError(error);
         }).finally(()=>{
             setLoading(false);
         })
     },[]);
 
     if(loading) return "Loading...";
+    if(error) return <Error errorText={error.toString()} />;
 
     return (
         <Container maxWidth="lg">

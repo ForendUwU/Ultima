@@ -420,6 +420,7 @@
   <component name="PhpStan">
     <PhpStan_settings>
       <phpstan_by_interpreter interpreter_id="0e4ad7f7-91b6-40b0-905a-5594b78a469c" tool_path="vendor/bin/phpstan" timeout="60000" />
+      <PhpStanConfiguration tool_path="$PROJECT_DIR$/backend/vendor/bin/phpstan" />
     </PhpStan_settings>
   </component>
   <component name="PhpStanOptionsConfiguration">

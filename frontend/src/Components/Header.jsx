@@ -1,19 +1,38 @@
-import {Grid, Typography} from "@mui/material";
+import {Grid, Typography, Button} from "@mui/material";
 import {Link} from "react-router-dom";
-import React, {useContext, useEffect} from "react";
+import React, {useEffect} from "react";
+import Cookies from 'universal-cookie';
+
+function handleLogout()
+{
+    const cookies = new Cookies();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    cookies.set('token', '', {expires: yesterday});
+    cookies.set('userId', '', {expires: yesterday});
+    window.location.reload();
+}
 
 export default function Header(){
-    const authorized = useContext(aut)
-    const [nickname, setNickname] = React.useState()
+    const cookies = new Cookies();
 
-    useEffect(()=>{
-        fetch('https://localhost/api/user', {
+    const userId = cookies.get('userId');
+    const [nickname, setNickname] = React.useState(null)
+    console.log(userId);
+
+    useEffect(() => {
+        fetch('https://localhost/api/user/' + userId, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
-        })
-    }, [])
+        }).then(response => {
+            return response.json();
+        }).then(decodedResponse => {
+            setNickname(decodedResponse['nickname']);
+        });
+    }, []);
 
     return(
         <Grid container spacing={2} alignItems="center">
@@ -21,12 +40,16 @@ export default function Header(){
                 <Link to="/" underline="none"><Typography variant="h1">Ultima</Typography></Link>
             </Grid>
             <Grid item xs="auto" align="right" justifyContent="flex-end">
-                <Link to="/" underline="none"><Typography variant="h4">Home</Typography></Link>
+                <Button to="/" underline="none"><Typography variant="h4">Home</Typography></Button>
             </Grid>
-            {}
             <Grid item xs="auto" justifyContent="flex-end">
-                <Link to="/signIn" underline="none"><Typography variant="h4">Sign In</Typography></Link>
+                <Button href="/signIn"><Typography variant="h4">{nickname || "Sign In"}</Typography></Button>
             </Grid>
+            {nickname &&
+            <Grid item xs="auto" justifyContent="flex-end">
+                <Button onClick={handleLogout}><Typography variant="h4">Logout</Typography></Button>
+            </Grid>
+            }
         </Grid>
     );
 }

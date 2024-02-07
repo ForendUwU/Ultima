@@ -8,8 +8,8 @@ import {
 
 import "./App.css";
 
-import SignIn from "../SignInPage/SignIn";
-import Games from "../ReactExercises/WorkingWithAPI";
+import SignIn from "../AuthorizationPages/SignIn";
+import Registration from "../AuthorizationPages/Registration";
 import HomePage from "../HomePage/HomePage"
 
 function App() {
@@ -25,6 +25,10 @@ function App() {
             <Route
                 path="/signIn"
                 element={<SignIn />}
+            />
+            <Route
+                path="/registration"
+                element={<Registration />}
             />
             <Route
                 path="*"

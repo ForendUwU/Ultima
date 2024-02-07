@@ -1,26 +1,23 @@
 import React from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
+import Cookies from 'universal-cookie';
+import {Paper, Typography, Grid, Button} from "@mui/material";
 import {Link} from "react-router-dom";
-import Header from "../Components/Header";
+
+export const NicknameContext = React.createContext('a');
 
 export default function SignIn() {
     const [showError, setShowError] = React.useState(false)
-    const [errorMessage, setErrorMessage] = React.useState()
+    const [errorMessage, setErrorMessage] = React.useState('')
     const [authorized, setAuthorized] = React.useState(false)
-    const [nickname, setNickname] = React.useState()
+    const [nickname, setNickname] = React.useState(null)
 
-    export const AuthContext = React.createContext(false);
+    const cookies = new Cookies();
 
     const handleSubmit = (e) => {
         e.preventDefault();
         let { login, password } = document.forms[0];
+        cookies.set('token', null);
+        cookies.set('userId', null);
 
         fetch('https://localhost/api/login', {
             method: 'POST',
@@ -53,42 +50,20 @@ export default function SignIn() {
                         return response.json();
                     }).then(decodedResponse => {
                         setNickname(decodedResponse['nickname']);
+
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+
+                        cookies.set('token', decodedResponse['token'], {expires: tomorrow});
+                        cookies.set('userId', decodedResponse['id'], {expires: tomorrow});
+
+                        window.open("/");
                     });
                 } else {
                     setErrorMessage(data['message']);
                 }
             });
         })
-    }
-
-    const getGames = async () => {
-        let response = await fetch("https://localhost/api/games", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            await response.json();
-        } else {
-            alert("HTTP-Error: " + response.status);
-        }
-    }
-
-    const logout = async () => {
-        let response = await fetch("https://localhost/api/games", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            await response.json();
-        } else {
-            alert("HTTP-Error: " + response.status);
-        }
     }
 
     return (
@@ -183,13 +158,10 @@ export default function SignIn() {
                         </Paper>
                     }
                 </div>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                }}>
-                    <Link to="/" underline="none"><Typography variant="h4">Go back</Typography></Link>
-                </div>
+                <br/>
+                <Link to="/" underline="none"><Typography variant="h5">Go back</Typography></Link>
+                <Link to="/registration" underline="none"><Typography variant="h5">Registration</Typography></Link>
             </Grid>
         </Grid>
-);
+    );
 }
