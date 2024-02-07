@@ -69,22 +69,17 @@ class AuthorizationController extends AbstractController
 
         if (!$data['login'] || !$data['password']){
             return new JsonResponse(
-                [
-                    'content' => [
-                        'result' => 'fail',
+                    [
                         'message' => 'Missing data'
                     ],
-                ],
-                Response::HTTP_UNAUTHORIZED
+                Response::HTTP_BAD_REQUEST
             );
         }
 
         $result = $this->authorizationService->login($data['login'], $data['password']);
 
         return new JsonResponse(
-            [
-                $result['content']
-            ],
+            $result['content'],
             $result['code']
         );
     }
@@ -96,24 +91,20 @@ class AuthorizationController extends AbstractController
     #[Tag('Authorization')]
     public function logout(Request $request): ?JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $token = $request->headers->get('authorization');
 
-        if (!$data['userId']) {
+        if (!$token) {
             return new JsonResponse(
                 [
-                    'content' => [
-                        'message' => 'Missing user id'
-                    ],
+                    'message' => 'Missing token'
                 ],
                 Response::HTTP_BAD_REQUEST);
         }
 
-        $result = $this->authorizationService->logout($data['userId']);
+        $result = $this->authorizationService->logout($token);
 
         return new JsonResponse(
-            [
-                $result['content']
-            ],
+            $result['content'],
             $result['code']
         );
     }
@@ -124,7 +115,7 @@ class AuthorizationController extends AbstractController
         methods: ['POST']
     )]
     #[Tag('Authorization')]
-    public function registration(Request $request): ?JsonResponse
+    public function register(Request $request): ?JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -139,7 +130,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        $result = $this->authorizationService->registration(
+        $result = $this->authorizationService->register(
             $data['login'],
             $data['password'],
             $data['email'],

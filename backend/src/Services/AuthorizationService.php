@@ -10,26 +10,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthorizationService
 {
-    private const PRIVATE_KEY = 'WHFZQGXm#k$mBzX]A0f(=g^GbcFz5,~zUQY:$kGdEvu((%s*EmSRQFJ[/#qW^';
-    private const ALGORITHM = 'HS256';
-
     public function __construct(
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly TokenService $tokenService
     ) {
 
-    }
-
-    public function createToken(User $user): string
-    {
-        $payload = [
-            'id' => $user->getId(),
-            'login' => $user->getLogin(),
-            'email' => $user->getEmail(),
-            //TODO change role .
-            'role' => $user->getRoles()
-        ];
-
-        return JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
     }
 
     public function login(string $login, string $password): array
@@ -54,20 +39,19 @@ class AuthorizationService
             );
         }
 
-        $token = $this->createToken($user);
+        $token = $this->tokenService->createToken($user);
         $user->setToken($token);
         $this->em->flush();
 
         return array(
             'content' => [
-                'token' => $token,
-                'userId' => $user->getId()
+                'token' => $token
             ],
             'code' => Response::HTTP_OK
         );
     }
 
-    public function registration(string $login, string $password, string $email, string $nickname): array
+    public function register(string $login, string $password, string $email, string $nickname): array
     {
         $newUser = new User();
 
@@ -76,7 +60,7 @@ class AuthorizationService
         $newUser->setEmail($email);
         $newUser->setNickname($nickname);
 
-        $token = $this->createToken($newUser);
+        $token = $this->tokenService->createToken($newUser);
         $newUser->setToken($token);
         $newUser->setRoles(['ROLE_USER']);
 
@@ -91,8 +75,11 @@ class AuthorizationService
         );
     }
 
-    public function logout(string $userId): array
+    public function logout(string $token): array
     {
+        $decodedToken = $this->tokenService->decode($token);
+        $userId = $decodedToken->id;
+
         $user = $this->em->getRepository(User::class)->findOneBy(['id' => $userId]);
 
         if (!$user) {

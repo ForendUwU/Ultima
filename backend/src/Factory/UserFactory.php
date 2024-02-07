@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
 /**
  * @extends ModelFactory<User>
@@ -48,10 +49,11 @@ final class UserFactory extends ModelFactory
     {
         return [
             'balance' => self::faker()->randomFloat(),
-            'email' => self::faker()->text(255),
-            'login' => self::faker()->text(180),
-            'nickname' => self::faker()->text(255),
+            'email' => self::faker()->text(20),
+            'login' => self::faker()->text(20),
+            'nickname' => self::faker()->text(20),
             'password' => self::faker()->text(),
+            'token' => self::faker()->text(20),
             'roles' => [],
         ];
     }

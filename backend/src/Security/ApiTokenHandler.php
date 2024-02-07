@@ -22,11 +22,6 @@ class ApiTokenHandler implements AccessTokenHandlerInterface
             throw new BadCredentialsException();
         }
 
-//        if (!$user->getToken())
-//        {
-//            throw new CustomUserMessageAuthenticationException('Token expired');
-//        }
-
         return new UserBadge($user->getLogin());
     }
 }

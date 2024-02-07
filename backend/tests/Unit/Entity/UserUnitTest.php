@@ -16,6 +16,7 @@ class UserUnitTest extends TestCase
         $this->assertNotNull($testUser->getBalance());
         $this->assertEquals(0, $testUser->getBalance());
         $this->assertNotNull($testUser->getPurchasedGames());
+        $this->assertNotNull($testUser->getId());
     }
 
     public function testCreateNotEmptyUserEntity(): void
@@ -32,8 +33,10 @@ class UserUnitTest extends TestCase
         $testUser->setEmail('test@email.com');
         $testUser->addPurchasedGame($testPurchasedGame);
         $testUser->setToken('Test token');
+        $testUser->setBalance(2.10);
 
         $this->assertEquals('Test Login', $testUser->getLogin());
+        $this->assertEquals('Test Login', $testUser->getUserIdentifier());
         $this->assertContains('ROLE_ADMIN', $testUser->getRoles());
         $this->assertContains($testPurchasedGame, $testUser->getPurchasedGames());
         $this->assertEquals('Test token', $testUser->getToken());
@@ -42,9 +45,12 @@ class UserUnitTest extends TestCase
         $this->assertEquals('Test FirstName', $testUser->getFirstName());
         $this->assertEquals('Test LastName', $testUser->getLastName());
         $this->assertEquals('test@email.com', $testUser->getEmail());
-        
+        $this->assertEquals(2.10, $testUser->getBalance());
+
         $testUser->removePurchasedGame($testPurchasedGame);
+        $testUser->eraseCredentials();
 
         $this->assertTrue($testUser->getPurchasedGames()->isEmpty());
+        $this->assertNull($testUser->getToken());
     }
 }
