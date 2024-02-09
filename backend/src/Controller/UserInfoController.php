@@ -17,7 +17,7 @@ class UserInfoController extends AbstractController
 {
     public function __construct(
         private readonly TokenService $tokenService,
-        private UserInfoService $userInfoService
+        private readonly UserInfoService $userInfoService
     ) {
 
     }
@@ -33,9 +33,7 @@ class UserInfoController extends AbstractController
         if (!$token) {
             return new JsonResponse(
                 [
-                    'content' => [
-                        'message' => 'Missing token'
-                    ],
+                    'message' => 'Token is missing'
                 ],
                 Response::HTTP_BAD_REQUEST);
         }
@@ -43,6 +41,6 @@ class UserInfoController extends AbstractController
         $decodedToken = $this->tokenService->decode($token);
         $result = $this->userInfoService->getUserInfo($decodedToken->id);
 
-        return new JsonResponse($result, Response::HTTP_OK);
+        return new JsonResponse($result['content'], Response::HTTP_OK);
     }
 }

@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Firebase\JWT\JWT;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthorizationService
@@ -69,7 +67,7 @@ class AuthorizationService
 
         return array(
             'content' => [
-                'token' => $token
+                'token' => $token,
             ],
             'code' => Response::HTTP_OK
         );

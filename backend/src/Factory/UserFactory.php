@@ -30,21 +30,11 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\service_l
  */
 final class UserFactory extends ModelFactory
 {
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
     public function __construct()
     {
         parent::__construct();
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
-     */
     protected function getDefaults(): array
     {
         return [
@@ -55,12 +45,10 @@ final class UserFactory extends ModelFactory
             'password' => self::faker()->text(),
             'token' => self::faker()->text(20),
             'roles' => [],
+            'purchasedGames' => []
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     protected function initialize(): self
     {
         return $this

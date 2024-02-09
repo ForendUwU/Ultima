@@ -16,15 +16,12 @@ class UserInfoService
 
     }
 
-    /**
-     * @throws NotSupported
-     */
     public function getUserInfo($userId): array
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['id' => $userId]);
         return array(
             'content' => [
-                'login' => $user->getId(),
+                'login' => $user->getLogin(),
                 'nickname' => $user->getNickname(),
                 'balance' => $user->getBalance(),
                 'firstName' => $user->getFirstName(),

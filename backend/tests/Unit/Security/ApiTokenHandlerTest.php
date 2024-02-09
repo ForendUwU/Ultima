@@ -23,10 +23,10 @@ class ApiTokenHandlerTest extends TestCase
         $repositoryMock = $this->createMock(UserRepository::class);
 
         $repositoryMock->expects(self::once())
-            ->method("findOneBy")
+            ->method('findOneBy')
             ->willReturn($testUser);
         $emMock->expects(self::once())
-            ->method("getRepository")
+            ->method('getRepository')
             ->willReturn($repositoryMock);
 
         $apiTokenHandler = new ApiTokenHandler($emMock);

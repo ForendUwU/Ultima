@@ -122,11 +122,9 @@ class AuthorizationController extends AbstractController
         if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
             return new JsonResponse(
                 [
-                    'content' => [
-                        'message' => 'Missing data'
-                    ],
+                    'message' => 'Missing data'
                 ],
-                Response::HTTP_UNAUTHORIZED
+                Response::HTTP_BAD_REQUEST
             );
         }
 
@@ -138,11 +136,7 @@ class AuthorizationController extends AbstractController
         );
 
         return new JsonResponse(
-            [
-                'content' => [
-                    'token' => $result['token']
-                ]
-            ],
+            $result['content'],
             $result['code']
         );
     }

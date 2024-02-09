@@ -13,12 +13,15 @@ class TokenService
 
     public function createToken(User $user): string
     {
+        $tokenCreationDate = new \DateTimeImmutable();
+
         $payload = [
             'id' => $user->getId(),
             'login' => $user->getLogin(),
             'email' => $user->getEmail(),
             //TODO change role
-            'role' => $user->getRoles()
+            'role' => $user->getRoles(),
+            'tokenCreationDate' => $tokenCreationDate->format('Y-m-d')
         ];
 
         return $this->encode($payload);
