@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class AuthorizationService
 {
@@ -57,13 +58,23 @@ class AuthorizationService
         $newUser->setPassword($password);
         $newUser->setEmail($email);
         $newUser->setNickname($nickname);
+        $newUser->setRoles(['ROLE_USER']);
 
         $token = $this->tokenService->createToken($newUser);
         $newUser->setToken($token);
-        $newUser->setRoles(['ROLE_USER']);
 
         $this->em->persist($newUser);
-        $this->em->flush();
+        try {
+            $this->em->flush();
+        }
+        catch (UniqueConstraintViolationException $e) {
+            return array(
+                'content' => [
+                    'message' => 'This login already exists',
+                ],
+                'code' => Response::HTTP_UNAUTHORIZED
+            );
+        }
 
         return array(
             'content' => [
@@ -76,9 +87,9 @@ class AuthorizationService
     public function logout(string $token): array
     {
         $decodedToken = $this->tokenService->decode($token);
-        $userId = $decodedToken->id;
+        $userLogin = $decodedToken->login;
 
-        $user = $this->em->getRepository(User::class)->findOneBy(['id' => $userId]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
 
         if (!$user) {
             return array(

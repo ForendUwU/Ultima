@@ -16,7 +16,6 @@ class TokenService
         $tokenCreationDate = new \DateTimeImmutable();
 
         $payload = [
-            'id' => $user->getId(),
             'login' => $user->getLogin(),
             'email' => $user->getEmail(),
             //TODO change role

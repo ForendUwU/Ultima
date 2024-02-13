@@ -16,9 +16,9 @@ class UserInfoService
 
     }
 
-    public function getUserInfo($userId): array
+    public function getUserInfo($userLogin): array
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['id' => $userId]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
         return array(
             'content' => [
                 'login' => $user->getLogin(),

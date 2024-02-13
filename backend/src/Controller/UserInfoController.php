@@ -39,7 +39,7 @@ class UserInfoController extends AbstractController
         }
 
         $decodedToken = $this->tokenService->decode($token);
-        $result = $this->userInfoService->getUserInfo($decodedToken->id);
+        $result = $this->userInfoService->getUserInfo($decodedToken->login);
 
         return new JsonResponse($result['content'], Response::HTTP_OK);
     }

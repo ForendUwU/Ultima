@@ -118,6 +118,36 @@ class AuthorizationServiceTest extends TestCase
         $this->assertEquals('test', $result['content']['token']);
     }
 
+    public function testRegisterLoginAlreadyExists()
+    {
+        $this->createService();
+
+        $this->tokenServiceMock
+            ->expects($this->once())
+            ->method('createToken')
+            ->willReturn('test');
+
+        $testUser = new User();
+        $testUser->setLogin('test');
+
+        $repositoryMock = $this->createMock(UserRepository::class);
+
+        $this->emMock
+            ->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($repositoryMock);
+        $repositoryMock
+            ->expects($this->once())
+            ->method('findOneBy')
+            ->willReturn($testUser);
+
+        $result = $this->authService->register('test', 'test', 'test@email.com', 'test');
+
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $result['code']);
+        $this->assertNotEmpty($result['content']['message']);
+        $this->assertEquals('This login already exists', $result['content']['message']);
+    }
+
     public function testLogoutSuccess()
     {
         $this->createService();
@@ -138,7 +168,7 @@ class AuthorizationServiceTest extends TestCase
             ->willReturn($testUser);
 
         $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->id = 0;
+        $fakeDecodedToken->login = 'someLogin';
 
         $this->tokenServiceMock
             ->expects($this->once())
@@ -168,7 +198,7 @@ class AuthorizationServiceTest extends TestCase
             ->willReturn(null);
 
         $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->id = 0;
+        $fakeDecodedToken->login = 'someLogin';
 
         $this->tokenServiceMock
             ->expects($this->once())
@@ -202,7 +232,7 @@ class AuthorizationServiceTest extends TestCase
             ->willReturn($testUser);
 
         $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->id = 0;
+        $fakeDecodedToken->login = 'someLogin';
 
         $this->tokenServiceMock
             ->expects($this->once())
