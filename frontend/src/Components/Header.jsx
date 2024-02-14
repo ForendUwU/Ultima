@@ -1,13 +1,25 @@
 import {Grid, Typography, Button} from "@mui/material";
-import {Link} from "react-router-dom";
 import React, {useEffect} from "react";
 import Cookies from 'universal-cookie';
+import {GetUserInfo} from "../Scripts/GetUserInfo";
 
 function handleLogout()
 {
     const cookies = new Cookies();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
+
+    fetch('https://localhost/api/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': cookies.get('token')
+        }
+    }).then(response => {
+        return response.json();
+    }).then(decodedResponse => {
+        console.log(decodedResponse);
+    });
 
     cookies.set('token', '', {expires: yesterday});
     cookies.set('userId', '', {expires: yesterday});
@@ -16,20 +28,11 @@ function handleLogout()
 
 export default function Header(){
     const cookies = new Cookies();
-
-    const userId = cookies.get('userId');
     const [nickname, setNickname] = React.useState(null)
-    console.log(userId);
 
     useEffect(() => {
-        fetch('https://localhost/api/user/' + userId, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
-            return response.json();
-        }).then(decodedResponse => {
+        console.log(cookies.get('token'));
+        GetUserInfo(cookies.get('token')).then(decodedResponse => {
             setNickname(decodedResponse['nickname']);
         });
     }, []);
@@ -37,10 +40,10 @@ export default function Header(){
     return(
         <Grid container spacing={2} alignItems="center">
             <Grid item xs="auto" style={{flexGrow: 1}}>
-                <Link to="/" underline="none"><Typography variant="h1">Ultima</Typography></Link>
+                <Button href="/"><Typography variant="h1">Ultima</Typography></Button>
             </Grid>
             <Grid item xs="auto" align="right" justifyContent="flex-end">
-                <Button to="/" underline="none"><Typography variant="h4">Home</Typography></Button>
+                <Button href="/"><Typography variant="h4">Home</Typography></Button>
             </Grid>
             <Grid item xs="auto" justifyContent="flex-end">
                 <Button href="/signIn"><Typography variant="h4">{nickname || "Sign In"}</Typography></Button>
