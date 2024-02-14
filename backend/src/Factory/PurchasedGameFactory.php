@@ -29,11 +29,6 @@ use Zenstruck\Foundry\RepositoryProxy;
  */
 final class PurchasedGameFactory extends ModelFactory
 {
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
-     */
     protected function getDefaults(): array
     {
         return [
@@ -43,9 +38,6 @@ final class PurchasedGameFactory extends ModelFactory
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     protected function initialize(): self
     {
         return $this

@@ -4,32 +4,16 @@ namespace App\Services;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Firebase\JWT\JWT;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class AuthorizationService
 {
-    private const PRIVATE_KEY = 'WHFZQGXm#k$mBzX]A0f(=g^GbcFz5,~zUQY:$kGdEvu((%s*EmSRQFJ[/#qW^';
-    private const ALGORITHM = 'HS256';
-
     public function __construct(
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly TokenService $tokenService
     ) {
 
-    }
-
-    public function createToken(User $user): string
-    {
-        $payload = [
-            'id' => $user->getId(),
-            'login' => $user->getLogin(),
-            'email' => $user->getEmail(),
-            //TODO change role .
-            'role' => $user->getRoles()
-        ];
-
-        return JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
     }
 
     public function login(string $login, string $password): array
@@ -54,33 +38,8 @@ class AuthorizationService
             );
         }
 
-        $token = $this->createToken($user);
+        $token = $this->tokenService->createToken($user);
         $user->setToken($token);
-        $this->em->flush();
-
-        return array(
-            'content' => [
-                'token' => $token,
-                'userId' => $user->getId()
-            ],
-            'code' => Response::HTTP_OK
-        );
-    }
-
-    public function registration(string $login, string $password, string $email, string $nickname): array
-    {
-        $newUser = new User();
-
-        $newUser->setLogin($login);
-        $newUser->setPassword($password);
-        $newUser->setEmail($email);
-        $newUser->setNickname($nickname);
-
-        $token = $this->createToken($newUser);
-        $newUser->setToken($token);
-        $newUser->setRoles(['ROLE_USER']);
-
-        $this->em->persist($newUser);
         $this->em->flush();
 
         return array(
@@ -91,9 +50,46 @@ class AuthorizationService
         );
     }
 
-    public function logout(string $userId): array
+    public function register(string $login, string $password, string $email, string $nickname): array
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['id' => $userId]);
+        $newUser = new User();
+
+        $newUser->setLogin($login);
+        $newUser->setPassword($password);
+        $newUser->setEmail($email);
+        $newUser->setNickname($nickname);
+        $newUser->setRoles(['ROLE_USER']);
+
+        $token = $this->tokenService->createToken($newUser);
+        $newUser->setToken($token);
+
+        $this->em->persist($newUser);
+        try {
+            $this->em->flush();
+        }
+        catch (UniqueConstraintViolationException $e) {
+            return array(
+                'content' => [
+                    'message' => 'This login is already in use',
+                ],
+                'code' => Response::HTTP_UNAUTHORIZED
+            );
+        }
+
+        return array(
+            'content' => [
+                'token' => $token,
+            ],
+            'code' => Response::HTTP_OK
+        );
+    }
+
+    public function logout(string $token): array
+    {
+        $decodedToken = $this->tokenService->decode($token);
+        $userLogin = $decodedToken->login;
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
 
         if (!$user) {
             return array(

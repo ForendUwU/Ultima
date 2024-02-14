@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 use Zenstruck\Foundry\ModelFactory;
 use Zenstruck\Foundry\Proxy;
 use Zenstruck\Foundry\RepositoryProxy;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
 /**
  * @extends ModelFactory<User>
@@ -29,36 +30,25 @@ use Zenstruck\Foundry\RepositoryProxy;
  */
 final class UserFactory extends ModelFactory
 {
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
-     *
-     * @todo inject services if required
-     */
     public function __construct()
     {
         parent::__construct();
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
-     * @todo add your default values here
-     */
     protected function getDefaults(): array
     {
         return [
             'balance' => self::faker()->randomFloat(),
-            'email' => self::faker()->text(255),
-            'login' => self::faker()->text(180),
-            'nickname' => self::faker()->text(255),
+            'email' => self::faker()->text(20),
+            'login' => self::faker()->text(20),
+            'nickname' => self::faker()->text(20),
             'password' => self::faker()->text(),
+            'token' => self::faker()->text(20),
             'roles' => [],
+            'purchasedGames' => []
         ];
     }
 
-    /**
-     * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#initialization
-     */
     protected function initialize(): self
     {
         return $this
