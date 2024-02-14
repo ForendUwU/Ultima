@@ -70,7 +70,7 @@ class AuthorizationService
         catch (UniqueConstraintViolationException $e) {
             return array(
                 'content' => [
-                    'message' => 'This login already exists',
+                    'message' => 'This login is already in use',
                 ],
                 'code' => Response::HTTP_UNAUTHORIZED
             );

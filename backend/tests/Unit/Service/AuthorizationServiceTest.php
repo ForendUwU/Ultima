@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Services\AuthorizationService;
 use App\Services\TokenService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -23,6 +24,7 @@ class AuthorizationServiceTest extends TestCase
         $this->emMock = $this->createMock(EntityManagerInterface::class);
         $this->authService = new AuthorizationService($this->emMock, $this->tokenServiceMock);
     }
+
     public function testLoginSuccess()
     {
         $this->createService();
@@ -118,7 +120,7 @@ class AuthorizationServiceTest extends TestCase
         $this->assertEquals('test', $result['content']['token']);
     }
 
-    public function testRegisterLoginAlreadyExists()
+    public function testRegisterUserWithThisLoginAlreadyExists()
     {
         $this->createService();
 
@@ -127,25 +129,17 @@ class AuthorizationServiceTest extends TestCase
             ->method('createToken')
             ->willReturn('test');
 
-        $testUser = new User();
-        $testUser->setLogin('test');
-
-        $repositoryMock = $this->createMock(UserRepository::class);
-
+        $exceptionMock = $this->createMock(UniqueConstraintViolationException::class);
         $this->emMock
             ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($repositoryMock);
-        $repositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testUser);
+            ->method('flush')
+            ->willThrowException($exceptionMock);
 
         $result = $this->authService->register('test', 'test', 'test@email.com', 'test');
 
         $this->assertEquals(Response::HTTP_UNAUTHORIZED, $result['code']);
         $this->assertNotEmpty($result['content']['message']);
-        $this->assertEquals('This login already exists', $result['content']['message']);
+        $this->assertEquals('This login is already in use', $result['content']['message']);
     }
 
     public function testLogoutSuccess()
