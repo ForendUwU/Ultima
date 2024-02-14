@@ -47,17 +47,27 @@ class AuthorizationController extends AbstractController
         response: 200,
         description: 'Successfully authorized',
         content: new OA\JsonContent(
-            properties: [new OA\Property(property: 'result', type: 'string', example: 'success')],
+            properties: [new OA\Property(property: 'token', type: 'string', example: 'token')],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad request',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message1', type: 'string', example: 'Missing data'),
+                new OA\Property(property: 'message2', type: 'string', example: 'This user does not exist')
+            ],
             type: 'object'
         )
     )]
     #[OA\Response(
         response: 401,
-        description: 'Missing credentials',
+        description: 'Unauthorized',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'result', type: 'string', example: 'fail'),
-                new OA\Property(property: 'message', type: 'string', example: 'missing credentials'),
+                new OA\Property(property: 'message', type: 'string', example: 'Wrong login or password'),
             ],
             type: 'object'
         )
@@ -88,6 +98,35 @@ class AuthorizationController extends AbstractController
         "/api/logout",
         methods: ['POST']
     )]
+    #[OA\Response(
+        response: 200,
+        description: 'Logout successfully',
+        content: new OA\JsonContent(
+            properties: [new OA\Property(property: 'message', type: 'string', example: 'Logout success')],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad request',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message1', type: 'string', example: 'Missing token'),
+                new OA\Property(property: 'message2', type: 'string', example: 'User does not exist'),
+            ],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'User already unauthorized'),
+            ],
+            type: 'object'
+        )
+    )]
     #[Tag('Authorization')]
     public function logout(Request $request): ?JsonResponse
     {
@@ -113,6 +152,66 @@ class AuthorizationController extends AbstractController
         "/api/register",
         name: 'app_register',
         methods: ['POST']
+    )]
+    #[Parameter(
+        name: 'login',
+        description: 'User login',
+        in: 'query',
+        required: true,
+        schema: new OA\Schema(type: 'string'),
+        example: 'test_login'
+    )]
+    #[Parameter(
+        name: 'password',
+        description: 'User password',
+        in: 'query',
+        required: true,
+        schema: new OA\Schema(type: 'string'),
+        example: 'test_password'
+    )]
+    #[Parameter(
+        name: 'email',
+        description: 'User email',
+        in: 'query',
+        required: true,
+        schema: new OA\Schema(type: 'string'),
+        example: 'test_email'
+    )]
+    #[Parameter(
+        name: 'nickname',
+        description: 'User nickname',
+        in: 'query',
+        required: true,
+        schema: new OA\Schema(type: 'string'),
+        example: 'test_nickname'
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Register successfully',
+        content: new OA\JsonContent(
+            properties: [new OA\Property(property: 'token', type: 'string', example: 'token')],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad request',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Missing data'),
+            ],
+            type: 'object'
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'This login is already in use'),
+            ],
+            type: 'object'
+        )
     )]
     #[Tag('Authorization')]
     public function register(Request $request): ?JsonResponse

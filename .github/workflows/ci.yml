@@ -70,7 +70,6 @@ jobs:
             -Dsonar.projectKey=ForendUwU_Ultima
             -Dsonar.organization=nikita-perepelov-org
             -Dsonar.tests=backend/tests
-            -Dsonar.testsExclusions=backend/tests
             -Dsonar.sources=backend/src
             -Dsonar.sourceEncoding=UTF-8
         env:
