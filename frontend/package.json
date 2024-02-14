@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "-": "^0.0.1",
+    "jquery": "^3.7.1",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.2",
@@ -12,6 +13,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@react-spring/web": "^9.7.3",
     "bootstrap": "^3.4.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.0",
