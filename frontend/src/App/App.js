@@ -8,9 +8,9 @@ import {
 
 import "./App.css";
 
-import SignIn from "../AuthorizationPages/SignIn";
-import Registration from "../AuthorizationPages/Registration";
-import HomePage from "../HomePage/HomePage"
+import SignIn from "../Pages/AuthorizationPages/SignIn";
+import Registration from "../Pages/AuthorizationPages/Registration";
+import HomePage from "../Pages/HomePage/HomePage"
 
 function App() {
   return (
