@@ -1,11 +1,11 @@
+import React from "react";
+import Cookies from 'universal-cookie';
 import FullscreenGrid from "../../Components/FullscreenGrid";
 import GlowingGrid from "../../Components/GlowingGrid";
 import {Alert, Typography} from "@mui/material";
 import TextInput from "../../Components/TextInput";
 import SubmitButton from "../../Components/SubmitButton";
 import {Link} from "react-router-dom";
-import React from "react";
-import Cookies from 'universal-cookie';
 
 export default function Registration() {
     const [showError, setShowError] = React.useState(false)
@@ -80,7 +80,7 @@ export default function Registration() {
                 }
                 <br/>
                 <Link to="/"><Typography variant="h5">Back to home page</Typography></Link>
-                <Link to="/signIn"><Typography variant="h5">Back to sign in</Typography></Link>
+                <Link to="/sign-in"><Typography variant="h5">Back to sign in</Typography></Link>
             </GlowingGrid>
         </FullscreenGrid>
     );

@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import { Typography } from "@mui/material";
-import FullscreenGrid from "../Components/FullscreenGrid";
+import FullscreenGrid from "../../Components/FullscreenGrid";
 import { animated, useTrail } from '@react-spring/web'
 
 export default function Loading() {

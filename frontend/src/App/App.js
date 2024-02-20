@@ -11,6 +11,7 @@ import "./App.css";
 import SignIn from "../Pages/AuthorizationPages/SignIn";
 import Registration from "../Pages/AuthorizationPages/Registration";
 import HomePage from "../Pages/HomePage/HomePage"
+import PurchasedGames from "../Pages/PurchasedGames/PurchasedGames";
 
 function App() {
   return (
@@ -23,12 +24,16 @@ function App() {
                 element={<HomePage />}
             />
             <Route
-                path="/signIn"
+                path="/sign-in"
                 element={<SignIn />}
             />
             <Route
                 path="/registration"
                 element={<Registration />}
+            />
+            <Route
+                path="/purchased-games"
+                element={<PurchasedGames />}
             />
             <Route
                 path="*"
