@@ -6,7 +6,7 @@ use App\Entity\PurchasedGame;
 use App\Entity\User;
 use PHPUnit\Framework\TestCase;
 
-class UserUnitTest extends TestCase
+class UserTest extends TestCase
 {
     public function testCreateEmptyUserEntity(): void
     {
@@ -48,9 +48,7 @@ class UserUnitTest extends TestCase
         $this->assertEquals(2.10, $testUser->getBalance());
 
         $testUser->removePurchasedGame($testPurchasedGame);
-        $testUser->eraseCredentials();
 
         $this->assertTrue($testUser->getPurchasedGames()->isEmpty());
-        $this->assertNull($testUser->getToken());
     }
 }

@@ -4,8 +4,8 @@ namespace App\Tests\Unit\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Services\AuthorizationService;
-use App\Services\TokenService;
+use App\Service\AuthorizationService;
+use App\Service\TokenService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -162,11 +162,11 @@ class AuthorizationServiceTest extends TestCase
             ->willReturn($testUser);
 
         $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->login = 'someLogin';
+        $fakeDecodedToken->login = 'testLogin';
 
         $this->tokenServiceMock
             ->expects($this->once())
-            ->method('decode')
+            ->method('decodeLongToken')
             ->willReturn($fakeDecodedToken);
 
         $result = $this->authService->logout('test');
@@ -192,11 +192,11 @@ class AuthorizationServiceTest extends TestCase
             ->willReturn(null);
 
         $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->login = 'someLogin';
+        $fakeDecodedToken->login = 'testLogin';
 
         $this->tokenServiceMock
             ->expects($this->once())
-            ->method('decode')
+            ->method('decodeLongToken')
             ->willReturn($fakeDecodedToken);
 
         $result = $this->authService->logout('test');
@@ -226,11 +226,11 @@ class AuthorizationServiceTest extends TestCase
             ->willReturn($testUser);
 
         $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->login = 'someLogin';
+        $fakeDecodedToken->login = 'testLogin';
 
         $this->tokenServiceMock
             ->expects($this->once())
-            ->method('decode')
+            ->method('decodeLongToken')
             ->willReturn($fakeDecodedToken);
 
         $result = $this->authService->logout('test');

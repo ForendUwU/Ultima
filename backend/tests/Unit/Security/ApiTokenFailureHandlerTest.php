@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Security;
 
 use App\Security\ApiTokenFailureHandler;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 class ApiTokenFailureHandlerTest extends TestCase
 {
-    public function testGetUserBadgeFrom(): void
+    public function testOnAuthenticationFailure(): void
     {
         $apiTokenFailureHandler = new ApiTokenFailureHandler();
 
@@ -19,11 +20,12 @@ class ApiTokenFailureHandlerTest extends TestCase
 
         $result = $apiTokenFailureHandler->onAuthenticationFailure($testRequest, $testAuthException);
         $this->assertEquals(
-            new Response(
-                json_encode([
+            new JsonResponse(
+                [
                     'result' => 'fail',
                     'message' => 'Unauthorized'
-                ])
+                ],
+                Response::HTTP_UNAUTHORIZED
             ), $result
         );
     }

@@ -11,12 +11,11 @@ use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use App\Services\AuthorizationService;
+use App\Service\AuthorizationService;
 
 #[AsController]
 class AuthorizationController extends AbstractController
 {
-
     public function __construct(
         private readonly AuthorizationService $authorizationService
     ) {
@@ -77,7 +76,7 @@ class AuthorizationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data['login'] || !$data['password']){
+        if (!$data || !$data['login'] || !$data['password']){
             return new JsonResponse(
                     [
                         'message' => 'Missing data'
@@ -131,14 +130,6 @@ class AuthorizationController extends AbstractController
     public function logout(Request $request): ?JsonResponse
     {
         $token = $request->headers->get('authorization');
-
-        if (!$token) {
-            return new JsonResponse(
-                [
-                    'message' => 'Missing token'
-                ],
-                Response::HTTP_BAD_REQUEST);
-        }
 
         $result = $this->authorizationService->logout($token);
 
@@ -218,7 +209,7 @@ class AuthorizationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
+        if (!$data || !$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
             return new JsonResponse(
                 [
                     'message' => 'Missing data'

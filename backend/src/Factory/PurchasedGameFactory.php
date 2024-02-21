@@ -33,7 +33,7 @@ final class PurchasedGameFactory extends ModelFactory
     {
         return [
             'game' => GameFactory::new(),
-            'hoursOfPlaying' => self::faker()->randomFloat(),
+            'hoursOfPlaying' => self::faker()->randomFloat(0, 1, 999),
             'user' => UserFactory::new(),
         ];
     }

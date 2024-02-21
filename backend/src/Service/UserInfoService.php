@@ -1,11 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
 use App\Entity\User;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Exception\NotSupported;
 use Doctrine\ORM\EntityManagerInterface;
 
 class UserInfoService

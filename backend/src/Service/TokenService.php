@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
 use App\Entity\User;
 use Firebase\JWT\JWT;
@@ -20,7 +20,7 @@ class TokenService
             'email' => $user->getEmail(),
             //TODO change role
             'role' => $user->getRoles(),
-            'tokenCreationDate' => $tokenCreationDate->format('Y-m-d')
+            'tokenCreationDate' => $tokenCreationDate->format('Y-m-d H:i:s')
         ];
 
         return $this->encode($payload);
@@ -31,8 +31,13 @@ class TokenService
         return JWT::encode($payload, self::PRIVATE_KEY, self::ALGORITHM);
     }
 
-    public function decode(string $token)
+    public function decode(string $token): \stdClass
     {
         return JWT::decode($token, new Key(self::PRIVATE_KEY, self::ALGORITHM));
+    }
+
+    public function decodeLongToken(string $token): \stdClass
+    {
+        return JWT::decode(substr($token,7), new Key(self::PRIVATE_KEY, self::ALGORITHM));
     }
 }

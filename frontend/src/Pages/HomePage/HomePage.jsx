@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import Header from "../../Components/Header"
 import Error from "../StatePages/Error"
-import { Container, ImageList, ImageListItem, Typography, Button }  from "@mui/material";
+import {Container, ImageList, ImageListItem, Typography, Button, Alert, AlertTitle} from "@mui/material";
 import FullscreenGrid from "../../Components/FullscreenGrid";
 import GlowingGrid from "../../Components/GlowingGrid";
 import Loading from "../StatePages/Loading";
@@ -16,13 +16,12 @@ export default function HomePage() {
     const [error, setError] = React.useState(null);
     const [nickname, setNickname] = React.useState(null);
     const [userLoaded, setUserLoaded] = React.useState(false);
+    const [isForbidden, setIsForbidden] = React.useState(false);
 
     const navigate = useNavigate();
     const cookies = new Cookies();
 
     const handleClick = (e, gameId) => {
-        e.preventDefault();
-        //setLoading(true);
         fetch('https://localhost/api/purchase-game', {
             method: 'POST',
             body: JSON.stringify({
@@ -33,14 +32,19 @@ export default function HomePage() {
                 'Authorization': 'Bearer ' + cookies.get('token')
             }
         }).then(response => {
-            if (response.ok) {
+            if (response.ok || response.status === 403) {
                 return response.json();
             } else {
                 throw new Error();
             }
         }).then(decodedResponse => {
-            navigate('/purchased-games');
+            if (decodedResponse['message'] === 'Game already purchased'){
+                setIsForbidden(true);
+            } else {
+                navigate('/purchased-games');
+            }
         }).catch(error => {
+            console.log(error);
             setError(error);
         }).finally(()=>{
             setLoading(false);
@@ -102,12 +106,13 @@ export default function HomePage() {
         })
     }, []);
 
+    //if (isForbidden) { setTimeout(() => {setIsForbidden(false)}, 2000) }
     if(loading || !userLoaded) return <Loading />;
     if(error) return <Error errorText={error.toString()} />;
 
     return (
         <FullscreenGrid>
-            <Container maxWidth="lg" >
+            <Container maxWidth="lg">
                 <GlowingGrid>
                     <Header nickname={nickname} handleLogout={handleLogout} />
                     <PageTitle title="Shop" />
@@ -131,6 +136,13 @@ export default function HomePage() {
                     </ImageList>
                 </GlowingGrid>
             </Container>
+            {isForbidden &&
+                <Alert severity="success" variant="standard" className="alert" sx={{position: "absolute"}}>
+                    <AlertTitle>Failure!</AlertTitle>
+                    You already has this game!
+                    <Button onClick={() => {setIsForbidden(false)}}>Ok</Button>
+                </Alert>
+            }
         </FullscreenGrid>
     );
 }

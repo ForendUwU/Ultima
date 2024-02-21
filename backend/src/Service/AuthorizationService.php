@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class AuthorizationService
 {
+    use ResetDatabase;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly TokenService $tokenService
@@ -86,7 +89,7 @@ class AuthorizationService
 
     public function logout(string $token): array
     {
-        $decodedToken = $this->tokenService->decode($token);
+        $decodedToken = $this->tokenService->decodeLongToken($token);
         $userLogin = $decodedToken->login;
 
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);

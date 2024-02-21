@@ -4,9 +4,10 @@ namespace App\Tests\Functional\Controller;
 
 use App\Entity\User;
 use App\Factory\UserFactory;
-use App\Services\TokenService;
+use App\Service\TokenService;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -80,6 +81,7 @@ class AuthorizationControllerTest extends WebTestCase
 
     /**
      * @throws NotSupported
+     * @throws ORMException
      */
     public function testLogoutSuccess()
     {
@@ -93,12 +95,15 @@ class AuthorizationControllerTest extends WebTestCase
 
         $testUser->setToken($testToken);
 
+        $this->em->persist($testUser);
+        $this->em->flush();
+
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/logout',
             [],
             [
-                'HTTP_Authorization' => $testToken
+                'HTTP_Authorization' => 'Bearer '.$testToken
             ]
         );
 
@@ -108,21 +113,6 @@ class AuthorizationControllerTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $this->assertNotNull($decodedResponse['message']);
         $this->assertEquals('Logout successfully', $decodedResponse['message']);
-    }
-
-    public function testLogoutMissingToken()
-    {
-        $this->client->jsonRequest(
-            'POST',
-            'https://localhost/api/logout'
-        );
-
-        $response = $this->client->getResponse();
-        $decodedResponse = json_decode($response->getContent(), true);
-
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse['message']);
-        $this->assertEquals('Missing token', $decodedResponse['message']);
     }
 
     public function testRegisterSuccess()

@@ -22,11 +22,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'user')]
 #[ApiResource(
     operations: [
-        new Get(uriTemplate: 'api/user/{id}'),
+        new Get(uriTemplate: 'api/user/api-platform-{id}'),
         new GetCollection(uriTemplate: 'api/user'),
         new Post(uriTemplate: 'api/user'),
-        new Patch(uriTemplate: 'api/user/{id}'),
-        new Delete(uriTemplate: 'api/user/{id}'),
+        new Patch(uriTemplate: 'api/user/api-platform-{id}'),
+        new Delete(uriTemplate: 'api/user/api-platform-{id}'),
     ],
     normalizationContext: [
         'groups' => ['user:read']
@@ -185,7 +185,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
-        $this->token = null;
+        
     }
 
     public function getNickname(): ?string

@@ -4,8 +4,7 @@ namespace App\Tests\Unit\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use App\Services\AuthorizationService;
-use App\Services\UserInfoService;
+use App\Service\UserInfoService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
