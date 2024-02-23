@@ -19,41 +19,56 @@ class AuthorizationService
 
     }
 
-    public function login(string $login, string $password): array
+    /**
+     * @throws \Exception
+     */
+    public function login(string $login, string $password): string
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $login]);
 
         if (!$user) {
-            return array(
-                'content' => [
-                    'message' => 'This user does not exist',
-                ],
-                'code' => Response::HTTP_BAD_REQUEST
-            );
+            throw new \Exception('This user does not exist', Response::HTTP_BAD_REQUEST);
         }
 
         if ($user->getPassword() !== $password){
-            return array(
-                'content' => [
-                    'message' => 'Wrong login or password',
-                ],
-                'code' => Response::HTTP_UNAUTHORIZED
-            );
+            throw new \Exception('Wrong login or password', Response::HTTP_UNAUTHORIZED);
         }
 
         $token = $this->tokenService->createToken($user);
         $user->setToken($token);
         $this->em->flush();
 
-        return array(
-            'content' => [
-                'token' => $token
-            ],
-            'code' => Response::HTTP_OK
-        );
+        return $token;
     }
 
-    public function register(string $login, string $password, string $email, string $nickname): array
+    /**
+     * @throws \Exception
+     */
+    public function logout(string $token): string
+    {
+        $decodedToken = $this->tokenService->decodeLongToken($token);
+        $userLogin = $decodedToken->login;
+
+        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
+
+        if (!$user) {
+            throw new \Exception('User does not exist', Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$user->getToken()){
+            throw new \Exception('User already unauthorized', Response::HTTP_FORBIDDEN);
+        }
+
+        $user->setToken(null);
+        $this->em->flush();
+
+        return 'Logout successfully';
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function register(string $login, string $password, string $email, string $nickname): string
     {
         $newUser = new User();
 
@@ -67,59 +82,8 @@ class AuthorizationService
         $newUser->setToken($token);
 
         $this->em->persist($newUser);
-        try {
-            $this->em->flush();
-        }
-        catch (UniqueConstraintViolationException $e) {
-            return array(
-                'content' => [
-                    'message' => 'This login is already in use',
-                ],
-                'code' => Response::HTTP_UNAUTHORIZED
-            );
-        }
-
-        return array(
-            'content' => [
-                'token' => $token,
-            ],
-            'code' => Response::HTTP_OK
-        );
-    }
-
-    public function logout(string $token): array
-    {
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-        $userLogin = $decodedToken->login;
-
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
-
-        if (!$user) {
-            return array(
-                'content' => [
-                    'message' => 'User does not exist'
-                ],
-                'code' => Response::HTTP_BAD_REQUEST
-            );
-        }
-
-        if (!$user->getToken()){
-            return array(
-                'content' => [
-                    'message' => 'User already unauthorized'
-                ],
-                'code' => Response::HTTP_FORBIDDEN
-            );
-        }
-
-        $user->setToken(null);
         $this->em->flush();
 
-        return array(
-            'content' => [
-                'message' => 'Logout successfully'
-            ],
-            'code' => Response::HTTP_OK
-        );
+        return $token;
     }
 }

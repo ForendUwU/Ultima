@@ -15,7 +15,7 @@ class GameTest extends TestCase
         $this->assertNotNull($testGame);
         $this->assertNotNull($testGame->getPublishedAt());
         $this->assertNotNull($testGame->getPurchasedGames());
-        $this->assertNotNull($testGame->getID());
+        $this->assertEquals(0, $testGame->getID());
     }
 
     public function testCreateNotEmptyGameEntity(): void

@@ -13,7 +13,7 @@ class UserInfoServiceTest extends TestCase
     private UserInfoService $userInfoService;
     private $emMock;
 
-    public function createService(): void
+    public function setUp(): void
     {
         $this->emMock = $this->createMock(EntityManagerInterface::class);
         $this->userInfoService = new UserInfoService($this->emMock);
@@ -21,8 +21,6 @@ class UserInfoServiceTest extends TestCase
 
     public function testGetUserInfo()
     {
-        $this->createService();
-
         $testUser = new User();
         $testUser->setPassword('test');
         $testUser->setToken('test');
@@ -41,13 +39,19 @@ class UserInfoServiceTest extends TestCase
         $result = $this->userInfoService->getUserInfo(0);
 
         $this->assertNotEmpty($result);
-        $this->assertNotEmpty($result['content']);
-        $this->assertArrayHasKey('login', $result['content']);
-        $this->assertArrayHasKey('nickname', $result['content']);
-        $this->assertArrayHasKey('balance', $result['content']);
-        $this->assertArrayHasKey('firstName', $result['content']);
-        $this->assertArrayHasKey('lastName', $result['content']);
-        $this->assertArrayHasKey('email', $result['content']);
-        $this->assertArrayHasKey('purchasedGames', $result['content']);
+        $this->assertArrayHasKey('login', $result);
+        $this->assertArrayHasKey('nickname', $result);
+        $this->assertArrayHasKey('balance', $result);
+        $this->assertArrayHasKey('firstName', $result);
+        $this->assertArrayHasKey('lastName', $result);
+        $this->assertArrayHasKey('email', $result);
+        $this->assertArrayHasKey('purchasedGames', $result);
+        $this->assertEquals($testUser->getLogin(), $result['login']);
+        $this->assertEquals($testUser->getNickname(), $result['nickname']);
+        $this->assertEquals($testUser->getBalance(), $result['balance']);
+        $this->assertEquals($testUser->getFirstName(), $result['firstName']);
+        $this->assertEquals($testUser->getLastName(), $result['lastName']);
+        $this->assertEquals($testUser->getEmail(), $result['email']);
+        $this->assertEquals($testUser->getPurchasedGames(), $result['purchasedGames']);
     }
 }

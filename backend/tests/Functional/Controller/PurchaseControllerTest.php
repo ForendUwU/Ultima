@@ -3,15 +3,13 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Entity\Game;
+use App\Entity\PurchasedGame;
 use App\Entity\User;
 use App\Factory\GameFactory;
 use App\Factory\PurchasedGameFactory;
 use App\Factory\UserFactory;
 use App\Service\TokenService;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\NotSupported;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -36,12 +34,7 @@ class PurchaseControllerTest extends WebTestCase
             ->getManager();
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws NotSupported
-     * @throws ORMException
-     */
-    public function testPurchaseSuccess()
+    public function testPurchase()
     {
         UserFactory::createOne([
             'login' => 'testLogin',
@@ -79,27 +72,14 @@ class PurchaseControllerTest extends WebTestCase
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $this->assertNotEmpty($decodedResponse['message']);
         $this->assertEquals('Successfully purchased', $decodedResponse['message']);
-    }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws NotSupported
-     * @throws ORMException
-     */
-    public function testPurchaseMissingData()
-    {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
+        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $testUser]);
 
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
-        $this->em->persist($testUser);
-        $this->em->flush();
+        $this->assertNotNull($purchasedGame);
+        $this->assertNotNull($purchasedGame->getGame());
+        $this->assertEquals($testGame->getId(), $purchasedGame->getGame()->getId());
+        $this->assertEquals($testGame->getTitle(), $purchasedGame->getGame()->getTitle());
+        $this->assertEquals(0, $purchasedGame->getHoursOfPlaying());
 
         $this->client->jsonRequest(
             'POST',
@@ -111,7 +91,6 @@ class PurchaseControllerTest extends WebTestCase
                 'HTTP_Authorization' => 'Bearer '.$testToken
             ]
         );
-
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
@@ -120,11 +99,6 @@ class PurchaseControllerTest extends WebTestCase
         $this->assertEquals('Missing data', $decodedResponse['message']);
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws NotSupported
-     */
     public function testGetPurchasedGamesSuccess()
     {
         UserFactory::createOne([
@@ -153,7 +127,7 @@ class PurchaseControllerTest extends WebTestCase
 
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/user/get-purchased-games',
+            'https://localhost/api/purchase-game',
             [],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -164,9 +138,18 @@ class PurchaseControllerTest extends WebTestCase
         $decodedResponse = json_decode($response->getContent(), true);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $this->assertNotEmpty($decodedResponse);
+        $this->assertArrayHasKey(0, $decodedResponse);
         $this->assertNotEmpty($decodedResponse[0]);
         $this->assertNotNull($decodedResponse[0]['gameId']);
-        $this->assertEquals('testTitle', $decodedResponse[0]['title']);
+        $this->assertNotNull($decodedResponse[0]['title']);
         $this->assertNotNull($decodedResponse[0]['hoursOfPlaying']);
+
+        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $testUser]);
+
+        $this->assertEquals($purchasedGame->getGame()->getTitle(), $decodedResponse[0]['title']);
+        $this->assertEquals($purchasedGame->getGame()->getId(), $decodedResponse[0]['gameId']);
+        $this->assertEquals($purchasedGame->getHoursOfPlaying(), $decodedResponse[0]['hoursOfPlaying']);
     }
 }

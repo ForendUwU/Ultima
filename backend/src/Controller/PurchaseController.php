@@ -43,27 +43,39 @@ class PurchaseController extends AbstractController
         $token = $request->headers->get('Authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
-        $result = $this->purchaseService->purchase($data['gameId'], $decodedToken->login);
+        try {
+            $result = $this->purchaseService->purchase($data['gameId'], $decodedToken->login);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                [
+                    'message' => $e->getMessage()
+                ],
+                $e->getCode()
+            );
+        }
 
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+                'message' => $result
+            ],
+            Response::HTTP_OK
         );
     }
 
     #[Route(
-        "/api/user/get-purchased-games",
+        "/api/purchase-game",
         methods: ['GET']
     )]
-    #[Tag('User')]
+    #[Tag('Purchase')]
     public function getPurchasedGames(Request $request): ?JsonResponse
     {
         $token = $request->headers->get('authorization');
 
         $result = $this->purchaseService->getPurchasedGames($token);
+
         return new JsonResponse(
-            $result['content']->getValues(),
-            $result['code']
+            $result,
+            Response::HTTP_OK
         );
     }
 }

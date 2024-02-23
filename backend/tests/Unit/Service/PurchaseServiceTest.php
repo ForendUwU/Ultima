@@ -22,64 +22,15 @@ class PurchaseServiceTest extends TestCase
     private $emMock;
     private PurchaseService $purchaseService;
 
-    public function createService(): void
+    public function setUp(): void
     {
         $this->emMock = $this->createMock(EntityManagerInterface::class);
         $this->tokenServiceMock = $this->createMock(TokenService::class);
-
         $this->purchaseService = new PurchaseService($this->emMock, $this->tokenServiceMock);
     }
 
-    public function testPurchaseSuccess()
+    public function purchaseDataProvider(): array
     {
-        $this->createService();
-
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-
-        $testGame = new Game();
-        $testGame->setTitle('testTitle');
-
-        $userRepositoryMock = $this->createMock(UserRepository::class);
-        $gamesRepositoryMock = $this->createMock(GamesRepository::class);
-        $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
-
-        $this->emMock
-            ->expects($this->any())
-            ->method('getRepository')
-            ->willReturnOnConsecutiveCalls(
-                $userRepositoryMock,
-                $gamesRepositoryMock,
-                $purchasedGameRepositoryMock
-            );
-        $userRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testUser);
-        $gamesRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testGame);
-        $purchasedGameRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn(null);
-
-        $result = $this->purchaseService->purchase(1, 1);
-
-        $this->assertEquals(
-            array(
-                'content' => [
-                    'message' => 'Successfully purchased'
-                ],
-                'code' => Response::HTTP_OK
-        ), $result);
-    }
-
-    public function testPurchaseGameAlreadyPurchased()
-    {
-        $this->createService();
-
         $testUser = new User();
         $testUser->setLogin('testLogin');
 
@@ -90,6 +41,17 @@ class PurchaseServiceTest extends TestCase
         $testPurchasedGame->setUser($testUser);
         $testPurchasedGame->setGame($testGame);
 
+        return [
+            'success' => [$testUser, $testGame, null],
+            'game already purchased' => [$testUser, $testGame, $testPurchasedGame]
+        ];
+    }
+
+    /**
+     *  @dataProvider purchaseDataProvider
+     */
+    public function testPurchase($testUser, $testGame, $testPurchasedGame)
+    {
         $userRepositoryMock = $this->createMock(UserRepository::class);
         $gamesRepositoryMock = $this->createMock(GamesRepository::class);
         $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
@@ -115,33 +77,40 @@ class PurchaseServiceTest extends TestCase
             ->method('findOneBy')
             ->willReturn($testPurchasedGame);
 
-        $result = $this->purchaseService->purchase(1, 1);
+        if (!$testPurchasedGame) {
+            $result = $this->purchaseService->purchase(1, 1);
 
-        $this->assertEquals(
-            array(
-                'content' => [
-                    'message' => 'Game already purchased'
-                ],
-                'code' => Response::HTTP_FORBIDDEN
-            ), $result);
+            $this->assertNotNull($result);
+            $this->assertEquals('Successfully purchased', $result);
+        } else {
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessage('Game already purchased');
+
+            $this->purchaseService->purchase(1, 1);
+        }
     }
 
     public function testGetPurchasedGamesSuccess()
     {
-        $this->createService();
-
         $testUser = new User();
         $testUser->setLogin('testLogin');
         $testUser->setToken('someToken');
 
         $testGame = new Game();
         $testGame->setTitle('testTitle');
+        $testGame2 = new Game();
+        $testGame2->setTitle('testTitle2');
 
         $testPurchasedGame = new PurchasedGame();
         $testPurchasedGame->setGame($testGame);
         $testPurchasedGame->setUser($testUser);
 
+        $testPurchasedGame2 = new PurchasedGame();
+        $testPurchasedGame2->setGame($testGame2);
+        $testPurchasedGame2->setUser($testUser);
+
         $testUser->addPurchasedGame($testPurchasedGame);
+        $testUser->addPurchasedGame($testPurchasedGame2);
 
         $userRepositoryMock = $this->createMock(UserRepository::class);
 
@@ -164,11 +133,15 @@ class PurchaseServiceTest extends TestCase
 
         $result = $this->purchaseService->getPurchasedGames('someToken');
 
-        $this->assertNotNull($result['content']);
-        $this->assertNotNull($result['content'][0]);
-        $this->assertEquals(0, $result['content'][0]['gameId']);
-        $this->assertEquals('testTitle', $result['content'][0]['title']);
-        $this->assertEquals(0.0, $result['content'][0]['hoursOfPlaying']);
-        $this->assertEquals(Response::HTTP_OK, $result['code']);
+        $this->assertNotEmpty($result);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertArrayHasKey(1, $result);
+        $this->assertNotEmpty($result[0]);
+        $this->assertArrayHasKey('gameId', $result[0]);
+        $this->assertArrayHasKey('title', $result[0]);
+        $this->assertArrayHasKey('hoursOfPlaying', $result[0]);
+        $this->assertEquals($testGame->getId(), $result[0]['gameId']);
+        $this->assertEquals($testGame->getTitle(), $result[0]['title']);
+        $this->assertEquals(0, $result[0]['hoursOfPlaying']);
     }
 }

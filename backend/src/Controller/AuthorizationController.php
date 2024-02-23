@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +23,9 @@ class AuthorizationController extends AbstractController
 
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         "/api/login",
         methods: ['POST']
@@ -85,11 +89,22 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        $result = $this->authorizationService->login($data['login'], $data['password']);
+        try {
+            $result = $this->authorizationService->login($data['login'], $data['password']);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                [
+                    'message' => $e->getMessage()
+                ],
+                $e->getCode()
+            );
+        }
 
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+                'token' => $result,
+            ],
+            Response::HTTP_OK
         );
     }
 
@@ -131,11 +146,22 @@ class AuthorizationController extends AbstractController
     {
         $token = $request->headers->get('authorization');
 
-        $result = $this->authorizationService->logout($token);
+        try {
+            $result = $this->authorizationService->logout($token);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                [
+                    'message' => $e->getMessage()
+                ],
+                $e->getCode()
+            );
+        }
 
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+            'message' => $result
+            ],
+            Response::HTTP_OK
         );
     }
 
@@ -218,16 +244,34 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        $result = $this->authorizationService->register(
-            $data['login'],
-            $data['password'],
-            $data['email'],
-            $data['nickname']
-        );
+        try {
+            $result = $this->authorizationService->register(
+                $data['login'],
+                $data['password'],
+                $data['email'],
+                $data['nickname']
+            );
+        } catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse(
+                [
+                    'message' => 'This login is already in use'
+                ],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                [
+                    'message' => $e->getMessage()
+                ],
+                $e->getCode()
+            );
+        }
 
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+                'token' => $result
+            ],
+            Response::HTTP_OK
         );
     }
 }

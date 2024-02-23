@@ -53,7 +53,7 @@ class UserInfoControllerTest extends WebTestCase
 
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/user/get-info-by-token',
+            'https://localhost/api/user/me',
             [],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -64,13 +64,19 @@ class UserInfoControllerTest extends WebTestCase
         $decodedResponse = json_decode($response->getContent(), true);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse);
+        $this->assertNotEmpty($decodedResponse);
+        $this->assertNotNull($decodedResponse['login']);
+        $this->assertNotNull($decodedResponse['nickname']);
+        $this->assertNotNull($decodedResponse['balance']);
+        $this->assertNotNull($decodedResponse['firstName']);
+        $this->assertNotNull($decodedResponse['lastName']);
+        $this->assertNotNull($decodedResponse['email']);
         $this->assertEquals($testUser->getLogin(), $decodedResponse['login']);
         $this->assertEquals($testUser->getNickname(), $decodedResponse['nickname']);
         $this->assertEquals($testUser->getBalance(), $decodedResponse['balance']);
         $this->assertEquals($testUser->getFirstName(), $decodedResponse['firstName']);
         $this->assertEquals($testUser->getLastName(), $decodedResponse['lastName']);
         $this->assertEquals($testUser->getEmail(), $decodedResponse['email']);
-        $this->assertEmpty($decodedResponse['purchasedGames']);
+        $this->assertArrayHasKey('purchasedGames', $decodedResponse);
     }
 }

@@ -16,16 +16,14 @@ class UserInfoService
     public function getUserInfo($userLogin): array
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
-        return array(
-            'content' => [
-                'login' => $user->getLogin(),
-                'nickname' => $user->getNickname(),
-                'balance' => $user->getBalance(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'email' => $user->getEmail(),
-                'purchasedGames' => $user->getPurchasedGames()
-            ]
-        );
+        return [
+            'login' => $user->getLogin(),
+            'nickname' => $user->getNickname(),
+            'balance' => $user->getBalance(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'email' => $user->getEmail(),
+            'purchasedGames' => $user->getPurchasedGames()
+        ];
     }
 }

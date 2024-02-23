@@ -22,7 +22,7 @@ class UserInfoController extends AbstractController
 
     }
     #[Route(
-        "/api/user/get-info-by-token",
+        "/api/user/me",
         methods: ['GET']
     )]
     #[Tag('User')]
@@ -33,6 +33,9 @@ class UserInfoController extends AbstractController
         $decodedToken = $this->tokenService->decodeLongToken($token);
         $result = $this->userInfoService->getUserInfo($decodedToken->login);
 
-        return new JsonResponse($result['content'], Response::HTTP_OK);
+        return new JsonResponse(
+            $result,
+            Response::HTTP_OK
+        );
     }
 }

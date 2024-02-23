@@ -16,7 +16,11 @@ class PurchaseService
     ) {
 
     }
-    public function purchase($gameId, $userLogin): array
+
+    /**
+     * @throws \Exception
+     */
+    public function purchase($gameId, $userLogin): string
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
         $game = $this->em->getRepository(Game::class)->findOneBy(['id' => $gameId]);
@@ -24,12 +28,7 @@ class PurchaseService
         $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $user, 'game' => $game]);
 
         if ($purchasedGames) {
-            return array(
-                'content' => [
-                    'message' => 'Game already purchased'
-                ],
-                'code' => Response::HTTP_FORBIDDEN
-            );
+            throw new \Exception('Game already purchased', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $purchasedGame = new PurchasedGame();
@@ -41,12 +40,7 @@ class PurchaseService
         $this->em->persist($purchasedGame);
         $this->em->flush();
 
-        return array(
-            'content' => [
-                'message' => 'Successfully purchased'
-            ],
-            'code' => Response::HTTP_OK
-        );
+        return 'Successfully purchased';
     }
 
     public function getPurchasedGames($token): array
@@ -54,18 +48,13 @@ class PurchaseService
         $decodedToken = $this->tokenService->decodeLongToken($token);
         $user = $this->em->getRepository(User::class)->findOneBy(['login' => $decodedToken->login]);
 
-        $result = $user->getPurchasedGames()->map(function($purchasedGame) {
-            return [
-                'gameId' => $purchasedGame->getGame()->getId(),
-                'title' => $purchasedGame->getGame()->getTitle(),
-                'hoursOfPlaying' =>  $purchasedGame->getHoursOfPlaying()
-            ];
-        });
+        $result = $user->getPurchasedGames()->map(static fn ($purchasedGame) => [
+            'gameId' => $purchasedGame->getGame()->getId(),
+            'title' => $purchasedGame->getGame()->getTitle(),
+            'hoursOfPlaying' =>  $purchasedGame->getHoursOfPlaying()
+        ]);
 
-        return array(
-            'content' => $result,
-            'code' => Response::HTTP_OK
-        );
+        return $result->getValues();
     }
 }
 

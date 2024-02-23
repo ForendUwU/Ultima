@@ -16,7 +16,7 @@ class UserTest extends TestCase
         $this->assertNotNull($testUser->getBalance());
         $this->assertEquals(0, $testUser->getBalance());
         $this->assertNotNull($testUser->getPurchasedGames());
-        $this->assertNotNull($testUser->getId());
+        $this->assertEquals(0, $testUser->getId());
     }
 
     public function testCreateNotEmptyUserEntity(): void

@@ -44,6 +44,8 @@ final class UserFactory extends ModelFactory
             'nickname' => self::faker()->text(20),
             'password' => self::faker()->text(),
             'token' => self::faker()->text(20),
+            'firstName' => self::faker()->text(20),
+            'lastName' => self::faker()->text(20),
             'roles' => [],
             'purchasedGames' => []
         ];

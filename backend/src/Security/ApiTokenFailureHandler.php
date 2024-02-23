@@ -10,7 +10,6 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerI
 
 class ApiTokenFailureHandler implements AuthenticationFailureHandlerInterface
 {
-
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): JsonResponse
     {
         return new JsonResponse(
