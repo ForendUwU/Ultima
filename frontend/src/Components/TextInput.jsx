@@ -1,7 +1,7 @@
 import React from "react";
 import {OutlinedInput} from "@mui/material";
 
-export default function TextInput({inputName})
+export default function TextInput({inputName, type})
 {
     return(
         <OutlinedInput
@@ -9,7 +9,7 @@ export default function TextInput({inputName})
             fullWidth
             id={inputName}
             name={inputName}
-            type={inputName}
+            type={type || inputName}
             sx={{
                 height: "6vh",
                 fontSize: "100%",

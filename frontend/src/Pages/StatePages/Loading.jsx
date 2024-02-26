@@ -19,7 +19,7 @@ export default function Loading() {
             </Typography>
             {
                 trailSprings.map((props, index) => (
-                    <animated.div style={{...props}} key={index}>
+                    <animated.div style={{...props, height: "100%"}} key={index}>
                         .
                     </animated.div>
                 ))

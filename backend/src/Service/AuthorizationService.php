@@ -5,8 +5,8 @@ namespace App\Service;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Zenstruck\Foundry\Test\ResetDatabase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AuthorizationService
 {
@@ -14,7 +14,8 @@ class AuthorizationService
 
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly TokenService $tokenService
+        private readonly TokenService $tokenService,
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
 
     }
@@ -30,7 +31,7 @@ class AuthorizationService
             throw new \Exception('This user does not exist', Response::HTTP_BAD_REQUEST);
         }
 
-        if ($user->getPassword() !== $password){
+        if (!$this->userPasswordHasher->isPasswordValid($user, $password)){
             throw new \Exception('Wrong login or password', Response::HTTP_UNAUTHORIZED);
         }
 
@@ -71,11 +72,15 @@ class AuthorizationService
     public function register(string $login, string $password, string $email, string $nickname): string
     {
         $newUser = new User();
+        try {
+            $newUser->setLogin($login);
+            $newUser->setEmail($email);
+            $newUser->setNickname($nickname);
+            $newUser->setPassword($password, $this->userPasswordHasher);
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+        }
 
-        $newUser->setLogin($login);
-        $newUser->setPassword($password);
-        $newUser->setEmail($email);
-        $newUser->setNickname($nickname);
         $newUser->setRoles(['ROLE_USER']);
 
         $token = $this->tokenService->createToken($newUser);

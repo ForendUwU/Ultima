@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -129,11 +130,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->login;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setLogin(string $login): static
     {
-        $this->login = $login;
-
-        return $this;
+        if (strlen($login) < 6) {
+            throw new \Exception('Login must contain 6 or more characters');
+        } elseif (strlen($login) > 20) {
+            throw new \Exception('Login must contain less than 20 characters');
+        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $login)) {
+            throw new \Exception('Login must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+        } else {
+            $this->login = $login;
+            return $this;
+        }
     }
 
     /**
@@ -173,11 +184,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    /**
+     * @throws \Exception
+     */
+    public function setPassword(string $password, UserPasswordHasherInterface $hasher): static
     {
-        $this->password = $password;
-
-        return $this;
+        if (strlen($password) < 6) {
+            throw new \Exception('Password must contain 6 or more characters');
+        } elseif (strlen($password) > 50) {
+            throw new \Exception('Password must contain less than 50 characters');
+        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $password)) {
+            throw new \Exception('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+        } else {
+            $hashedPassword = $hasher->hashPassword(
+                $this,
+                $password
+            );
+            $this->password = $hashedPassword;
+            return $this;
+        }
     }
 
     /**
@@ -193,11 +218,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->nickname;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setNickname(string $nickname): static
     {
-        $this->nickname = $nickname;
-
-        return $this;
+        if (strlen($nickname) < 2) {
+            throw new \Exception('Password must contain 2 or more characters');
+        } elseif (strlen($nickname) > 20) {
+            throw new \Exception('Password must contain less than 50 characters');
+        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $nickname)) {
+            throw new \Exception('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+        } else {
+            $this->nickname = $nickname;
+            return $this;
+        }
     }
 
     public function getBalance(): ?float

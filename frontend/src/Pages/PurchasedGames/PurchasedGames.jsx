@@ -8,6 +8,7 @@ import Loading from "../StatePages/Loading";
 import Cookies from 'universal-cookie';
 import PageTitle from "../../Components/PageTitle";
 import {GetUserInfo} from "../../Scripts/GetUserInfo";
+import {useNavigate} from "react-router-dom";
 
 export default function PurchasedGames() {
     const [games, setGames] = React.useState([]);
@@ -15,10 +16,12 @@ export default function PurchasedGames() {
     const [error, setError] = React.useState(null);
     const [nickname, setNickname] = React.useState(null);
     const [userLoaded, setUserLoaded] = React.useState(false);
+
     const cookies = new Cookies();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('https://localhost/api/user/get-purchased-games', {
+        fetch('https://localhost/api/purchase-game', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -35,7 +38,6 @@ export default function PurchasedGames() {
         }).catch(error => {
             setError(error);
         }).finally(()=>{
-            console.log(123);
             setLoading(false);
         })
     },[]);
@@ -61,7 +63,7 @@ export default function PurchasedGames() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': cookies.get('token')
+                'Authorization': 'Bearer ' . cookies.get('token')
             }
         }).then(response => {
             return response.json();
@@ -71,7 +73,7 @@ export default function PurchasedGames() {
 
         cookies.set('token', '', {expires: yesterday});
         cookies.set('userId', '', {expires: yesterday});
-        window.location.reload();
+        navigate(0);
     }
 
     if(loading || !userLoaded) return <Loading />;
@@ -83,7 +85,7 @@ export default function PurchasedGames() {
                 <GlowingGrid>
                     <Header nickname={nickname} handleLogout={handleLogout} />
                     <PageTitle title="Purchased games" />
-                        {games.length !== 0 ?
+                        {games && games.length !== 0 ?
                             <ImageList cols={6}>
                                 {
                                     games.map((item, index) => (

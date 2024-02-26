@@ -32,7 +32,7 @@ export default function HomePage() {
                 'Authorization': 'Bearer ' + cookies.get('token')
             }
         }).then(response => {
-            if (response.ok || response.status === 403) {
+            if (response.ok || response.status === 422) {
                 return response.json();
             } else {
                 throw new Error();
@@ -61,7 +61,7 @@ export default function HomePage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': cookies.get('token')
+                'Authorization': 'Bearer ' + cookies.get('token')
             }
         }).then(response => {
             return response.json();
@@ -71,7 +71,7 @@ export default function HomePage() {
 
         cookies.set('token', '', {expires: yesterday});
         cookies.set('userId', '', {expires: yesterday});
-        window.location.reload();
+        navigate(0);
     }
 
     useEffect(() => {
@@ -106,7 +106,6 @@ export default function HomePage() {
         })
     }, []);
 
-    //if (isForbidden) { setTimeout(() => {setIsForbidden(false)}, 2000) }
     if(loading || !userLoaded) return <Loading />;
     if(error) return <Error errorText={error.toString()} />;
 

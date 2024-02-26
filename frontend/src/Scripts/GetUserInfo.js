@@ -1,6 +1,6 @@
 export function GetUserInfo(token)
 {
-    return fetch('https://localhost/api/user/get-info-by-token', {
+    return fetch('https://localhost/api/user/me', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
