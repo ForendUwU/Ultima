@@ -8,13 +8,12 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Exceptions\ValidationException;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\DocBlock\Tags\Formatter\PassthroughFormatter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -137,11 +136,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLogin(string $login): static
     {
         if (strlen($login) < 6) {
-            throw new \Exception('Login must contain 6 or more characters');
+            throw new ValidationException('Login must contain 6 or more characters');
         } elseif (strlen($login) > 20) {
-            throw new \Exception('Login must contain less than 20 characters');
+            throw new ValidationException('Login must contain less than 20 characters');
         } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $login)) {
-            throw new \Exception('Login must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            throw new ValidationException(
+                'Login must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters'
+            );
         } else {
             $this->login = $login;
             return $this;
@@ -213,12 +214,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNickname(string $nickname): static
     {
         if (strlen($nickname) < 2) {
-            throw new \Exception('Nickname must contain 2 or more characters');
+            throw new ValidationException('Nickname must contain 2 or more characters');
         } elseif (strlen($nickname) > 20) {
-            throw new \Exception('Nickname must contain less than 50 characters');
+            throw new ValidationException('Nickname must contain less than 50 characters');
         } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $nickname)) {
             dump($nickname);
-            throw new \Exception('Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            throw new ValidationException(
+                'Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters'
+            );
         } else {
             $this->nickname = $nickname;
             return $this;

@@ -3,10 +3,11 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Exceptions\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Zenstruck\Foundry\Test\ResetDatabase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Zenstruck\Foundry\Test\ResetDatabase;
 
 class AuthorizationService
 {
@@ -102,15 +103,17 @@ class AuthorizationService
     public function validatePassword(string $password): bool
     {
         if (strlen($password) < 6) {
-            throw new \Exception('Password must contain 6 or more characters');
+            throw new ValidationException('Password must contain 6 or more characters');
         } elseif (strlen($password) > 50) {
-            throw new \Exception('Password must contain less than 50 characters');
+            throw new ValidationException('Password must contain less than 50 characters');
         } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $password)) {
-            throw new \Exception('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            throw new ValidationException('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
         } elseif (!preg_match("/[0-9]/", $password)) {
-            throw new \Exception('Password must contain at least one number');
+            throw new ValidationException('Password must contain at least one number');
         } elseif (!preg_match("/[!~_&*%@$]/", $password)) {
-            throw new \Exception('Password must contain at least one of this symbols "!", "~", "_", "&", "*", "%", "@", "$"');
+            throw new ValidationException(
+                'Password must contain at least one of this symbols "!", "~", "_", "&", "*", "%", "@", "$"'
+            );
         } else {
             return true;
         }
