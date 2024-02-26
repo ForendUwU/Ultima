@@ -30,12 +30,12 @@ class UserRepositoryTest extends WebTestCase
      */
     public function testUpgradePasswordSuccess(): void
     {
-        $oldPassword = 'test password';
-        $newPassword = 'new test password';
+        $oldPassword = 'testPassword';
+        $newPassword = 'newTestPassword';
 
         $testUser = new User();
-        $testUser->setLogin('test login');
-        $testUser->setNickname('test nickname');
+        $testUser->setLogin('testLogin');
+        $testUser->setNickname('testNickname');
         $testUser->setEmail('test@email.com');
         $testUser->setPassword($oldPassword);
 

@@ -33,7 +33,7 @@ class AuthorizationControllerTest extends WebTestCase
     public function loginDataProvider(): array
     {
         return [
-            'success' => ['testLogin', 'testPassword'],
+            'success' => ['testLogin', 'testPassword1!'],
             'missing data' => ['', '']
         ];
     }
@@ -41,7 +41,7 @@ class AuthorizationControllerTest extends WebTestCase
     public function registerDataProvider(): array
     {
         return [
-            'success' => ['testLogin', 'testPassword', 'testEmail', 'testNickname'],
+            'success' => ['testLogin', 'testPassword1!', 'testEmail', 'testNickname'],
             'missing data' => ['', '', '', '']
         ];
     }
@@ -53,7 +53,7 @@ class AuthorizationControllerTest extends WebTestCase
     {
         UserFactory::createOne([
             'login' => 'testLogin',
-            'password' => 'testPassword'
+            'password' => 'testPassword1!'
         ]);
 
         $this->client->jsonRequest(
@@ -83,7 +83,7 @@ class AuthorizationControllerTest extends WebTestCase
     {
         UserFactory::createOne([
             'login' => 'testLogin',
-            'password' => 'testPassword'
+            'password' => 'testPassword1!'
         ]);
 
         $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);

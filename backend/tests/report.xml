@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="" tests="31" assertions="172" errors="0" warnings="0" failures="0" skipped="0" time="4.414734">
-    <testsuite name="Project Test Suite" tests="31" assertions="172" errors="0" warnings="0" failures="0" skipped="0" time="4.414734">
-      <testsuite name="App\Tests\Functional\Controller\AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" tests="5" assertions="16" errors="0" warnings="0" failures="0" skipped="0" time="2.236334">
-        <testsuite name="App\Tests\Functional\Controller\AuthorizationControllerTest::testLogin" tests="2" assertions="6" errors="0" warnings="0" failures="0" skipped="0" time="1.054787">
-          <testcase name="testLogin with data set &quot;success&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="52" assertions="3" time="0.644836"/>
-          <testcase name="testLogin with data set &quot;missing data&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="52" assertions="3" time="0.409951"/>
+  <testsuite name="" tests="31" assertions="172" errors="0" warnings="0" failures="0" skipped="0" time="6.848673">
+    <testsuite name="Project Test Suite" tests="31" assertions="172" errors="0" warnings="0" failures="0" skipped="0" time="6.848673">
+      <testsuite name="App\Tests\Functional\Controller\AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" tests="5" assertions="16" errors="0" warnings="0" failures="0" skipped="0" time="3.755992">
+        <testsuite name="App\Tests\Functional\Controller\AuthorizationControllerTest::testLogin" tests="2" assertions="6" errors="0" warnings="0" failures="0" skipped="0" time="2.048986">
+          <testcase name="testLogin with data set &quot;success&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="52" assertions="3" time="1.465071"/>
+          <testcase name="testLogin with data set &quot;missing data&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="52" assertions="3" time="0.583915"/>
         </testsuite>
-        <testcase name="testLogoutSuccess" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="82" assertions="3" time="0.427024"/>
-        <testsuite name="App\Tests\Functional\Controller\AuthorizationControllerTest::testRegisterSuccess" tests="2" assertions="7" errors="0" warnings="0" failures="0" skipped="0" time="0.754523">
-          <testcase name="testRegisterSuccess with data set &quot;success&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="117" assertions="4" time="0.386271"/>
-          <testcase name="testRegisterSuccess with data set &quot;missing data&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="117" assertions="3" time="0.368252"/>
-        </testsuite>
-      </testsuite>
-      <testsuite name="App\Tests\Functional\Controller\PurchaseControllerTest" file="/app/tests/Functional/Controller/PurchaseControllerTest.php" tests="2" assertions="21" errors="0" warnings="0" failures="0" skipped="0" time="0.980950">
-        <testcase name="testPurchase" class="App\Tests\Functional\Controller\PurchaseControllerTest" classname="App.Tests.Functional.Controller.PurchaseControllerTest" file="/app/tests/Functional/Controller/PurchaseControllerTest.php" line="37" assertions="11" time="0.540109"/>
-        <testcase name="testGetPurchasedGamesSuccess" class="App\Tests\Functional\Controller\PurchaseControllerTest" classname="App.Tests.Functional.Controller.PurchaseControllerTest" file="/app/tests/Functional/Controller/PurchaseControllerTest.php" line="102" assertions="10" time="0.440841"/>
-      </testsuite>
-      <testsuite name="App\Tests\Functional\Controller\UserInfoControllerTest" file="/app/tests/Functional/Controller/UserInfoControllerTest.php" tests="1" assertions="15" errors="0" warnings="0" failures="0" skipped="0" time="0.387696">
-        <testcase name="testGetUserInfoSuccess" class="App\Tests\Functional\Controller\UserInfoControllerTest" classname="App.Tests.Functional.Controller.UserInfoControllerTest" file="/app/tests/Functional/Controller/UserInfoControllerTest.php" line="39" assertions="15" time="0.387696"/>
-      </testsuite>
-      <testsuite name="App\Tests\Functional\Repository\UserRepositoryTest" file="/app/tests/Functional/Repository/UserRepositoryTest.php" tests="2" assertions="2" errors="0" warnings="0" failures="0" skipped="0" time="0.733612">
-        <testcase name="testUpgradePasswordSuccess" class="App\Tests\Functional\Repository\UserRepositoryTest" classname="App.Tests.Functional.Repository.UserRepositoryTest" file="/app/tests/Functional/Repository/UserRepositoryTest.php" line="31" assertions="1" time="0.381545"/>
-        <testcase name="testUpgradePasswordNotSupported" class="App\Tests\Functional\Repository\UserRepositoryTest" classname="App.Tests.Functional.Repository.UserRepositoryTest" file="/app/tests/Functional/Repository/UserRepositoryTest.php" line="51" assertions="1" time="0.352067"/>
-      </testsuite>
-      <testsuite name="App\Tests\Unit\Entity\GameTest" file="/app/tests/Unit/Entity/GameTest.php" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.001194">
-        <testcase name="testCreateEmptyGameEntity" class="App\Tests\Unit\Entity\GameTest" classname="App.Tests.Unit.Entity.GameTest" file="/app/tests/Unit/Entity/GameTest.php" line="11" assertions="4" time="0.000547"/>
-        <testcase name="testCreateNotEmptyGameEntity" class="App\Tests\Unit\Entity\GameTest" classname="App.Tests.Unit.Entity.GameTest" file="/app/tests/Unit/Entity/GameTest.php" line="21" assertions="6" time="0.000648"/>
-      </testsuite>
-      <testsuite name="App\Tests\Unit\Entity\PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" tests="2" assertions="7" errors="0" warnings="0" failures="0" skipped="0" time="0.001199">
-        <testcase name="testCreateEmptyPurchasedGame" class="App\Tests\Unit\Entity\PurchasedGameTest" classname="App.Tests.Unit.Entity.PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" line="12" assertions="4" time="0.000577"/>
-        <testcase name="testCreateNotEmptyPurchasedGame" class="App\Tests\Unit\Entity\PurchasedGameTest" classname="App.Tests.Unit.Entity.PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" line="22" assertions="3" time="0.000622"/>
-      </testsuite>
-      <testsuite name="App\Tests\Unit\Entity\UserTest" file="/app/tests/Unit/Entity/UserTest.php" tests="2" assertions="18" errors="0" warnings="0" failures="0" skipped="0" time="0.003004">
-        <testcase name="testCreateEmptyUserEntity" class="App\Tests\Unit\Entity\UserTest" classname="App.Tests.Unit.Entity.UserTest" file="/app/tests/Unit/Entity/UserTest.php" line="11" assertions="6" time="0.000629"/>
-        <testcase name="testCreateNotEmptyUserEntity" class="App\Tests\Unit\Entity\UserTest" classname="App.Tests.Unit.Entity.UserTest" file="/app/tests/Unit/Entity/UserTest.php" line="22" assertions="12" time="0.002375"/>
-      </testsuite>
-      <testsuite name="App\Tests\Unit\Security\ApiTokenFailureHandlerTest" file="/app/tests/Unit/Security/ApiTokenFailureHandlerTest.php" tests="1" assertions="1" errors="0" warnings="0" failures="0" skipped="0" time="0.002807">
-        <testcase name="testOnAuthenticationFailure" class="App\Tests\Unit\Security\ApiTokenFailureHandlerTest" classname="App.Tests.Unit.Security.ApiTokenFailureHandlerTest" file="/app/tests/Unit/Security/ApiTokenFailureHandlerTest.php" line="14" assertions="1" time="0.002807"/>
-      </testsuite>
-      <testsuite name="App\Tests\Unit\Security\ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" tests="3" assertions="11" errors="0" warnings="0" failures="0" skipped="0" time="0.039936">
-        <testsuite name="App\Tests\Unit\Security\ApiTokenHandlerTest::testGetUserBadgeFrom" tests="3" assertions="11" errors="0" warnings="0" failures="0" skipped="0" time="0.039936">
-          <testcase name="testGetUserBadgeFrom with data set &quot;success&quot;" class="App\Tests\Unit\Security\ApiTokenHandlerTest" classname="App.Tests.Unit.Security.ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" line="41" assertions="4" time="0.034751"/>
-          <testcase name="testGetUserBadgeFrom with data set &quot;bad credentials&quot;" class="App\Tests\Unit\Security\ApiTokenHandlerTest" classname="App.Tests.Unit.Security.ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" line="41" assertions="3" time="0.002890"/>
-          <testcase name="testGetUserBadgeFrom with data set &quot;expired token&quot;" class="App\Tests\Unit\Security\ApiTokenHandlerTest" classname="App.Tests.Unit.Security.ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" line="41" assertions="4" time="0.002295"/>
+        <testcase name="testLogoutSuccess" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="82" assertions="3" time="0.620599"/>
+        <testsuite name="App\Tests\Functional\Controller\AuthorizationControllerTest::testRegisterSuccess" tests="2" assertions="7" errors="0" warnings="0" failures="0" skipped="0" time="1.086406">
+          <testcase name="testRegisterSuccess with data set &quot;success&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="117" assertions="4" time="0.551790"/>
+          <testcase name="testRegisterSuccess with data set &quot;missing data&quot;" class="App\Tests\Functional\Controller\AuthorizationControllerTest" classname="App.Tests.Functional.Controller.AuthorizationControllerTest" file="/app/tests/Functional/Controller/AuthorizationControllerTest.php" line="117" assertions="3" time="0.534617"/>
         </testsuite>
       </testsuite>
-      <testsuite name="App\Tests\Unit\Service\AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" tests="7" assertions="31" errors="0" warnings="0" failures="0" skipped="0" time="0.013738">
-        <testsuite name="App\Tests\Unit\Service\AuthorizationServiceTest::testLogin" tests="3" assertions="13" errors="0" warnings="0" failures="0" skipped="0" time="0.006418">
-          <testcase name="testLogin with data set &quot;success&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="64" assertions="5" time="0.002119"/>
-          <testcase name="testLogin with data set &quot;user does not exist&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="64" assertions="4" time="0.002540"/>
-          <testcase name="testLogin with data set &quot;wrong password&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="64" assertions="4" time="0.001759"/>
-        </testsuite>
-        <testcase name="testRegisterSuccess" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="98" assertions="3" time="0.001090"/>
-        <testsuite name="App\Tests\Unit\Service\AuthorizationServiceTest::testLogout" tests="3" assertions="15" errors="0" warnings="0" failures="0" skipped="0" time="0.006230">
-          <testcase name="testLogout with data set &quot;success&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="114" assertions="5" time="0.002028"/>
-          <testcase name="testLogout with data set &quot;user does not exist&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="114" assertions="5" time="0.001866"/>
-          <testcase name="testLogout with data set &quot;user already unauthorized&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="114" assertions="5" time="0.002337"/>
+      <testsuite name="App\Tests\Functional\Controller\PurchaseControllerTest" file="/app/tests/Functional/Controller/PurchaseControllerTest.php" tests="2" assertions="21" errors="0" warnings="0" failures="0" skipped="0" time="1.362905">
+        <testcase name="testPurchase" class="App\Tests\Functional\Controller\PurchaseControllerTest" classname="App.Tests.Functional.Controller.PurchaseControllerTest" file="/app/tests/Functional/Controller/PurchaseControllerTest.php" line="37" assertions="11" time="0.732132"/>
+        <testcase name="testGetPurchasedGamesSuccess" class="App\Tests\Functional\Controller\PurchaseControllerTest" classname="App.Tests.Functional.Controller.PurchaseControllerTest" file="/app/tests/Functional/Controller/PurchaseControllerTest.php" line="102" assertions="10" time="0.630773"/>
+      </testsuite>
+      <testsuite name="App\Tests\Functional\Controller\UserInfoControllerTest" file="/app/tests/Functional/Controller/UserInfoControllerTest.php" tests="1" assertions="15" errors="0" warnings="0" failures="0" skipped="0" time="0.573825">
+        <testcase name="testGetUserInfoSuccess" class="App\Tests\Functional\Controller\UserInfoControllerTest" classname="App.Tests.Functional.Controller.UserInfoControllerTest" file="/app/tests/Functional/Controller/UserInfoControllerTest.php" line="39" assertions="15" time="0.573825"/>
+      </testsuite>
+      <testsuite name="App\Tests\Functional\Repository\UserRepositoryTest" file="/app/tests/Functional/Repository/UserRepositoryTest.php" tests="2" assertions="2" errors="0" warnings="0" failures="0" skipped="0" time="0.957107">
+        <testcase name="testUpgradePasswordSuccess" class="App\Tests\Functional\Repository\UserRepositoryTest" classname="App.Tests.Functional.Repository.UserRepositoryTest" file="/app/tests/Functional/Repository/UserRepositoryTest.php" line="31" assertions="1" time="0.504077"/>
+        <testcase name="testUpgradePasswordNotSupported" class="App\Tests\Functional\Repository\UserRepositoryTest" classname="App.Tests.Functional.Repository.UserRepositoryTest" file="/app/tests/Functional/Repository/UserRepositoryTest.php" line="51" assertions="1" time="0.453031"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\GameTest" file="/app/tests/Unit/Entity/GameTest.php" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.002290">
+        <testcase name="testCreateEmptyGameEntity" class="App\Tests\Unit\Entity\GameTest" classname="App.Tests.Unit.Entity.GameTest" file="/app/tests/Unit/Entity/GameTest.php" line="11" assertions="4" time="0.001051"/>
+        <testcase name="testCreateNotEmptyGameEntity" class="App\Tests\Unit\Entity\GameTest" classname="App.Tests.Unit.Entity.GameTest" file="/app/tests/Unit/Entity/GameTest.php" line="21" assertions="6" time="0.001238"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" tests="2" assertions="7" errors="0" warnings="0" failures="0" skipped="0" time="0.002204">
+        <testcase name="testCreateEmptyPurchasedGame" class="App\Tests\Unit\Entity\PurchasedGameTest" classname="App.Tests.Unit.Entity.PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" line="12" assertions="4" time="0.001026"/>
+        <testcase name="testCreateNotEmptyPurchasedGame" class="App\Tests\Unit\Entity\PurchasedGameTest" classname="App.Tests.Unit.Entity.PurchasedGameTest" file="/app/tests/Unit/Entity/PurchasedGameTest.php" line="22" assertions="3" time="0.001178"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Entity\UserTest" file="/app/tests/Unit/Entity/UserTest.php" tests="2" assertions="18" errors="0" warnings="0" failures="0" skipped="0" time="0.005248">
+        <testcase name="testCreateEmptyUserEntity" class="App\Tests\Unit\Entity\UserTest" classname="App.Tests.Unit.Entity.UserTest" file="/app/tests/Unit/Entity/UserTest.php" line="11" assertions="6" time="0.001263"/>
+        <testcase name="testCreateNotEmptyUserEntity" class="App\Tests\Unit\Entity\UserTest" classname="App.Tests.Unit.Entity.UserTest" file="/app/tests/Unit/Entity/UserTest.php" line="22" assertions="12" time="0.003985"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Security\ApiTokenFailureHandlerTest" file="/app/tests/Unit/Security/ApiTokenFailureHandlerTest.php" tests="1" assertions="1" errors="0" warnings="0" failures="0" skipped="0" time="0.009910">
+        <testcase name="testOnAuthenticationFailure" class="App\Tests\Unit\Security\ApiTokenFailureHandlerTest" classname="App.Tests.Unit.Security.ApiTokenFailureHandlerTest" file="/app/tests/Unit/Security/ApiTokenFailureHandlerTest.php" line="14" assertions="1" time="0.009910"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Security\ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" tests="3" assertions="11" errors="0" warnings="0" failures="0" skipped="0" time="0.085854">
+        <testsuite name="App\Tests\Unit\Security\ApiTokenHandlerTest::testGetUserBadgeFrom" tests="3" assertions="11" errors="0" warnings="0" failures="0" skipped="0" time="0.085854">
+          <testcase name="testGetUserBadgeFrom with data set &quot;success&quot;" class="App\Tests\Unit\Security\ApiTokenHandlerTest" classname="App.Tests.Unit.Security.ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" line="41" assertions="4" time="0.073020"/>
+          <testcase name="testGetUserBadgeFrom with data set &quot;bad credentials&quot;" class="App\Tests\Unit\Security\ApiTokenHandlerTest" classname="App.Tests.Unit.Security.ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" line="41" assertions="3" time="0.006663"/>
+          <testcase name="testGetUserBadgeFrom with data set &quot;expired token&quot;" class="App\Tests\Unit\Security\ApiTokenHandlerTest" classname="App.Tests.Unit.Security.ApiTokenHandlerTest" file="/app/tests/Unit/Security/ApiTokenHandlerTest.php" line="41" assertions="4" time="0.006172"/>
         </testsuite>
       </testsuite>
-      <testsuite name="App\Tests\Unit\Service\PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" tests="3" assertions="23" errors="0" warnings="0" failures="0" skipped="0" time="0.012370">
-        <testsuite name="App\Tests\Unit\Service\PurchaseServiceTest::testPurchase" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.009959">
-          <testcase name="testPurchase with data set &quot;success&quot;" class="App\Tests\Unit\Service\PurchaseServiceTest" classname="App.Tests.Unit.Service.PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" line="53" assertions="5" time="0.007768"/>
-          <testcase name="testPurchase with data set &quot;game already purchased&quot;" class="App\Tests\Unit\Service\PurchaseServiceTest" classname="App.Tests.Unit.Service.PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" line="53" assertions="5" time="0.002191"/>
+      <testsuite name="App\Tests\Unit\Service\AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" tests="7" assertions="31" errors="0" warnings="0" failures="0" skipped="0" time="0.049056">
+        <testsuite name="App\Tests\Unit\Service\AuthorizationServiceTest::testLogin1" tests="3" assertions="13" errors="0" warnings="0" failures="0" skipped="0" time="0.026285">
+          <testcase name="testLogin1 with data set &quot;success&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="72" assertions="5" time="0.009811"/>
+          <testcase name="testLogin1 with data set &quot;user does not exist&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="72" assertions="4" time="0.007391"/>
+          <testcase name="testLogin1 with data set &quot;wrong password&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="72" assertions="4" time="0.009083"/>
         </testsuite>
-        <testcase name="testGetPurchasedGamesSuccess" class="App\Tests\Unit\Service\PurchaseServiceTest" classname="App.Tests.Unit.Service.PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" line="93" assertions="13" time="0.002410"/>
+        <testcase name="testRegisterSuccess" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="116" assertions="3" time="0.002727"/>
+        <testsuite name="App\Tests\Unit\Service\AuthorizationServiceTest::testLogout" tests="3" assertions="15" errors="0" warnings="0" failures="0" skipped="0" time="0.020043">
+          <testcase name="testLogout with data set &quot;success&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="132" assertions="5" time="0.005744"/>
+          <testcase name="testLogout with data set &quot;user does not exist&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="132" assertions="5" time="0.008455"/>
+          <testcase name="testLogout with data set &quot;user already unauthorized&quot;" class="App\Tests\Unit\Service\AuthorizationServiceTest" classname="App.Tests.Unit.Service.AuthorizationServiceTest" file="/app/tests/Unit/Service/AuthorizationServiceTest.php" line="132" assertions="5" time="0.005844"/>
+        </testsuite>
       </testsuite>
-      <testsuite name="App\Tests\Unit\Service\UserInfoServiceTest" file="/app/tests/Unit/Service/UserInfoServiceTest.php" tests="1" assertions="17" errors="0" warnings="0" failures="0" skipped="0" time="0.001894">
-        <testcase name="testGetUserInfo" class="App\Tests\Unit\Service\UserInfoServiceTest" classname="App.Tests.Unit.Service.UserInfoServiceTest" file="/app/tests/Unit/Service/UserInfoServiceTest.php" line="22" assertions="17" time="0.001894"/>
+      <testsuite name="App\Tests\Unit\Service\PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" tests="3" assertions="23" errors="0" warnings="0" failures="0" skipped="0" time="0.038955">
+        <testsuite name="App\Tests\Unit\Service\PurchaseServiceTest::testPurchase" tests="2" assertions="10" errors="0" warnings="0" failures="0" skipped="0" time="0.031285">
+          <testcase name="testPurchase with data set &quot;success&quot;" class="App\Tests\Unit\Service\PurchaseServiceTest" classname="App.Tests.Unit.Service.PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" line="53" assertions="5" time="0.022018"/>
+          <testcase name="testPurchase with data set &quot;game already purchased&quot;" class="App\Tests\Unit\Service\PurchaseServiceTest" classname="App.Tests.Unit.Service.PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" line="53" assertions="5" time="0.009266"/>
+        </testsuite>
+        <testcase name="testGetPurchasedGamesSuccess" class="App\Tests\Unit\Service\PurchaseServiceTest" classname="App.Tests.Unit.Service.PurchaseServiceTest" file="/app/tests/Unit/Service/PurchaseServiceTest.php" line="93" assertions="13" time="0.007670"/>
+      </testsuite>
+      <testsuite name="App\Tests\Unit\Service\UserInfoServiceTest" file="/app/tests/Unit/Service/UserInfoServiceTest.php" tests="1" assertions="17" errors="0" warnings="0" failures="0" skipped="0" time="0.005328">
+        <testcase name="testGetUserInfo" class="App\Tests\Unit\Service\UserInfoServiceTest" classname="App.Tests.Unit.Service.UserInfoServiceTest" file="/app/tests/Unit/Service/UserInfoServiceTest.php" line="22" assertions="17" time="0.005328"/>
       </testsuite>
     </testsuite>
   </testsuite>

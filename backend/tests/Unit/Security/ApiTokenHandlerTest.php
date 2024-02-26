@@ -18,7 +18,7 @@ class ApiTokenHandlerTest extends TestCase
     public function getUserBadgeDataProvider(): array
     {
         $testUser = new User();
-        $testUser->setLogin('test login');
+        $testUser->setLogin('testLogin');
 
         $expectedUserBadge = new UserBadge($testUser->getLogin());
 

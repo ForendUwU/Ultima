@@ -6,22 +6,28 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\AuthorizationService;
 use App\Service\TokenService;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AuthorizationServiceTest extends TestCase
 {
     private AuthorizationService $authService;
     private $tokenServiceMock;
     private $emMock;
+    private $userPasswordHasherMock;
 
     public function setUp(): void
     {
         $this->tokenServiceMock = $this->createMock(TokenService::class);
         $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->authService = new AuthorizationService($this->emMock, $this->tokenServiceMock);
+        $this->userPasswordHasherMock = $this->createMock(UserPasswordHasherInterface::class);
+        $this->authService = new AuthorizationService(
+            $this->emMock,
+            $this->tokenServiceMock,
+            $this->userPasswordHasherMock
+        );
     }
 
     public function loginDataProvider(): array
@@ -61,7 +67,7 @@ class AuthorizationServiceTest extends TestCase
     /**
      *  @dataProvider loginDataProvider
      */
-    public function testLogin($testUser, $password, $expectedToken)
+    public function testLogin1($testUser, $password, $expectedToken)
     {
         $repositoryMock = $this->createMock(UserRepository::class);
 
@@ -80,6 +86,11 @@ class AuthorizationServiceTest extends TestCase
                 ->method('createToken')
                 ->willReturn('test');
 
+            $this->userPasswordHasherMock
+                ->expects($this->any())
+                ->method('isPasswordValid')
+                ->willReturn(true);
+
             $result = $this->authService->login('test', $password);
 
             $this->assertNotNull($result);
@@ -89,6 +100,11 @@ class AuthorizationServiceTest extends TestCase
             $this->expectExceptionMessage('This user does not exist');
             $this->authService->login('test', $password);
         } else {
+            $this->userPasswordHasherMock
+                ->expects($this->any())
+                ->method('isPasswordValid')
+                ->willReturn(false);
+
             $this->expectException(\Exception::class);
             $this->expectExceptionMessage('Wrong login or password');
             $this->authService->login('test', $password);
@@ -102,7 +118,7 @@ class AuthorizationServiceTest extends TestCase
             ->method('createToken')
             ->willReturn('test');
 
-        $result = $this->authService->register('test', 'test', 'test@email.com', 'test');
+        $result = $this->authService->register('testLogin', 'testPassword1!', 'test@email.com', 'test');
 
         $this->assertNotNull($result);
         $this->assertEquals('test', $result);

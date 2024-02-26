@@ -71,15 +71,19 @@ class AuthorizationService
      */
     public function register(string $login, string $password, string $email, string $nickname): string
     {
+        $this->validatePassword($password);
+
         $newUser = new User();
-        try {
-            $newUser->setLogin($login);
-            $newUser->setEmail($email);
-            $newUser->setNickname($nickname);
-            $newUser->setPassword($password, $this->userPasswordHasher);
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-        }
+
+        $newUser->setLogin($login);
+        $newUser->setEmail($email);
+        $newUser->setNickname($nickname);
+        $newUser->setPassword(
+            $this->userPasswordHasher->hashPassword(
+                $newUser,
+                $password
+            )
+        );
 
         $newUser->setRoles(['ROLE_USER']);
 
@@ -90,5 +94,25 @@ class AuthorizationService
         $this->em->flush();
 
         return $token;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function validatePassword(string $password): bool
+    {
+        if (strlen($password) < 6) {
+            throw new \Exception('Password must contain 6 or more characters');
+        } elseif (strlen($password) > 50) {
+            throw new \Exception('Password must contain less than 50 characters');
+        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $password)) {
+            throw new \Exception('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+        } elseif (!preg_match("/[0-9]/", $password)) {
+            throw new \Exception('Password must contain at least one number');
+        } elseif (!preg_match("/[!~_&*%@$]/", $password)) {
+            throw new \Exception('Password must contain at least one of this symbols "!", "~", "_", "&", "*", "%", "@", "$"');
+        } else {
+            return true;
+        }
     }
 }

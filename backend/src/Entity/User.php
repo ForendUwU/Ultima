@@ -12,6 +12,7 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\DocBlock\Tags\Formatter\PassthroughFormatter;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -187,22 +188,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @throws \Exception
      */
-    public function setPassword(string $password, UserPasswordHasherInterface $hasher): static
+    public function setPassword(string $password): string
     {
-        if (strlen($password) < 6) {
-            throw new \Exception('Password must contain 6 or more characters');
-        } elseif (strlen($password) > 50) {
-            throw new \Exception('Password must contain less than 50 characters');
-        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $password)) {
-            throw new \Exception('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
-        } else {
-            $hashedPassword = $hasher->hashPassword(
-                $this,
-                $password
-            );
-            $this->password = $hashedPassword;
-            return $this;
-        }
+        $this->password = $password;
+        return $password;
     }
 
     /**
@@ -224,11 +213,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNickname(string $nickname): static
     {
         if (strlen($nickname) < 2) {
-            throw new \Exception('Password must contain 2 or more characters');
+            throw new \Exception('Nickname must contain 2 or more characters');
         } elseif (strlen($nickname) > 20) {
-            throw new \Exception('Password must contain less than 50 characters');
+            throw new \Exception('Nickname must contain less than 50 characters');
         } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $nickname)) {
-            throw new \Exception('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            dump($nickname);
+            throw new \Exception('Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
         } else {
             $this->nickname = $nickname;
             return $this;
