@@ -1,8 +1,7 @@
 import React from "react";
 import Cookies from 'universal-cookie';
-import {Paper, Typography, Grid, Alert} from "@mui/material";
-import {Link} from "react-router-dom";
-import {GetUserInfo} from "../../Scripts/GetUserInfo";
+import {Typography, Alert} from "@mui/material";
+import {Link, useNavigate} from "react-router-dom";
 import FullscreenGrid from "../../Components/FullscreenGrid";
 import GlowingGrid from "../../Components/GlowingGrid";
 import TextInput from "../../Components/TextInput";
@@ -12,9 +11,9 @@ export default function SignIn() {
     const [showError, setShowError] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState('')
     const [authorized, setAuthorized] = React.useState(false)
-    const [nickname, setNickname] = React.useState(null)
 
     const cookies = new Cookies();
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -42,16 +41,12 @@ export default function SignIn() {
             }
         }).then(decodedResponse => {
             if(!decodedResponse['message']){
-                GetUserInfo(decodedResponse['token']).then(userInfo => {
-                    setNickname(userInfo['nickname']);
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
 
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
+                cookies.set('token', decodedResponse['token'], {expires: tomorrow});
 
-                    cookies.set('token', decodedResponse['token'], {expires: tomorrow});
-
-                    window.location.replace("/");
-                });
+                navigate('/');
             } else {
                 setErrorMessage(decodedResponse['message']);
             }

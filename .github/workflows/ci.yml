@@ -72,6 +72,8 @@ jobs:
             -Dsonar.tests=backend/tests
             -Dsonar.sources=backend/src
             -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.php.coverage.reportPaths=backend/tests/coverage.xml
+            -Dsonar.php.tests.reportPaths=backend/tests/report.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Services\TokenService;
-use App\Services\UserInfoService;
+use App\Service\TokenService;
+use App\Service\UserInfoService;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +22,7 @@ class UserInfoController extends AbstractController
 
     }
     #[Route(
-        "/api/user-info-by-token",
+        "/api/user/me",
         methods: ['GET']
     )]
     #[Tag('User')]
@@ -30,17 +30,12 @@ class UserInfoController extends AbstractController
     {
         $token = $request->headers->get('authorization');
 
-        if (!$token) {
-            return new JsonResponse(
-                [
-                    'message' => 'Token is missing'
-                ],
-                Response::HTTP_BAD_REQUEST);
-        }
-
-        $decodedToken = $this->tokenService->decode($token);
+        $decodedToken = $this->tokenService->decodeLongToken($token);
         $result = $this->userInfoService->getUserInfo($decodedToken->login);
 
-        return new JsonResponse($result['content'], Response::HTTP_OK);
+        return new JsonResponse(
+            $result,
+            Response::HTTP_OK
+        );
     }
 }

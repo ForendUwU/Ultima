@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Tag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,18 +12,21 @@ use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use App\Services\AuthorizationService;
+use App\Service\AuthorizationService;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsController]
 class AuthorizationController extends AbstractController
 {
-
     public function __construct(
         private readonly AuthorizationService $authorizationService
     ) {
 
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         "/api/login",
         methods: ['POST']
@@ -77,7 +81,7 @@ class AuthorizationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data['login'] || !$data['password']){
+        if (!$data || !$data['login'] || !$data['password']){
             return new JsonResponse(
                     [
                         'message' => 'Missing data'
@@ -86,11 +90,22 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        $result = $this->authorizationService->login($data['login'], $data['password']);
+        try {
+            $result = $this->authorizationService->login($data['login'], $data['password']);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                [
+                    'message' => $e->getMessage()
+                ],
+                $e->getCode()
+            );
+        }
 
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+                'token' => $result,
+            ],
+            Response::HTTP_OK
         );
     }
 
@@ -132,19 +147,22 @@ class AuthorizationController extends AbstractController
     {
         $token = $request->headers->get('authorization');
 
-        if (!$token) {
+        try {
+            $result = $this->authorizationService->logout($token);
+        } catch (\Exception $e) {
             return new JsonResponse(
                 [
-                    'message' => 'Missing token'
+                    'message' => $e->getMessage()
                 ],
-                Response::HTTP_BAD_REQUEST);
+                $e->getCode()
+            );
         }
 
-        $result = $this->authorizationService->logout($token);
-
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+            'message' => $result
+            ],
+            Response::HTTP_OK
         );
     }
 
@@ -218,7 +236,7 @@ class AuthorizationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
+        if (!$data || !$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
             return new JsonResponse(
                 [
                     'message' => 'Missing data'
@@ -227,16 +245,34 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        $result = $this->authorizationService->register(
-            $data['login'],
-            $data['password'],
-            $data['email'],
-            $data['nickname']
-        );
+        try {
+            $result = $this->authorizationService->register(
+                $data['login'],
+                $data['password'],
+                $data['email'],
+                $data['nickname']
+            );
+        } catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse(
+                [
+                    'message' => 'This login is already in use'
+                ],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                [
+                    'message' => $e->getMessage()
+                ],
+                $e->getCode()
+            );
+        }
 
         return new JsonResponse(
-            $result['content'],
-            $result['code']
+            [
+                'token' => $result
+            ],
+            Response::HTTP_OK
         );
     }
 }

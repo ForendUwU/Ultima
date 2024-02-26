@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import { Typography } from "@mui/material";
-import FullscreenGrid from "../Components/FullscreenGrid";
+import FullscreenGrid from "../../Components/FullscreenGrid";
 import { animated, useTrail } from '@react-spring/web'
 
 export default function Loading() {
@@ -19,7 +19,7 @@ export default function Loading() {
             </Typography>
             {
                 trailSprings.map((props, index) => (
-                    <animated.div style={{...props}} key={index}>
+                    <animated.div style={{...props, height: "100%"}} key={index}>
                         .
                     </animated.div>
                 ))

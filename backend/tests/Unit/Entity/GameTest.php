@@ -6,7 +6,7 @@ use App\Entity\Game;
 use App\Entity\PurchasedGame;
 use PHPUnit\Framework\TestCase;
 
-class GameUnitTest extends TestCase
+class GameTest extends TestCase
 {
     public function testCreateEmptyGameEntity(): void
     {
@@ -15,6 +15,7 @@ class GameUnitTest extends TestCase
         $this->assertNotNull($testGame);
         $this->assertNotNull($testGame->getPublishedAt());
         $this->assertNotNull($testGame->getPurchasedGames());
+        $this->assertEquals(0, $testGame->getID());
     }
 
     public function testCreateNotEmptyGameEntity(): void
@@ -22,14 +23,14 @@ class GameUnitTest extends TestCase
         $testGame = new Game();
         $testPurchasedGame = new PurchasedGame();
 
-        $testGame->setTitle('Test GameUnitTest');
+        $testGame->setTitle('Test GameTest');
         $testGame->setDescription('Test Description');
         $testGame->setPrice(9.99);
         $testGame->addPurchasedGame($testPurchasedGame);
 
         $this->assertNotNull($testGame->getPublishedAt());
         $this->assertEquals($testPurchasedGame, $testGame->getPurchasedGames()->getValues()[0]);
-        $this->assertEquals('Test GameUnitTest', $testGame->getTitle());
+        $this->assertEquals('Test GameTest', $testGame->getTitle());
         $this->assertEquals('Test Description', $testGame->getDescription());
         $this->assertEquals(9.99, $testGame->getPrice());
 

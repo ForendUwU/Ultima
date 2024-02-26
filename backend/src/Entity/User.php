@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use App\Exceptions\ValidationException;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -22,11 +23,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'user')]
 #[ApiResource(
     operations: [
-        new Get(uriTemplate: 'api/user/{id}'),
+        new Get(uriTemplate: 'api/user/api-platform-{id}'),
         new GetCollection(uriTemplate: 'api/user'),
         new Post(uriTemplate: 'api/user'),
-        new Patch(uriTemplate: 'api/user/{id}'),
-        new Delete(uriTemplate: 'api/user/{id}'),
+        new Patch(uriTemplate: 'api/user/api-platform-{id}'),
+        new Delete(uriTemplate: 'api/user/api-platform-{id}'),
     ],
     normalizationContext: [
         'groups' => ['user:read']
@@ -129,11 +130,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->login;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setLogin(string $login): static
     {
-        $this->login = $login;
-
-        return $this;
+        if (strlen($login) < 6) {
+            throw new ValidationException('Login must contain 6 or more characters');
+        } elseif (strlen($login) > 20) {
+            throw new ValidationException('Login must contain less than 20 characters');
+        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $login)) {
+            throw new ValidationException(
+                'Login must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters'
+            );
+        } else {
+            $this->login = $login;
+            return $this;
+        }
     }
 
     /**
@@ -173,11 +186,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    /**
+     * @throws \Exception
+     */
+    public function setPassword(string $password): string
     {
         $this->password = $password;
-
-        return $this;
+        return $password;
     }
 
     /**
@@ -185,7 +200,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
-        $this->token = null;
+        
     }
 
     public function getNickname(): ?string
@@ -193,11 +208,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->nickname;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setNickname(string $nickname): static
     {
-        $this->nickname = $nickname;
-
-        return $this;
+        if (strlen($nickname) < 2) {
+            throw new ValidationException('Nickname must contain 2 or more characters');
+        } elseif (strlen($nickname) > 20) {
+            throw new ValidationException('Nickname must contain less than 50 characters');
+        } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $nickname)) {
+            dump($nickname);
+            throw new ValidationException(
+                'Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters'
+            );
+        } else {
+            $this->nickname = $nickname;
+            return $this;
+        }
     }
 
     public function getBalance(): ?float

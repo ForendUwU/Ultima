@@ -4,9 +4,10 @@ namespace App\Tests\Functional\Controller;
 
 use App\Entity\User;
 use App\Factory\UserFactory;
-use App\Services\TokenService;
+use App\Service\TokenService;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\NotSupported;
+use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -33,6 +34,7 @@ class UserInfoControllerTest extends WebTestCase
 
     /**
      * @throws NotSupported
+     * @throws ORMException
      */
     public function testGetUserInfoSuccess()
     {
@@ -46,12 +48,15 @@ class UserInfoControllerTest extends WebTestCase
 
         $testUser->setToken($testToken);
 
+        $this->em->persist($testUser);
+        $this->em->flush();
+
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/user-info-by-token',
+            'https://localhost/api/user/me',
             [],
             [
-                'HTTP_Authorization' => $testToken
+                'HTTP_Authorization' => 'Bearer '.$testToken
             ]
         );
 
@@ -59,32 +64,19 @@ class UserInfoControllerTest extends WebTestCase
         $decodedResponse = json_decode($response->getContent(), true);
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse);
+        $this->assertNotEmpty($decodedResponse);
+        $this->assertNotNull($decodedResponse['login']);
+        $this->assertNotNull($decodedResponse['nickname']);
+        $this->assertNotNull($decodedResponse['balance']);
+        $this->assertNotNull($decodedResponse['firstName']);
+        $this->assertNotNull($decodedResponse['lastName']);
+        $this->assertNotNull($decodedResponse['email']);
         $this->assertEquals($testUser->getLogin(), $decodedResponse['login']);
         $this->assertEquals($testUser->getNickname(), $decodedResponse['nickname']);
         $this->assertEquals($testUser->getBalance(), $decodedResponse['balance']);
         $this->assertEquals($testUser->getFirstName(), $decodedResponse['firstName']);
         $this->assertEquals($testUser->getLastName(), $decodedResponse['lastName']);
         $this->assertEquals($testUser->getEmail(), $decodedResponse['email']);
-        $this->assertEmpty($decodedResponse['purchasedGames']);
-    }
-
-    public function testGetUserInfoTokenIsMissing()
-    {
-        $this->client->jsonRequest(
-            'GET',
-            'https://localhost/api/user-info-by-token',
-            [],
-            [
-                'HTTP_Authorization' => ''
-            ]
-        );
-
-        $response = $this->client->getResponse();
-        $decodedResponse = json_decode($response->getContent(), true);
-
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $this->assertNotEmpty($decodedResponse['message']);
-        $this->assertEquals('Token is missing', $decodedResponse['message']);
+        $this->assertArrayHasKey('purchasedGames', $decodedResponse);
     }
 }

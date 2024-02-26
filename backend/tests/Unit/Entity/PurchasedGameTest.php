@@ -7,7 +7,7 @@ use App\Entity\PurchasedGame;
 use App\Entity\User;
 use PHPUnit\Framework\TestCase;
 
-class PurchasedGameUnitTest extends TestCase
+class PurchasedGameTest extends TestCase
 {
     public function testCreateEmptyPurchasedGame(): void
     {

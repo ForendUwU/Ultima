@@ -4,9 +4,8 @@ namespace App\Tests\Functional\Controller;
 
 use App\Entity\User;
 use App\Factory\UserFactory;
-use App\Services\TokenService;
+use App\Service\TokenService;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\NotSupported;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -31,61 +30,60 @@ class AuthorizationControllerTest extends WebTestCase
             ->getManager();
     }
 
-    public function testLoginSuccess()
+    public function loginDataProvider(): array
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
-
-        $this->client->jsonRequest(
-            'POST',
-            'https://localhost/api/login',
-            [
-                'login' => 'testLogin',
-                'password' => 'testPassword'
-            ]
-        );
-
-        $response = $this->client->getResponse();
-        $decodedResponse = json_decode($response->getContent(), true);
-
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertNotEmpty($decodedResponse['token']);
+        return [
+            'success' => ['testLogin', 'testPassword1!'],
+            'missing data' => ['', '']
+        ];
     }
 
-    public function testLoginMissingData()
+    public function registerDataProvider(): array
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
-
-        $this->client->jsonRequest(
-            'POST',
-            'https://localhost/api/login',
-            [
-                'login' => '',
-                'password' => ''
-            ]
-        );
-
-        $response = $this->client->getResponse();
-        $decodedResponse = json_decode($response->getContent(), true);
-
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse['message']);
-        $this->assertEquals('Missing data', $decodedResponse['message']);
+        return [
+            'success' => ['testLogin', 'testPassword1!', 'testEmail', 'testNickname'],
+            'missing data' => ['', '', '', '']
+        ];
     }
 
     /**
-     * @throws NotSupported
+     *  @dataProvider loginDataProvider
      */
+    public function testLogin($testLogin, $testPassword)
+    {
+        UserFactory::createOne([
+            'login' => 'testLogin',
+            'password' => 'testPassword1!'
+        ]);
+
+        $this->client->jsonRequest(
+            'POST',
+            'https://localhost/api/login',
+            [
+                'login' => $testLogin,
+                'password' => $testPassword
+            ]
+        );
+
+        $response = $this->client->getResponse();
+        $decodedResponse = json_decode($response->getContent(), true);
+
+        if ($testLogin && $testPassword) {
+            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+            $this->assertArrayHasKey('token', $decodedResponse);
+            $this->assertNotEmpty($decodedResponse['token']);
+        } else {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+            $this->assertNotNull($decodedResponse['message']);
+            $this->assertEquals('Missing data', $decodedResponse['message']);
+        }
+    }
+
     public function testLogoutSuccess()
     {
         UserFactory::createOne([
             'login' => 'testLogin',
-            'password' => 'testPassword'
+            'password' => 'testPassword1!'
         ]);
 
         $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
@@ -93,12 +91,15 @@ class AuthorizationControllerTest extends WebTestCase
 
         $testUser->setToken($testToken);
 
+        $this->em->persist($testUser);
+        $this->em->flush();
+
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/logout',
             [],
             [
-                'HTTP_Authorization' => $testToken
+                'HTTP_Authorization' => 'Bearer '.$testToken
             ]
         );
 
@@ -110,68 +111,38 @@ class AuthorizationControllerTest extends WebTestCase
         $this->assertEquals('Logout successfully', $decodedResponse['message']);
     }
 
-    public function testLogoutMissingToken()
+    /**
+     *  @dataProvider registerDataProvider
+     */
+    public function testRegisterSuccess($testLogin, $testPassword, $testEmail, $testNickname)
     {
-        $this->client->jsonRequest(
-            'POST',
-            'https://localhost/api/logout'
-        );
-
-        $response = $this->client->getResponse();
-        $decodedResponse = json_decode($response->getContent(), true);
-
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse['message']);
-        $this->assertEquals('Missing token', $decodedResponse['message']);
-    }
-
-    public function testRegisterSuccess()
-    {
-        $testLogin = 'testLogin';
-        $testEmail = 'testEmail';
-
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/register',
             [
                 'login' => $testLogin,
-                'password' => 'testPassword',
+                'password' => $testPassword,
                 'email' => $testEmail,
-                'nickname' => 'testNickname'
+                'nickname' => $testNickname
             ]
         );
 
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse['token']);
+        if ($testLogin && $testPassword && $testEmail && $testNickname) {
+            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+            $this->assertNotNull($decodedResponse['token']);
 
-        $decodedToken = $this->tokenService->decode($decodedResponse['token']);
+            $decodedToken = $this->tokenService->decode($decodedResponse['token']);
 
-        $this->assertEquals($testLogin, $decodedToken->login);
-        $this->assertEquals($testEmail, $decodedToken->email);
-    }
+            $this->assertEquals($testLogin, $decodedToken->login);
+            $this->assertEquals($testEmail, $decodedToken->email);
+        } else {
+            $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+            $this->assertNotNull($decodedResponse['message']);
 
-    public function testRegisterMissingData()
-    {
-        $this->client->jsonRequest(
-            'POST',
-            'https://localhost/api/register',
-            [
-                'login' => '',
-                'password' => '',
-                'email' => '',
-                'nickname' => ''
-            ]
-        );
-
-        $response = $this->client->getResponse();
-        $decodedResponse = json_decode($response->getContent(), true);
-
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        $this->assertNotNull($decodedResponse['message']);
-
-        $this->assertEquals('Missing data', $decodedResponse['message']);
+            $this->assertEquals('Missing data', $decodedResponse['message']);
+        }
     }
 }
