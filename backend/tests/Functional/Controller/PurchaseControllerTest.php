@@ -38,11 +38,13 @@ class PurchaseControllerTest extends WebTestCase
     {
         UserFactory::createOne([
             'login' => 'testLogin',
-            'password' => 'testPassword'
+            'password' => 'testPassword',
+            'balance' => '999'
         ]);
 
         GameFactory::createOne([
-            'title' => 'testTitle'
+            'title' => 'testTitle',
+            'price' => '99'
         ]);
 
         $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);

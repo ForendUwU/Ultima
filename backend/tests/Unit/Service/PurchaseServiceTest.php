@@ -9,6 +9,7 @@ use App\Repository\GamesRepository;
 use App\Repository\PurchasedGameRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthorizationService;
+use App\Service\GetEntitiesService;
 use App\Service\PurchaseService;
 use App\Service\TokenService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,15 +19,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PurchaseServiceTest extends TestCase
 {
-    private $tokenServiceMock;
     private $emMock;
+    private $getEntitiesServiceMock;
     private PurchaseService $purchaseService;
 
     public function setUp(): void
     {
         $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->tokenServiceMock = $this->createMock(TokenService::class);
-        $this->purchaseService = new PurchaseService($this->emMock, $this->tokenServiceMock);
+        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
+        $this->purchaseService = new PurchaseService($this->emMock, $this->getEntitiesServiceMock);
     }
 
     public function purchaseDataProvider(): array
@@ -50,28 +51,23 @@ class PurchaseServiceTest extends TestCase
     /**
      *  @dataProvider purchaseDataProvider
      */
-    public function testPurchase($testUser, $testGame, $testPurchasedGame)
+    public function testPurchase1($testUser, $testGame, $testPurchasedGame)
     {
-        $userRepositoryMock = $this->createMock(UserRepository::class);
-        $gamesRepositoryMock = $this->createMock(GamesRepository::class);
         $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
+
+        $this->getEntitiesServiceMock
+            ->expects($this->once())
+            ->method('getUserByLogin')
+            ->willReturn($testUser);
+        $this->getEntitiesServiceMock
+            ->expects($this->once())
+            ->method('getGameById')
+            ->willReturn($testGame);
 
         $this->emMock
             ->expects($this->any())
             ->method('getRepository')
-            ->willReturnOnConsecutiveCalls(
-                $userRepositoryMock,
-                $gamesRepositoryMock,
-                $purchasedGameRepositoryMock
-            );
-        $userRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testUser);
-        $gamesRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testGame);
+            ->willReturn($purchasedGameRepositoryMock);
         $purchasedGameRepositoryMock
             ->expects($this->once())
             ->method('findOneBy')
@@ -122,14 +118,6 @@ class PurchaseServiceTest extends TestCase
             ->expects($this->once())
             ->method('findOneBy')
             ->willReturn($testUser);
-
-        $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->login = 'testLogin';
-
-        $this->tokenServiceMock
-            ->expects($this->once())
-            ->method('decodeLongToken')
-            ->willReturn($fakeDecodedToken);
 
         $result = $this->purchaseService->getPurchasedGames('someToken');
 
