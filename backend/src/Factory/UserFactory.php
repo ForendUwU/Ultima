@@ -41,7 +41,7 @@ final class UserFactory extends ModelFactory
     protected function getDefaults(): array
     {
         return [
-            'balance' => self::faker()->randomFloat(),
+            'balance' => self::faker()->randomDigitNotNull(),
             'email' => self::faker()->text(20),
             'login' => self::faker()->text(20),
             'nickname' => self::faker()->word(),

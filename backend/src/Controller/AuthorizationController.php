@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Exceptions\ValidationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Tag;
@@ -259,7 +260,7 @@ class AuthorizationController extends AbstractController
                 ],
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
             return new JsonResponse(
                 [
                     'message' => $e->getMessage()

@@ -5,6 +5,7 @@ namespace App\Tests\Unit\Service;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\AuthorizationService;
+use App\Service\GetEntitiesService;
 use App\Service\TokenService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -17,16 +18,19 @@ class AuthorizationServiceTest extends TestCase
     private $tokenServiceMock;
     private $emMock;
     private $userPasswordHasherMock;
+    private $getEntitiesServiceMock;
 
     public function setUp(): void
     {
         $this->tokenServiceMock = $this->createMock(TokenService::class);
         $this->emMock = $this->createMock(EntityManagerInterface::class);
         $this->userPasswordHasherMock = $this->createMock(UserPasswordHasherInterface::class);
+        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
         $this->authService = new AuthorizationService(
             $this->emMock,
             $this->tokenServiceMock,
-            $this->userPasswordHasherMock
+            $this->userPasswordHasherMock,
+            $this->getEntitiesServiceMock
         );
     }
 
@@ -42,7 +46,6 @@ class AuthorizationServiceTest extends TestCase
 
         return [
             'success' => [$testUser, $password, $expectedToken],
-            'user does not exist' => [null, $password, $expectedToken],
             'wrong password' => [$testUser, $wrongPassword,  $expectedToken]
         ];
     }
@@ -59,7 +62,6 @@ class AuthorizationServiceTest extends TestCase
 
         return [
             'success' => [$testUser],
-            'user does not exist' => [null],
             'user already unauthorized' => [$testUserWithoutToken]
         ];
     }
@@ -67,17 +69,11 @@ class AuthorizationServiceTest extends TestCase
     /**
      *  @dataProvider loginDataProvider
      */
-    public function testLogin1($testUser, $password, $expectedToken)
+    public function testLogin($testUser, $password, $expectedToken)
     {
-        $repositoryMock = $this->createMock(UserRepository::class);
-
-        $this->emMock
+        $this->getEntitiesServiceMock
             ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($repositoryMock);
-        $repositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
+            ->method('getUserByLogin')
             ->willReturn($testUser);
 
         if ($testUser && $password == 'test') {
@@ -95,10 +91,6 @@ class AuthorizationServiceTest extends TestCase
 
             $this->assertNotNull($result);
             $this->assertEquals($expectedToken, $result);
-        } elseif (!$testUser) {
-            $this->expectException(\Exception::class);
-            $this->expectExceptionMessage('This user does not exist');
-            $this->authService->login('test', $password);
         } else {
             $this->userPasswordHasherMock
                 ->expects($this->any())
@@ -127,17 +119,11 @@ class AuthorizationServiceTest extends TestCase
     /**
      *  @dataProvider logoutDataProvider
      */
-    public function testLogout($testUser)
+    public function testLogout1($testUser)
     {
-        $repositoryMock = $this->createMock(UserRepository::class);
-
-        $this->emMock
+        $this->getEntitiesServiceMock
             ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($repositoryMock);
-        $repositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
+            ->method('getUserByLogin')
             ->willReturn($testUser);
 
         $fakeDecodedToken = new StdClass();
@@ -153,11 +139,6 @@ class AuthorizationServiceTest extends TestCase
 
             $this->assertNotNull($result);
             $this->assertEquals('Logout successfully', $result);
-        } elseif (empty($testUser)) {
-            $this->expectException(\Exception::class);
-            $this->expectExceptionMessage('User does not exist');
-
-            $this->authService->logout('test');
         }  elseif (!$testUser->getToken()) {
             $this->expectException(\Exception::class);
             $this->expectExceptionMessage('User already unauthorized');

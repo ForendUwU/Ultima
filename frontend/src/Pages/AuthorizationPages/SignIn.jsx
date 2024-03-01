@@ -55,7 +55,7 @@ export default function SignIn() {
 
     return (
         <FullscreenGrid>
-            <GlowingGrid>
+            <GlowingGrid maxWidth="55vh">
                 <form onSubmit={handleSubmit}>
                     <Typography variant="h5" style={{marginLeft: "1%"}}>Login</Typography>
                     <TextInput inputName="login" />

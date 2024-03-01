@@ -112,7 +112,7 @@ export default function Registration() {
                     <Typography variant="h5" style={{marginLeft: "1%"}}>Nickname</Typography>
                     <TextInput inputName="nickname" />
 
-                    <SubmitButton buttonText="Registrate" />
+                    <SubmitButton buttonText="Register" />
                 </form>
                 {isLoading &&
                     <Loading />

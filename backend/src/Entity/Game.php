@@ -69,7 +69,7 @@ class Game
     #[ApiFilter(RangeFilter::class)]
     #[Assert\GreaterThanOrEqual(0)]
     #[Groups(['game:read'])]
-    private ?float $price = 0;
+    private ?string $price = '0';
 
     #[ORM\Column]
     #[Groups(['game:read'])]
@@ -114,12 +114,12 @@ class Game
         return $this;
     }
 
-    public function getPrice(): ?float
+    public function getPrice(): ?string
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): static
+    public function setPrice(string $price): static
     {
         $this->price = $price;
 

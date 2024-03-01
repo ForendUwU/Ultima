@@ -2,7 +2,7 @@ import React from "react";
 import {Grid, Typography, Button} from "@mui/material";
 import HeaderButton from "./HeaderButton";
 
-export default function Header({nickname, handleLogout}){
+export default function Header({nickname, balance, handleLogout}){
     return (
         <Grid container spacing={2} alignItems="center">
             <Grid item xs="auto" style={{flexGrow: 1}}>
@@ -23,6 +23,9 @@ export default function Header({nickname, handleLogout}){
                 <>
                     <HeaderButton link="/purchased-games">
                         {nickname}
+                    </HeaderButton>
+                    <HeaderButton link="/account-funding">
+                        {balance}$
                     </HeaderButton>
                     <HeaderButton handler={handleLogout}>
                         Logout

@@ -16,7 +16,8 @@ class AuthorizationService
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly TokenService $tokenService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly GetEntitiesService $getEntitiesService
     ) {
 
     }
@@ -26,11 +27,7 @@ class AuthorizationService
      */
     public function login(string $login, string $password): string
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $login]);
-
-        if (!$user) {
-            throw new \Exception('This user does not exist', Response::HTTP_BAD_REQUEST);
-        }
+        $user = $this->getEntitiesService->getUserByLogin($login);
 
         if (!$this->userPasswordHasher->isPasswordValid($user, $password)){
             throw new \Exception('Wrong login or password', Response::HTTP_UNAUTHORIZED);
@@ -51,11 +48,7 @@ class AuthorizationService
         $decodedToken = $this->tokenService->decodeLongToken($token);
         $userLogin = $decodedToken->login;
 
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
-
-        if (!$user) {
-            throw new \Exception('User does not exist', Response::HTTP_BAD_REQUEST);
-        }
+        $user = $this->getEntitiesService->getUserByLogin($userLogin);
 
         if (!$user->getToken()){
             throw new \Exception('User already unauthorized', Response::HTTP_FORBIDDEN);
@@ -103,16 +96,20 @@ class AuthorizationService
     public function validatePassword(string $password): bool
     {
         if (strlen($password) < 6) {
-            throw new ValidationException('Password must contain 6 or more characters');
+            throw new ValidationException('Password must contain 6 or more characters', Response::HTTP_UNAUTHORIZED);
         } elseif (strlen($password) > 50) {
-            throw new ValidationException('Password must contain less than 50 characters');
+            throw new ValidationException('Password must contain less than 50 characters', Response::HTTP_UNAUTHORIZED);
         } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $password)) {
-            throw new ValidationException('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            throw new ValidationException(
+                'Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters',
+                Response::HTTP_UNAUTHORIZED
+            );
         } elseif (!preg_match("/[0-9]/", $password)) {
-            throw new ValidationException('Password must contain at least one number');
+            throw new ValidationException('Password must contain at least one number', Response::HTTP_UNAUTHORIZED);
         } elseif (!preg_match("/[!~_&*%@$]/", $password)) {
             throw new ValidationException(
-                'Password must contain at least one of this symbols "!", "~", "_", "&", "*", "%", "@", "$"'
+                'Password must contain at least one of this symbols "!", "~", "_", "&", "*", "%", "@", "$"',
+                Response::HTTP_UNAUTHORIZED
             );
         } else {
             return true;

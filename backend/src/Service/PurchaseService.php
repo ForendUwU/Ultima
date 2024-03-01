@@ -11,8 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 class PurchaseService
 {
     public function __construct(
-      private readonly EntityManagerInterface $em,
-      private readonly TokenService $tokenService
+        private readonly EntityManagerInterface $em,
+        private readonly GetEntitiesService $getEntitiesService
     ) {
 
     }
@@ -22,8 +22,8 @@ class PurchaseService
      */
     public function purchase($gameId, $userLogin): string
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
-        $game = $this->em->getRepository(Game::class)->findOneBy(['id' => $gameId]);
+        $user = $this->getEntitiesService->getUserByLogin($userLogin);
+        $game = $this->getEntitiesService->getGameById($gameId);
 
         $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $user, 'game' => $game]);
 
@@ -31,22 +31,29 @@ class PurchaseService
             throw new \Exception('Game already purchased', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $purchasedGame = new PurchasedGame();
-        $purchasedGame->setUser($user);
-        $purchasedGame->setGame($game);
+        $userBalanceAfterPurchasing = bcsub($user->getBalance(), $game->getPrice(), 2);
 
-        $user->addPurchasedGame($purchasedGame);
+        if ($userBalanceAfterPurchasing < 0) {
+            throw new \Exception('Not enough money', Response::HTTP_FORBIDDEN);
+        } else {
+            $user->setBalance($userBalanceAfterPurchasing);
 
-        $this->em->persist($purchasedGame);
-        $this->em->flush();
+            $purchasedGame = new PurchasedGame();
+            $purchasedGame->setUser($user);
+            $purchasedGame->setGame($game);
 
-        return 'Successfully purchased';
+            $user->addPurchasedGame($purchasedGame);
+
+            $this->em->persist($purchasedGame);
+            $this->em->flush();
+
+            return 'Successfully purchased';
+        }
     }
 
-    public function getPurchasedGames($token): array
+    public function getPurchasedGames($login): array
     {
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $decodedToken->login]);
+        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $login]);
 
         $result = $user->getPurchasedGames()->map(static fn ($purchasedGame) => [
             'gameId' => $purchasedGame->getGame()->getId(),
@@ -55,6 +62,22 @@ class PurchaseService
         ]);
 
         return $result->getValues();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function deletePurchasedGame($gameId, $login): void
+    {
+        $user = $this->getEntitiesService->getUserByLogin($login);
+        $game = $this->getEntitiesService->getGameById($gameId);
+
+        $purchasedGame = $this->getEntitiesService->getPurchasedGameByGameAndUser($game, $user);
+
+        $user->removePurchasedGame($purchasedGame);
+        $this->em->remove($purchasedGame);
+
+        $this->em->flush();
     }
 }
 

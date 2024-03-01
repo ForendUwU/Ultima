@@ -12,6 +12,7 @@ import SignIn from "../Pages/AuthorizationPages/SignIn";
 import Registration from "../Pages/AuthorizationPages/Registration";
 import HomePage from "../Pages/HomePage/HomePage"
 import PurchasedGames from "../Pages/PurchasedGames/PurchasedGames";
+import AccountFundingPage from "../Pages/AccountFundingPage/AccountFundingPage";
 
 function App() {
   return (
@@ -34,6 +35,10 @@ function App() {
             <Route
                 path="/purchased-games"
                 element={<PurchasedGames />}
+            />
+            <Route
+                path="/account-funding"
+                element={<AccountFundingPage />}
             />
             <Route
                 path="*"

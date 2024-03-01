@@ -72,8 +72,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $nickname = null;
 
     #[ORM\Column]
-    #[Groups('user:read')]
-    private ?float $balance;
+    #[Groups(['user:read', 'user:write'])]
+    private ?string $balance;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:write'])]
@@ -87,12 +87,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\Length(
-        min: 2,
-        max: 20,
-        minMessage: 'Min size for last name is 2',
-        maxMessage: 'Max size for last name is 20'
-    )]
     private ?string $lastName = null;
 
     #[ORM\Column]
@@ -116,7 +110,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->balance = 0;
+        $this->balance = '0';
         $this->purchasedGames = new ArrayCollection();
     }
 
@@ -228,12 +222,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
     }
 
-    public function getBalance(): ?float
+    public function getBalance(): ?string
     {
         return $this->balance;
     }
 
-    public function setBalance(float $balance): static
+    public function setBalance(string $balance): static
     {
         $this->balance = $balance;
 
