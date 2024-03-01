@@ -16,7 +16,7 @@ class PlayingService
     /**
      * @throws \Exception
      */
-    public function SavePlayingTime($gameId, $login, $time): void
+    public function savePlayingTime($gameId, $login, $time): void
     {
         $user = $this->getEntitiesService->getUserByLogin($login);
         $game = $this->getEntitiesService->getGameById($gameId);

@@ -104,7 +104,7 @@ class AuthorizationService
                 'Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters',
                 Response::HTTP_UNAUTHORIZED
             );
-        } elseif (!preg_match("/[0-9]/", $password)) {
+        } elseif (!preg_match("/\d/", $password)) {
             throw new ValidationException('Password must contain at least one number', Response::HTTP_UNAUTHORIZED);
         } elseif (!preg_match("/[!~_&*%@$]/", $password)) {
             throw new ValidationException(
