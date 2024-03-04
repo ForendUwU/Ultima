@@ -4,10 +4,29 @@ namespace App\Tests\Unit\Entity;
 
 use App\Entity\PurchasedGame;
 use App\Entity\User;
+use App\Exceptions\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
 {
+    public function validateLoginDataProvider(): array
+    {
+        return [
+            'smallLogin' => ['small'],
+            'bigLogin' => ['biggggggggggggggggggg'],
+            'loginWithInvalidCharacters' => ['login123^']
+        ];
+    }
+    public function validateNicknameDataProvider(): array
+    {
+        return [
+            'smallNickname' => ['s'],
+            'bigNickname' => ['bigggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'],
+            'NicknameWithInvalidCharacters' => ['nickname123^']
+        ];
+    }
+
+
     public function testCreateEmptyUserEntity(): void
     {
         $testUser = new User();
@@ -50,5 +69,49 @@ class UserTest extends TestCase
         $testUser->removePurchasedGame($testPurchasedGame);
 
         $this->assertTrue($testUser->getPurchasedGames()->isEmpty());
+    }
+
+    /**
+     *  @dataProvider validateLoginDataProvider
+     */
+    public function testValidateLogin($login)
+    {
+        $testUser = new User();
+
+        if ($login === 'small') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Login must contain 6 or more characters');
+            $testUser->setLogin($login);
+        } else if ($login === 'biggggggggggggggggggg') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Login must contain less than 20 characters');
+            $testUser->setLogin($login);
+        } else if ($login === 'login123^') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Login must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            $testUser->setLogin($login);
+        }
+    }
+
+    /**
+     *  @dataProvider validateNicknameDataProvider
+     */
+    public function testValidateNickname($nickname)
+    {
+        $testUser = new User();
+
+        if ($nickname === 's') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Nickname must contain 2 or more characters');
+            $testUser->setNickname($nickname);
+        } else if ($nickname === 'bigggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Nickname must contain less than 50 characters');
+            $testUser->setNickname($nickname);
+        } else if ($nickname === 'nickname123^') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            $testUser->setNickname($nickname);
+        }
     }
 }

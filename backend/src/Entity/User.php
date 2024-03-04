@@ -212,7 +212,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         } elseif (strlen($nickname) > 20) {
             throw new ValidationException('Nickname must contain less than 50 characters');
         } elseif (!preg_match("/^[a-zA-Z0-9!~_&*%@$]+$/", $nickname)) {
-            dump($nickname);
             throw new ValidationException(
                 'Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters'
             );

@@ -56,7 +56,7 @@ class PlayingController extends AbstractController
 
         return new JsonResponse(
             [
-                'message' => 'successfully updated'
+                'message' => 'Successfully updated'
             ],
             Response::HTTP_OK
         );
