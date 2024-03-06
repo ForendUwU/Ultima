@@ -53,7 +53,7 @@ class PurchaseService
 
     public function getPurchasedGames($login): array
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $login]);
+        $user = $this->getEntitiesService->getUserByLogin($login);
 
         $result = $user->getPurchasedGames()->map(static fn ($purchasedGame) => [
             'gameId' => $purchasedGame->getGame()->getId(),

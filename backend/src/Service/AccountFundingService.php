@@ -16,12 +16,10 @@ class AccountFundingService
     /**
      * @throws \Exception
      */
-    public function fund($amount, $login): string
+    public function fund($amount, $login): void
     {
         $user = $this->getEntitiesService->getUserByLogin($login);
         $user->setBalance(bcadd($user->getBalance(), $amount, 2));
         $this->em->flush();
-
-        return 'successfully funded';
     }
 }

@@ -34,6 +34,7 @@ class AuthorizationControllerTest extends WebTestCase
     {
         return [
             'success' => ['testLogin', 'testPassword1!'],
+            'wrong password' => ['testLogin', 'wrongPassword'],
             'missing data' => ['', '']
         ];
     }
@@ -42,7 +43,8 @@ class AuthorizationControllerTest extends WebTestCase
     {
         return [
             'success' => ['testLogin', 'testPassword1!', 'testEmail', 'testNickname'],
-            'missing data' => ['', '', '', '']
+            'missing data' => ['', '', '', ''],
+            'login already in use' => ['sameLogin', 'testPassword1!', 'testEmail', 'testNickname'],
         ];
     }
 
@@ -68,10 +70,15 @@ class AuthorizationControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($testLogin && $testPassword) {
+        if ($testLogin && $testPassword === 'testPassword1!') {
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertArrayHasKey('token', $decodedResponse);
             $this->assertNotEmpty($decodedResponse['token']);
+        } else if ($testLogin && $testPassword === 'wrongPassword') {
+            $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
+            $this->assertArrayHasKey('message', $decodedResponse);
+            $this->assertNotEmpty($decodedResponse['message']);
+            $this->assertEquals('Wrong login or password', $decodedResponse['message']);
         } else {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
             $this->assertNotNull($decodedResponse['message']);
@@ -79,7 +86,7 @@ class AuthorizationControllerTest extends WebTestCase
         }
     }
 
-    public function testLogoutSuccess()
+    public function testLogout()
     {
         UserFactory::createOne([
             'login' => 'testLogin',
@@ -114,8 +121,18 @@ class AuthorizationControllerTest extends WebTestCase
     /**
      *  @dataProvider registerDataProvider
      */
-    public function testRegisterSuccess($testLogin, $testPassword, $testEmail, $testNickname)
+    public function testRegister1($testLogin, $testPassword, $testEmail, $testNickname)
     {
+        if ($testLogin === 'sameLogin') {
+            $testUser = new User();
+            $testUser->setLogin('sameLogin');
+            $testUser->setPassword('somePassword123!');
+            $testUser->setNickname('someNickname');
+            $testUser->setEmail('someemail@mail.com');
+            $this->em->persist($testUser);
+            $this->em->flush();
+        }
+
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/register',
@@ -130,7 +147,7 @@ class AuthorizationControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($testLogin && $testPassword && $testEmail && $testNickname) {
+        if ($testLogin === 'testLogin' && $testPassword && $testEmail && $testNickname) {
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertNotNull($decodedResponse['token']);
 
@@ -138,6 +155,11 @@ class AuthorizationControllerTest extends WebTestCase
 
             $this->assertEquals($testLogin, $decodedToken->login);
             $this->assertEquals($testEmail, $decodedToken->email);
+        } else if ($testLogin === 'sameLogin' && $testPassword && $testEmail && $testNickname) {
+            $this->assertEquals(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
+            $this->assertNotNull($decodedResponse['message']);
+
+            $this->assertEquals('This login is already in use', $decodedResponse['message']);
         } else {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
             $this->assertNotNull($decodedResponse['message']);

@@ -1,27 +1,16 @@
-import React, {useEffect} from "react";
+import React, {useContext, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
-import {Container, Typography, Stack, Paper, Button, Dialog, DialogTitle} from "@mui/material";
+import {Container, Stack, Button, Dialog, DialogTitle} from "@mui/material";
 import Cookies from 'universal-cookie';
-
-import Header from "../../Components/Header"
-import FullscreenGrid from "../../Components/FullscreenGrid";
-import GlowingGrid from "../../Components/GlowingGrid";
-import PageTitle from "../../Components/PageTitle";
-import Timer from "../../Components/Timer";
-import PurchasedGameButton from "../../Components/PurchasedGameButton";
-
+import {FullscreenGrid, GlowingGrid, Header, PageTitle, Stopwatch, PurchasedGameCard} from "../../Components";
 import Error from "../StatePages/Error"
 import Loading from "../StatePages/Loading";
-
-import {GetUserInfo} from "../../Scripts/GetUserInfo";
+import {HeaderContext} from "../../App/App";
 
 export default function PurchasedGames() {
     const [games, setGames] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(null);
-    const [nickname, setNickname] = React.useState(null);
-    const [balance, setBalance] = React.useState(null);
-    const [userLoaded, setUserLoaded] = React.useState(false);
     const [showDialog, setShowDialog] = React.useState(false);
     const [currentlyPlayingGameTitle, setCurrentlyPlayingGameTitle] = React.useState();
     const [currentlyPlayingGameId, setCurrentlyPlayingGameId] = React.useState();
@@ -29,6 +18,7 @@ export default function PurchasedGames() {
 
     const cookies = new Cookies();
     const navigate = useNavigate();
+    const context = useContext(HeaderContext);
 
     //Get games purchased by user
     useEffect(() => {
@@ -57,20 +47,7 @@ export default function PurchasedGames() {
         })
     },[]);
 
-    //Get info about user for header
-    useEffect(() => {
-        GetUserInfo(cookies.get('token'))
-            .then(decodedResponse => {
-                setNickname(decodedResponse['nickname']);
-                setBalance(decodedResponse['balance']);
-            }).catch(error => {
-                setError(error);
-            }).finally(()=>{
-                setUserLoaded(true);
-            })
-    },[]);
-
-    //Timer
+    //Stopwatch
     useEffect(() => {
         let interval = null;
 
@@ -113,29 +90,6 @@ export default function PurchasedGames() {
         }).finally(() => navigate(0));
     }
 
-    function handleLogout()
-    {
-        const cookies = new Cookies();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        fetch('https://localhost/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
-            }
-        }).then(response => {
-            return response.json();
-        }).then(decodedResponse => {
-            console.log(decodedResponse);
-        }).finally(() => {
-            cookies.set('token', '', {expires: yesterday});
-            cookies.set('userId', '', {expires: yesterday});
-            navigate('/');
-        });
-    }
-
     function handleCloseGame()
     {
         setShowDialog(false);
@@ -157,28 +111,25 @@ export default function PurchasedGames() {
          }).finally(()=>navigate(0));
     }
 
-    if(loading || !userLoaded) return <Loading />;
+    if(loading || !context.userLoaded) return <Loading />;
     if(error) return <Error errorText={error.toString()} />;
 
     return (
         <FullscreenGrid>
             <Container maxWidth="lg">
                 <GlowingGrid>
-                    <Header nickname={nickname} balance={balance} handleLogout={handleLogout} />
+                    <Header />
                     <PageTitle title="Purchased games" />
                     {games && games.length !== 0 ?
                         <Stack spacing={2}>
                             {
                                 games.map((item, index) => (
-                                    <Paper key={index} elevation={3} sx={{padding: "1%", display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#9ED2C6", boxShadow: "0.1vh 0.1vh 0.3vh #e42323"}}>
-                                        <img src={`https://source.unsplash.com/random/200x200?sig=1`} alt="Game image"/>
-                                        <Typography sx={{fontSize: "150%"}}>{item.title}</Typography>
-                                        <Typography sx={{fontSize: "150%"}}>{item.hoursOfPlaying.toFixed(2)} hours</Typography>
-                                        <Stack>
-                                            <PurchasedGameButton color="success" handler={() => handleClickLaunchButton(item.title, item.gameId, item.hoursOfPlaying)}>Launch game</PurchasedGameButton>
-                                            <PurchasedGameButton color="error" handler={() => handleClickDeleteButton(item.gameId)}>Delete game from account</PurchasedGameButton>
-                                        </Stack>
-                                    </Paper>
+                                    <PurchasedGameCard
+                                        item={item}
+                                        index={index}
+                                        launchHandler={handleClickLaunchButton}
+                                        deleteHandler={handleClickDeleteButton}
+                                    />
                                 ))
                             }
                         </Stack>
@@ -188,7 +139,7 @@ export default function PurchasedGames() {
                     {showDialog &&
                         <Dialog open={showDialog}>
                             <DialogTitle variant="h3">You're playing in {currentlyPlayingGameTitle}</DialogTitle>
-                            <Timer time={time} />
+                            <Stopwatch time={time} />
                             <Button color="success" sx={{fontSize: "100%"}} onClick={()=>{setTime(time+60000)}}>+1 minute</Button>
                             <Button color="success" sx={{fontSize: "100%"}} onClick={()=>{setTime(time+3600000)}}>+1 hour</Button>
                             <Button color="error" sx={{fontSize: "100%"}} onClick={() => handleCloseGame()}>Close game</Button>

@@ -27,7 +27,7 @@ class PlayingController extends AbstractController
         methods: ['POST']
     )]
     #[Tag('Playing')]
-    public function SavePlayingTime(Request $request)
+    public function savePlayingTime(Request $request)
     {
         $data = json_decode($request->getContent(), true);
 
@@ -44,7 +44,7 @@ class PlayingController extends AbstractController
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $this->playingService->SavePlayingTime($data['gameId'], $decodedToken->login, $data['time']);
+            $this->playingService->savePlayingTime($data['gameId'], $decodedToken->login, $data['time']);
         } catch (\Exception $e) {
             return new JsonResponse(
                 [
@@ -56,7 +56,7 @@ class PlayingController extends AbstractController
 
         return new JsonResponse(
             [
-                'message' => 'successfully updated'
+                'message' => 'Successfully updated'
             ],
             Response::HTTP_OK
         );

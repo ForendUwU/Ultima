@@ -44,7 +44,7 @@ class AccountFundingController extends AbstractController
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $result = $this->accountFundingService->fund($data['amount'], $decodedToken->login);
+            $this->accountFundingService->fund($data['amount'], $decodedToken->login);
         }
         catch (\Exception $e) {
             return new JsonResponse(
@@ -57,7 +57,7 @@ class AccountFundingController extends AbstractController
 
         return new JsonResponse(
             [
-                'message' => $result
+                'message' => 'Successfully funded'
             ],
             Response::HTTP_OK
         );

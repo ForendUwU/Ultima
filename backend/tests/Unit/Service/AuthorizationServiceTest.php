@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Service;
 
 use App\Entity\User;
+use App\Exceptions\ValidationException;
 use App\Repository\UserRepository;
 use App\Service\AuthorizationService;
 use App\Service\GetEntitiesService;
@@ -66,6 +67,18 @@ class AuthorizationServiceTest extends TestCase
         ];
     }
 
+    public function validatePasswordDataProvider(): array
+    {
+        return [
+            'validPassword' => ['validPassword123!'],
+            'tooSmallPassword' => ['small'],
+            'tooBigPassword' => ['biggggggggggggggggggggggggggggggggggggggggggggggggggggggggg'],
+            'passwordWithInvalidSymbols' => ['^^^^^^'],
+            'passwordWithoutDigits' => ['password'],
+            'passwordWithoutSymbols' => ['password1'],
+        ];
+    }
+
     /**
      *  @dataProvider loginDataProvider
      */
@@ -119,7 +132,7 @@ class AuthorizationServiceTest extends TestCase
     /**
      *  @dataProvider logoutDataProvider
      */
-    public function testLogout1($testUser)
+    public function testLogout($testUser)
     {
         $this->getEntitiesServiceMock
             ->expects($this->once())
@@ -144,6 +157,36 @@ class AuthorizationServiceTest extends TestCase
             $this->expectExceptionMessage('User already unauthorized');
 
             $this->authService->logout('test');
+        }
+    }
+
+    /**
+     *  @dataProvider validatePasswordDataProvider
+     */
+    public function testValidatePassword($testPassword)
+    {
+        if ($testPassword === 'validPassword123!') {
+            $this->assertTrue($this->authService->validatePassword($testPassword));
+        } else if ($testPassword === 'small') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Password must contain 6 or more characters');
+            $this->authService->validatePassword($testPassword);
+        } else if ($testPassword === 'biggggggggggggggggggggggggggggggggggggggggggggggggggggggggg') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Password must contain less than 50 characters');
+            $this->authService->validatePassword($testPassword);
+        } else if ($testPassword === '^^^^^^') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
+            $this->authService->validatePassword($testPassword);
+        } else if ($testPassword === 'password') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Password must contain at least one number');
+            $this->authService->validatePassword($testPassword);
+        } else if ($testPassword === 'password1') {
+            $this->expectException(ValidationException::class);
+            $this->expectExceptionMessage('Password must contain at least one of this symbols "!", "~", "_", "&", "*", "%", "@", "$"');
+            $this->authService->validatePassword($testPassword);
         }
     }
 }

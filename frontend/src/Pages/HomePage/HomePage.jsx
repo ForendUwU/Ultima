@@ -1,85 +1,22 @@
-import React, {useEffect} from "react";
-import Header from "../../Components/Header"
+import React, {useContext, useEffect} from "react";
+import {Header, FullscreenGrid, GlowingGrid, PageTitle, GameButtonText} from "../../Components"
 import Error from "../StatePages/Error"
 import {Container, ImageList, ImageListItem, Button} from "@mui/material";
-import FullscreenGrid from "../../Components/FullscreenGrid";
-import GlowingGrid from "../../Components/GlowingGrid";
 import Loading from "../StatePages/Loading";
-import PageTitle from "../../Components/PageTitle";
-import Cookies from 'universal-cookie';
 import {useNavigate} from 'react-router-dom';
-import {GetUserInfo} from "../../Scripts/GetUserInfo";
-import GameButtonText from "../../Components/GameButtonText";
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
+import {HeaderContext} from "../../App/App";
 
 export default function HomePage() {
     const [games, setGames] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(null);
-    const [nickname, setNickname] = React.useState(null);
-    const [balance, setBalance] = React.useState(null);
-    const [userLoaded, setUserLoaded] = React.useState(false);
 
+    const context = useContext(HeaderContext);
     const navigate = useNavigate();
-    const cookies = new Cookies();
 
     const handleClick = (e, gameId) => {
-        if (cookies.get('token')) {
-            fetch('https://localhost/api/purchase-game', {
-                method: 'POST',
-                body: JSON.stringify({
-                    gameId: gameId,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + cookies.get('token')
-                }
-            }).then(response => {
-                if (response.ok || response.status === 422 || response.status === 403) {
-                    return response.json();
-                } else {
-                    throw new Error();
-                }
-            }).then(decodedResponse => {
-                if (decodedResponse['message'] === 'Game already purchased'){
-                    toast.error(decodedResponse['message'], {duration: 2500});
-                } else if (decodedResponse['message'] === 'Not enough money') {
-                    toast.error(decodedResponse['message'], {duration: 2500});
-                } else {
-                    navigate('/purchased-games');
-                }
-            }).catch(error => {
-                console.log(error);
-                setError(error);
-            }).finally(()=>{
-                setLoading(false);
-            });
-        } else {
-            toast.error('You must be authorized to buy games', {duration: 2500});
-        }
-    }
-
-    function handleLogout()
-    {
-        const cookies = new Cookies();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        fetch('https://localhost/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
-            }
-        }).then(response => {
-            return response.json();
-        }).then(decodedResponse => {
-            console.log(decodedResponse);
-        });
-
-        cookies.set('token', '', {expires: yesterday});
-        cookies.set('userId', '', {expires: yesterday});
-        navigate(0);
+            navigate('/game/'+gameId);
     }
 
     useEffect(() => {
@@ -103,26 +40,14 @@ export default function HomePage() {
         });
     }, []);
 
-    useEffect(() => {
-        GetUserInfo(cookies.get('token'))
-            .then(decodedResponse => {
-                setNickname(decodedResponse['nickname']);
-                setBalance(decodedResponse['balance']);
-            }).catch(error => {
-                setError(error);
-            }).finally(()=>{
-                setUserLoaded(true);
-        })
-    }, []);
-
-    if(loading || !userLoaded) return <Loading />;
-    if(error) return <Error errorText={error.toString()} />;
+    if (loading || !context.userLoaded) return <Loading />
+    if (error) return <Error errorText={error.toString()} />;
 
     return (
         <FullscreenGrid>
             <Container maxWidth="lg">
                 <GlowingGrid>
-                    <Header nickname={nickname} balance={balance} handleLogout={handleLogout} />
+                    <Header />
                     <PageTitle title="Shop" />
                     <ImageList cols={5} sx={{padding: "1%"}}>
                         {games.map((item, index) => (

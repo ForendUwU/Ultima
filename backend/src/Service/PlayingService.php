@@ -6,9 +6,11 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class PlayingService
 {
+    private const HOUR_IN_MILLISECONDS = 3600000;
+
     public function __construct(
-        private readonly GetEntitiesService $getEntitiesService,
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly GetEntitiesService $getEntitiesService
     ) {
 
     }
@@ -16,14 +18,14 @@ class PlayingService
     /**
      * @throws \Exception
      */
-    public function SavePlayingTime($gameId, $login, $time): void
+    public function savePlayingTime($gameId, $login, $time): void
     {
         $user = $this->getEntitiesService->getUserByLogin($login);
         $game = $this->getEntitiesService->getGameById($gameId);
 
         $purchasedGame = $this->getEntitiesService->getPurchasedGameByGameAndUser($game, $user);
 
-        $purchasedGame->setHoursOfPlaying($time/3600000);
+        $purchasedGame->setHoursOfPlaying($time / self::HOUR_IN_MILLISECONDS);
         $this->em->flush();
     }
 }

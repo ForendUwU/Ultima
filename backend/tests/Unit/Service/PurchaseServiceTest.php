@@ -32,26 +32,33 @@ class PurchaseServiceTest extends TestCase
 
     public function purchaseDataProvider(): array
     {
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
+        $testUserWithMoney = new User();
+        $testUserWithMoney->setLogin('testLogin');
+        $testUserWithMoney->setBalance('999');
+
+        $testUserWithoutMoney = new User();
+        $testUserWithoutMoney->setLogin('testLogin');
+        $testUserWithoutMoney->setBalance('0');
 
         $testGame = new Game();
         $testGame->setTitle('testTitle');
+        $testGame->setPrice('99');
 
         $testPurchasedGame = new PurchasedGame();
-        $testPurchasedGame->setUser($testUser);
+        $testPurchasedGame->setUser($testUserWithMoney);
         $testPurchasedGame->setGame($testGame);
 
         return [
-            'success' => [$testUser, $testGame, null],
-            'game already purchased' => [$testUser, $testGame, $testPurchasedGame]
+            'success' => [$testUserWithMoney, $testGame, null],
+            'not enough money' => [$testUserWithoutMoney, $testGame, null],
+            'game already purchased' => [$testUserWithMoney, $testGame, $testPurchasedGame]
         ];
     }
 
     /**
      *  @dataProvider purchaseDataProvider
      */
-    public function testPurchase1($testUser, $testGame, $testPurchasedGame)
+    public function testPurchase($testUser, $testGame, $testPurchasedGame)
     {
         $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
 
@@ -73,11 +80,16 @@ class PurchaseServiceTest extends TestCase
             ->method('findOneBy')
             ->willReturn($testPurchasedGame);
 
-        if (!$testPurchasedGame) {
+        if (!$testPurchasedGame && $testUser->getBalance() === '999') {
             $result = $this->purchaseService->purchase(1, 1);
 
             $this->assertNotNull($result);
             $this->assertEquals('Successfully purchased', $result);
+        } else if (!$testPurchasedGame && $testUser->getBalance() === '0') {
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessage('Not enough money');
+
+            $this->purchaseService->purchase(1, 1);
         } else {
             $this->expectException(\Exception::class);
             $this->expectExceptionMessage('Game already purchased');
@@ -108,15 +120,9 @@ class PurchaseServiceTest extends TestCase
         $testUser->addPurchasedGame($testPurchasedGame);
         $testUser->addPurchasedGame($testPurchasedGame2);
 
-        $userRepositoryMock = $this->createMock(UserRepository::class);
-
-        $this->emMock
+        $this->getEntitiesServiceMock
             ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($userRepositoryMock);
-        $userRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
+            ->method('getUserByLogin')
             ->willReturn($testUser);
 
         $result = $this->purchaseService->getPurchasedGames('someToken');

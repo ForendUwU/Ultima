@@ -24,8 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     shortName: 'Game',
     operations: [
         new Get(
-            uriTemplate: 'api/games/{id}',
-            security: 'is_granted(["ROLE_USER"])'
+            uriTemplate: 'api/games/{id}'
         ),
         new GetCollection(
             uriTemplate: 'api/games',
