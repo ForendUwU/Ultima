@@ -1,7 +1,7 @@
 import React from "react";
 import {Button} from "@mui/material";
 
-export default function FundingButton({handleClick, price})
+export default function FundingButton({handleClick, amount})
 {
     return(
         <Button
@@ -12,7 +12,7 @@ export default function FundingButton({handleClick, price})
             sx={{fontSize: "120%"}}
             onClick={handleClick}
         >
-            {price}$
+            {amount}$
         </Button>
     )
 }

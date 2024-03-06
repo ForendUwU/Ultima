@@ -1,10 +1,7 @@
 import React from "react";
 import Cookies from 'universal-cookie';
-import FullscreenGrid from "../../Components/FullscreenGrid";
-import GlowingGrid from "../../Components/GlowingGrid";
+import {FullscreenGrid, GlowingGrid, TextInput, SubmitButton} from "../../Components";
 import {Alert, Typography} from "@mui/material";
-import TextInput from "../../Components/TextInput";
-import SubmitButton from "../../Components/SubmitButton";
 import {Link, useNavigate} from "react-router-dom";
 import Loading from "../StatePages/Loading";
 
@@ -15,7 +12,6 @@ export default function Registration() {
     const [isLoading, setIsLoading] = React.useState(false)
 
     const cookies = new Cookies();
-    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -86,7 +82,7 @@ export default function Registration() {
 
                     cookies.set('token', decodedResponse['token'], {expires: tomorrow});
 
-                    navigate('/');
+                    window.location.replace('/');
                 } else {
                     setErrorMessage(decodedResponse['message']);
                 }

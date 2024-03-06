@@ -1,7 +1,6 @@
 import React from "react";
 import {Typography, Alert, Container} from "@mui/material";
-import FullscreenGrid from "../../Components/FullscreenGrid";
-import GlowingGrid from "../../Components/GlowingGrid";
+import {FullscreenGrid, GlowingGrid} from "../../Components/";
 
 export default function Error(props) {
     return(
