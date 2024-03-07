@@ -22,77 +22,82 @@ import Cookies from "universal-cookie";
 import Error from "../Pages/StatePages/Error";
 
 export const HeaderContext = createContext();
+export const UserContext = createContext();
 
 function App() {
-  const [nickname, setNickname] = React.useState(null);
-  const [balance, setBalance] = React.useState(null);
-  const [userLoaded, setUserLoaded] = React.useState(false);
-  const [error, setError] = React.useState(null);
+    const [userLoaded, setUserLoaded] = React.useState(false);
+    const [error, setError] = React.useState(null);
+    const [userInfo, setUserInfo] = React.useState(null);
 
+    const cookies = new Cookies();
 
-  const cookies = new Cookies();
+    useEffect(() => {
+            GetUserInfo(cookies.get('token'))
+                .then(decodedResponse => {
+                    setUserInfo({
+                        login: decodedResponse['login'],
+                        nickname: decodedResponse['nickname'],
+                        balance: decodedResponse['balance'],
+                        firstName: decodedResponse['firstName'],
+                        lastName: decodedResponse['lastName'],
+                        email: decodedResponse['email']
+                    })
+                })
+                .catch(error => {
+                    setError(error);
+                }).finally(()=>{
+                setUserLoaded(true);
+            })
+        }, []);
 
-  useEffect(() => {
-    GetUserInfo(cookies.get('token'))
-        .then(decodedResponse => {
-          setNickname(decodedResponse['nickname']);
-          setBalance(decodedResponse['balance']);
-        })
-        .catch(error => {
-          setError(error);
-        }).finally(()=>{
-          setUserLoaded(true);
-        })
-  }, []);
+    if(error) return <Error errorText={error.toString()} />;
 
-  if(error) return <Error errorText={error.toString()} />;
-
-  return (
-      <HeaderContext.Provider value={{
-        handleLogout: HandleLogout,
-        nickname: nickname,
-        balance: balance,
-        userLoaded: userLoaded
-      }}>
-        <Router>
-          <Routes>
-            <Route
-                exact
-                path="/"
-                element={<HomePage />}
-            />
-            <Route
-                path="/sign-in"
-                element={<SignIn />}
-            />
-            <Route
-                path="/registration"
-                element={<Registration />}
-            />
-            <Route
-                path="/purchased-games"
-                element={<PurchasedGames />}
-            />
-            <Route
-                path="/account-funding"
-                element={<AccountFundingPage />}
-            />
-            <Route
-                path="/game/:gameId"
-                element={<GamePage />}
-            />
-            <Route
-                path="/user/profile"
-                element={<ProfilePage />}
-            />
-            <Route
-                path="*"
-                element={<Navigate to="/" />}
-            />
-          </Routes>
-        </Router>
-      </HeaderContext.Provider>
-  );
+    return (
+        <HeaderContext.Provider value={{
+            handleLogout: HandleLogout,
+            userLoaded: userLoaded
+        }}>
+            <UserContext.Provider value={userInfo}>
+                <Router>
+                    <Routes>
+                        <Route
+                            exact
+                            path="/"
+                            element={<HomePage />}
+                        />
+                        <Route
+                            path="/sign-in"
+                            element={<SignIn />}
+                        />
+                        <Route
+                            path="/registration"
+                            element={<Registration />}
+                        />
+                        <Route
+                            path="/purchased-games"
+                            element={<PurchasedGames />}
+                        />
+                        <Route
+                            path="/account-funding"
+                            element={<AccountFundingPage />}
+                        />
+                        <Route
+                            path="/game/:gameId"
+                            element={<GamePage />}
+                        />
+                        <Route
+                            path="/profile"
+                            element={<ProfilePage />}
+                        />
+                        <Route
+                            path="*"
+                            element={<Navigate to="/" />}
+                        />
+                    </Routes>
+                </Router>
+            </UserContext.Provider>
+        </HeaderContext.Provider>
+    );
 }
 
 export default App;

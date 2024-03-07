@@ -1,10 +1,11 @@
 import React, {useContext} from "react";
 import {Grid, Typography, Button, Menu, MenuItem} from "@mui/material";
 import HeaderButton from "./HeaderButton";
-import {HeaderContext} from "../App/App";
+import {HeaderContext, UserContext} from "../App/App";
 
 export default function Header(){
-    const context = useContext(HeaderContext);
+    const headerContext = useContext(HeaderContext);
+    const userContext = useContext(UserContext);
 
     return (
         <Grid container spacing={2} alignItems="center">
@@ -15,7 +16,7 @@ export default function Header(){
                     </Typography>
                 </Button>
             </Grid>
-            {!context.nickname ?
+            {!userContext.nickname ?
                 <HeaderButton link="/sign-in">
                     Sign In
                 </HeaderButton>
@@ -24,13 +25,13 @@ export default function Header(){
                     <HeaderButton link="/purchased-games">
                         Your games
                     </HeaderButton>
-                    <HeaderButton link="/user/profile">
-                        {context.nickname}
+                    <HeaderButton link="/profile">
+                        {userContext.nickname}
                     </HeaderButton>
                     <HeaderButton link="/account-funding">
-                        {context.balance}$
+                        {userContext.balance}$
                     </HeaderButton>
-                    <HeaderButton handler={context.handleLogout}>
+                    <HeaderButton handler={headerContext.handleLogout}>
                         Logout
                     </HeaderButton>
                 </>

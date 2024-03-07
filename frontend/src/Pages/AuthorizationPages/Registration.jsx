@@ -1,15 +1,18 @@
 import React from "react";
 import Cookies from 'universal-cookie';
 import {FullscreenGrid, GlowingGrid, TextInput, SubmitButton} from "../../Components";
-import {Alert, Typography} from "@mui/material";
+import {Alert, Button, Typography} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import Loading from "../StatePages/Loading";
+import validateNickname from "../../Scripts/nicknameValidator";
+import validatePassword from "../../Scripts/passwordValidator";
+import validateLogin from "../../Scripts/loginValidator";
+import toast, { Toaster, ToastBar } from 'react-hot-toast';
 
 export default function Registration() {
-    const [showError, setShowError] = React.useState(false)
-    const [errorMessage, setErrorMessage] = React.useState('')
-    const [authorized, setAuthorized] = React.useState(false)
-    const [isLoading, setIsLoading] = React.useState(false)
+    const [authorized, setAuthorized] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [validated, setValidated] = React.useState(false);
 
     const cookies = new Cookies();
 
@@ -18,42 +21,18 @@ export default function Registration() {
         let { login, password, confirmationPassword, email, nickname } = document.forms[0];
         cookies.set('token', null);
 
-        let validation = false;
-        if (login.value.length < 6) {
-            setShowError(true);
-            setErrorMessage('Login must contain 6 or more characters');
-        } else if (login.value.length > 20) {
-            setShowError(true);
-            setErrorMessage('Login must contain less than 20 characters');
-        } else if (!login.value.match(/^[a-zA-Z0-9!~_&*%@$]+$/)) {
-            setShowError(true);
-            setErrorMessage('Login must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
-        } else if (password.value.length < 6) {
-            setShowError(true);
-            setErrorMessage('Password must contain 6 or more characters');
-        } else if (password.value.length > 50) {
-            setShowError(true);
-            setErrorMessage('Password must contain less than 50 characters');
-        } else if (!password.value.match(/^[a-zA-Z0-9!~_&*%@$]+$/)) {
-            setShowError(true);
-            setErrorMessage('Password must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
-        } else if (password.value !== confirmationPassword.value) {
-            setShowError(true);
-            setErrorMessage('Password and confirmation password must match');
-        } else if (nickname.value.length < 2) {
-            setShowError(true);
-            setErrorMessage('Nickname must contain 2 or more characters');
-        } else if (nickname.value.length > 20) {
-            setShowError(true);
-            setErrorMessage('Nickname must contain less than 20 characters');
-        } else if (!nickname.value.match(/^[a-zA-Z0-9!~_&*%@$]+$/)) {
-            setShowError(true);
-            setErrorMessage('Nickname must contain only letters, numbers and "!", "~", "_", "&", "*", "%", "@", "$" characters');
-        } else {
-            validation = true;
+        try {
+            if (validateNickname(nickname.value)
+                && validatePassword(password.value, confirmationPassword.value)
+                && validateLogin(login.value)
+            ) {
+                setValidated(true);
+            }
+        } catch (e) {
+            toast(e.message);
         }
 
-        if (validation) {
+        if (validated) {
             fetch('https://localhost/api/register', {
                 method: 'POST',
                 headers: {
@@ -68,10 +47,8 @@ export default function Registration() {
             }).then(response => {
                 if (response.ok) {
                     setAuthorized(true);
-                    setShowError(false);
                     return response.json();
                 } else {
-                    setShowError(true);
                     setAuthorized(false);
                     return response.json();
                 }
@@ -84,7 +61,7 @@ export default function Registration() {
 
                     window.location.replace('/');
                 } else {
-                    setErrorMessage(decodedResponse['message']);
+                    toast(decodedResponse['message']);
                 }
             })
         }
@@ -114,15 +91,24 @@ export default function Registration() {
                 {isLoading &&
                     <Loading />
                 }
-                {showError &&
-                    <Alert severity="error" variant="outlined" sx={{fontSize:"100%", marginTop: "5%"}}>{errorMessage}</Alert>
-                }
                 {authorized &&
                     <Alert severity="success" variant="outlined" sx={{fontSize:"100%", marginTop: "5%"}}>You are logged in</Alert>
                 }
                 <br/>
                 <Link to="/"><Typography variant="h5">Back to home page</Typography></Link>
                 <Link to="/sign-in"><Typography variant="h5">Back to sign in</Typography></Link>
+                <Toaster>
+                    {(t) => (
+                        <ToastBar toast={t}>
+                            {({ icon, message }) => (
+                                <>
+                                    {icon}
+                                    {message}
+                                </>
+                            )}
+                        </ToastBar>
+                    )}
+                </Toaster>
             </GlowingGrid>
         </FullscreenGrid>
     );
