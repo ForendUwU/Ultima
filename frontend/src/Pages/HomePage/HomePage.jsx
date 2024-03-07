@@ -1,7 +1,7 @@
 import React, {useContext, useEffect} from "react";
 import {Header, FullscreenGrid, GlowingGrid, PageTitle, GameButtonText} from "../../Components"
 import Error from "../StatePages/Error"
-import {Container, ImageList, ImageListItem, Button} from "@mui/material";
+import {Container, ImageList, ImageListItem, Button, Autocomplete, TextField} from "@mui/material";
 import Loading from "../StatePages/Loading";
 import {useNavigate} from 'react-router-dom';
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
@@ -12,7 +12,8 @@ export default function HomePage() {
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(null);
 
-    const context = useContext(HeaderContext);
+    const headerContext = useContext(HeaderContext);
+
     const navigate = useNavigate();
 
     const handleClick = (e, gameId) => {
@@ -40,7 +41,7 @@ export default function HomePage() {
         });
     }, []);
 
-    if (loading || !context.userLoaded) return <Loading />
+    if (loading || !headerContext.userLoaded) return <Loading />
     if (error) return <Error errorText={error.toString()} />;
 
     return (

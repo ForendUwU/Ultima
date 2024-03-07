@@ -18,7 +18,8 @@ export default function PurchasedGames() {
 
     const cookies = new Cookies();
     const navigate = useNavigate();
-    const context = useContext(HeaderContext);
+
+    const headerContext = useContext(HeaderContext);
 
     //Get games purchased by user
     useEffect(() => {
@@ -111,7 +112,7 @@ export default function PurchasedGames() {
          }).finally(()=>navigate(0));
     }
 
-    if(loading || !context.userLoaded) return <Loading />;
+    if(loading || !headerContext.userLoaded) return <Loading />;
     if(error) return <Error errorText={error.toString()} />;
 
     return (

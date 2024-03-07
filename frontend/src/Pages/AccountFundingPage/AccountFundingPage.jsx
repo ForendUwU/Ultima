@@ -12,7 +12,8 @@ export default function AccountFundingPage() {
 
     const cookies = new Cookies();
     const navigate = useNavigate();
-    const context = useContext(HeaderContext);
+
+    const headerContext = useContext(HeaderContext);
 
     function handleClick (amount) {
             fetch('https://localhost/api/fund', {
@@ -31,7 +32,7 @@ export default function AccountFundingPage() {
             }).finally(()=>{navigate(0);});
     }
 
-    if(!context.userLoaded) return <Loading />;
+    if(!headerContext.userLoaded) return <Loading />;
     if(error) return <Error errorText={error.toString()} />;
 
     return (

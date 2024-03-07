@@ -1,12 +1,13 @@
 import React from "react";
 import {OutlinedInput} from "@mui/material";
 
-export default function TextInput({inputName, type})
+export default function TextInput({inputName, type, defaultValue = null, required = true})
 {
     return(
         <OutlinedInput
-            required
+            required={required}
             fullWidth
+            defaultValue={defaultValue}
             id={inputName}
             name={inputName}
             type={type || inputName}

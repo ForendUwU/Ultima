@@ -16,7 +16,8 @@ export default function GamePage() {
 
     const { gameId } = useParams();
     const navigate = useNavigate();
-    const context = useContext(HeaderContext);
+
+    const headerContext = useContext(HeaderContext);
 
     const cookies = new Cookies();
 
@@ -65,7 +66,7 @@ export default function GamePage() {
                 } else if (decodedResponse['message'] === 'Not enough money') {
                     toast.error(decodedResponse['message'], {duration: 2500});
                 } else {
-                    navigate('/purchased-games');
+                    window.location.replace('/purchased-games');
                 }
             }).catch(error => {
                 console.log(error);
@@ -78,7 +79,7 @@ export default function GamePage() {
         }
     }
 
-    if(loading || !context.userLoaded) return <Loading />;
+    if(loading || !headerContext.userLoaded) return <Loading />;
     if(error) return <Error errorText={error.toString()} />;
 
     return (
@@ -108,6 +109,7 @@ export default function GamePage() {
                             />
                         </Grid>
                     </Grid>
+                    <PageTitle title="Reviews" />
                 </GlowingGrid>
             </Container>
             <Toaster>

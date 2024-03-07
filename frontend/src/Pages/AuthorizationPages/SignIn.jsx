@@ -1,7 +1,7 @@
 import React from "react";
 import Cookies from 'universal-cookie';
 import {Typography, Alert} from "@mui/material";
-import {Link, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {FullscreenGrid, GlowingGrid, TextInput, SubmitButton} from "../../Components";
 
 export default function SignIn() {
@@ -41,7 +41,7 @@ export default function SignIn() {
                 tomorrow.setDate(tomorrow.getDate() + 1);
 
                 cookies.set('token', decodedResponse['token'], {expires: tomorrow});
-window.location.replace('/');
+                window.location.replace('/');
                 //navigate('/');
             } else {
                 setErrorMessage(decodedResponse['message']);
