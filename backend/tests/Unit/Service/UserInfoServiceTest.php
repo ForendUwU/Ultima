@@ -11,18 +11,21 @@ use App\Service\GetEntitiesService;
 use App\Service\UserInfoService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserInfoServiceTest extends TestCase
 {
     private UserInfoService $userInfoService;
     private $emMock;
     private $getEntitiesServiceMock;
+    private $userPasswordHasherMock;
 
     public function setUp(): void
     {
         $this->emMock = $this->createMock(EntityManagerInterface::class);
         $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
-        $this->userInfoService = new UserInfoService($this->emMock, $this->getEntitiesServiceMock);
+        $this->userPasswordHasherMock = $this->createMock(UserPasswordHasherInterface::class);
+        $this->userInfoService = new UserInfoService($this->emMock, $this->getEntitiesServiceMock, $this->userPasswordHasherMock);
     }
 
     public function testGetUserInfo()
