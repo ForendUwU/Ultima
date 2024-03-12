@@ -1,7 +1,7 @@
 import React, {useContext, useEffect} from "react";
 import {Header, FullscreenGrid, GlowingGrid, PageTitle, GameButtonText} from "../../Components"
 import Error from "../StatePages/Error"
-import {Container, ImageList, ImageListItem, Button, Autocomplete, TextField} from "@mui/material";
+import {Container, ImageList, ImageListItem, Button} from "@mui/material";
 import Loading from "../StatePages/Loading";
 import {useNavigate} from 'react-router-dom';
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
@@ -49,7 +49,7 @@ export default function HomePage() {
             <Container maxWidth="lg">
                 <GlowingGrid>
                     <Header />
-                    <PageTitle title="Shop" />
+                    <PageTitle>Shop</PageTitle>
                     <ImageList cols={5} sx={{padding: "1%"}}>
                         {games.map((item, index) => (
                             <Button key={index} sx={{ backgroundColor: "#9ED2C6", boxShadow: "0.1vh 0.1vh 0.3vh #e42323" }} onClick={e => handleClick(e, item.id)}>

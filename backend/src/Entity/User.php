@@ -25,6 +25,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     operations: [
         new GetCollection(uriTemplate: 'api/user'),
         new Post(uriTemplate: 'api/user'),
+        new Patch(uriTemplate: 'api/user/{id}')
     ],
     normalizationContext: [
         'groups' => ['user:read']
@@ -104,11 +105,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?string $token = null;
 
+    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: Review::class, orphanRemoval: true)]
+    private Collection $reviews;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->balance = '0';
         $this->purchasedGames = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -309,6 +314,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setToken(?string $token): static
     {
         $this->token = $token;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review): static
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReview(Review $review): static
+    {
+        if ($this->reviews->removeElement($review)) {
+            // set the owning side to null (unless already changed)
+            if ($review->getUser() === $this) {
+                $review->setUser(null);
+            }
+        }
 
         return $this;
     }

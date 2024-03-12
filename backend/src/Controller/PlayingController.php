@@ -27,7 +27,7 @@ class PlayingController extends AbstractController
         methods: ['POST']
     )]
     #[Tag('Playing')]
-    public function savePlayingTime(Request $request)
+    public function savePlayingTime(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 

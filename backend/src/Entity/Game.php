@@ -78,10 +78,14 @@ class Game
     #[Groups(['game:read', 'game:write'])]
     private Collection $purchasedGames;
 
+    #[ORM\OneToMany(mappedBy: 'gameId', targetEntity: Review::class, orphanRemoval: true)]
+    private Collection $reviews;
+
     public function __construct()
     {
         $this->publishedAt = new \DateTimeImmutable();
         $this->purchasedGames = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -155,6 +159,36 @@ class Game
             && $purchasedGame->getGame() === $this
         ) {
             $purchasedGame->setGame(null);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review): static
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReview(Review $review): static
+    {
+        if ($this->reviews->removeElement($review)) {
+            // set the owning side to null (unless already changed)
+            if ($review->getGame() === $this) {
+                $review->setGame(null);
+            }
         }
 
         return $this;
