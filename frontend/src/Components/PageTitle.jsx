@@ -1,7 +1,7 @@
 import React from "react";
 import {Grid, Typography} from "@mui/material";
 
-export default function PageTitle(props){
+export default function PageTitle({children}){
     return(
         <Grid container justifyContent="center">
             <Grid item sx={{
@@ -12,7 +12,7 @@ export default function PageTitle(props){
                     color: "#54BAB9FF",
                     textShadow: "0.1vh 0.1vh 0.2vh #e42323"
                 }}>
-                    {props.title}
+                    {children}
                 </Typography>
             </Grid>
         </Grid>

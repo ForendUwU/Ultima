@@ -1,9 +1,8 @@
 import React from "react";
 import Cookies from 'universal-cookie';
 import {FullscreenGrid, GlowingGrid, TextInput, SubmitButton} from "../../Components";
-import {Alert, Button, Typography} from "@mui/material";
-import {Link, useNavigate} from "react-router-dom";
-import Loading from "../StatePages/Loading";
+import {Alert, Typography} from "@mui/material";
+import {Link} from "react-router-dom";
 import validateNickname from "../../Scripts/nicknameValidator";
 import validatePassword from "../../Scripts/passwordValidator";
 import validateLogin from "../../Scripts/loginValidator";
@@ -11,14 +10,18 @@ import toast, { Toaster, ToastBar } from 'react-hot-toast';
 
 export default function Registration() {
     const [authorized, setAuthorized] = React.useState(false);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [validated, setValidated] = React.useState(false);
+    const [isRegistrating, setIsRegistrating] = React.useState(false);
 
     const cookies = new Cookies();
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         let { login, password, confirmationPassword, email, nickname } = document.forms[0];
+        let isValidated = false;
+
+        setIsRegistrating(true);
+
         cookies.set('token', null);
 
         try {
@@ -26,13 +29,13 @@ export default function Registration() {
                 && validatePassword(password.value, confirmationPassword.value)
                 && validateLogin(login.value)
             ) {
-                setValidated(true);
+                isValidated = true;
             }
         } catch (e) {
             toast(e.message);
         }
 
-        if (validated) {
+        if (isValidated) {
             fetch('https://localhost/api/register', {
                 method: 'POST',
                 headers: {
@@ -86,11 +89,8 @@ export default function Registration() {
                     <Typography variant="h5" style={{marginLeft: "1%"}}>Nickname</Typography>
                     <TextInput inputName="nickname" />
 
-                    <SubmitButton buttonText="Register" />
+                    <SubmitButton isLoading={isRegistrating} buttonText="Register" />
                 </form>
-                {isLoading &&
-                    <Loading />
-                }
                 {authorized &&
                     <Alert severity="success" variant="outlined" sx={{fontSize:"100%", marginTop: "5%"}}>You are logged in</Alert>
                 }

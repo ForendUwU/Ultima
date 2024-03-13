@@ -10,3 +10,4 @@ export {default as SubmitButton} from './SubmitButton';
 export {default as TextInput} from './TextInput';
 export {default as Stopwatch} from './Stopwatch';
 export {default as PurchasedGameCard} from './PurchasedGameCard';
+export {default as ReviewInputField} from './ReviewInputField';

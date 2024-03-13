@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\PurchasedGame;
+use App\Entity\Review;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;

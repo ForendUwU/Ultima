@@ -40,7 +40,7 @@ export default function AccountFundingPage() {
             <Container maxWidth="lg">
                 <GlowingGrid>
                     <Header />
-                    <PageTitle title="Account funding" />
+                    <PageTitle>Account funding</PageTitle>
                     <Stack spacing={2}>
                         <FundingButton amount={5} handleClick={() => handleClick(5)} />
                         <FundingButton amount={10} handleClick={() => handleClick(10)} />

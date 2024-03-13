@@ -120,7 +120,7 @@ export default function PurchasedGames() {
             <Container maxWidth="lg">
                 <GlowingGrid>
                     <Header />
-                    <PageTitle title="Purchased games" />
+                    <PageTitle>Purchased games</PageTitle>
                     {games && games.length !== 0 ?
                         <Stack spacing={2}>
                             {
@@ -135,7 +135,7 @@ export default function PurchasedGames() {
                             }
                         </Stack>
                         :
-                        <PageTitle title="You don't have any games :(" />
+                        <PageTitle>You don't have any games :(</PageTitle>
                     }
                     {showDialog &&
                         <Dialog open={showDialog}>

@@ -113,7 +113,7 @@ class UserInfoController extends AbstractController
         methods: ['PATCH']
     )]
     #[Tag('User')]
-    public function updateUserInfo(Request $request, $login)
+    public function updateUserInfo(Request $request, $login): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 

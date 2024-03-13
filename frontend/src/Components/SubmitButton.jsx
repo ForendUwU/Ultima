@@ -1,19 +1,22 @@
 import React from "react";
-import {Button} from "@mui/material";
+import {Button as JoyButton} from '@mui/joy';
 
-export default function SubmitButton({buttonText})
+export default function SubmitButton({buttonText, isLoading})
 {
     return(
-        <Button
-            type="submit"
-            fullWidth
-            variant="outlined"
-            color="primary"
-            size="large"
-            sx={{fontSize: "100%"}}
-        >
-            {buttonText}
-        </Button>
+        <>
+            <JoyButton
+                loading={isLoading}
+                type="submit"
+                fullWidth
+                variant="solid"
+                color="primary"
+                size="lg"
+                sx={{fontSize: "100%"}}
+            >
+                {buttonText}
+            </JoyButton>
+        </>
     )
 }
 

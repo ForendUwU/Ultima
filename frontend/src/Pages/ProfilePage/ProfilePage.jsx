@@ -78,7 +78,7 @@ export default function ProfilePage() {
                         throw new Error(response.status);
                     }
                 }).then(decodedResponse => {
-                    if (decodedResponse['result'] === "invalid") {
+                    if (decodedResponse['message'] === "invalid") {
                         setIsOldPasswordCorrect(false);
                     }
                 }).catch(e=>console.log(e));
@@ -118,10 +118,10 @@ export default function ProfilePage() {
             })
         }).then(response => {
             if (response.ok) {
-                return response.json();
+                window.location.reload();
+            } else {
+                console.log(response);
             }
-        }).then(decodedResponse => {
-            window.location.reload();
         })
     }
 
@@ -133,7 +133,7 @@ export default function ProfilePage() {
             <Container maxWidth="lg">
                 <GlowingGrid>
                     <Header />
-                    <PageTitle title="Profile" />
+                    <PageTitle>Profile</PageTitle>
                     <Grid container alignItems="center" direction="column">
                         <Grid item>
                             <Avatar alt={userContext.nickname} src="/static/images/avatar/1.jpg" sx={{fontSize: "190%", width: 180, height: 180}} />
