@@ -15,31 +15,17 @@ class ReviewsService
 
     }
 
-    public function getGameReviews($gameId): array
-    {
-        $game = $this->getEntitiesService->getGameById($gameId);
-
-        return array_map(function ($item) {
-            return [
-                'content' => $item->getContent(),
-                'likes' => $item->getLikes(),
-                'dislikes' => $item->getDislikes(),
-                'user' => $item->getUser()->getNickname(),
-            ];
-        }, $this->em->getRepository(Review::class)->findBy(['game' => $game]));
-    }
-
     /**
      * @throws \Exception
      */
-    public function createGameReview($reviewContent, $userLogin, $gameId): void
+    public function createGameReview($reviewContent, $userLogin, $gameId): Review
     {
         $user = $this->getEntitiesService->getUserByLogin($userLogin);
         $game = $this->getEntitiesService->getGameById($gameId);
 
         $checkIfReviewExists = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
         if ($checkIfReviewExists)
-            throw new \Exception('User already have review on this game', Response::HTTP_UNPROCESSABLE_ENTITY);
+            throw new \Exception('User already has review on this game', Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $review = new Review();
         $review->setContent($reviewContent);
@@ -50,12 +36,28 @@ class ReviewsService
 
         $this->em->persist($review);
         $this->em->flush();
+
+        return $review;
+    }
+
+    public function getGameReviews($gameId): array
+    {
+        $game = $this->getEntitiesService->getGameById($gameId);
+
+        return array_map(function ($item) {
+            return [
+                'content' => $item->getContent(),
+                'likes' => $item->getLikes(),
+                'dislikes' => $item->getDislikes(),
+                'userNickname' => $item->getUser()->getNickname(),
+            ];
+        }, $this->em->getRepository(Review::class)->findBy(['game' => $game]));
     }
 
     /**
      * @throws \Exception
      */
-    public function changeGameReviewContent($reviewContent, $userLogin, $gameId): void
+    public function changeGameReviewContent($reviewContent, $userLogin, $gameId): Review
     {
         $user = $this->getEntitiesService->getUserByLogin($userLogin);
         $game = $this->getEntitiesService->getGameById($gameId);
@@ -68,12 +70,14 @@ class ReviewsService
         }
 
         $this->em->flush();
+
+        return $review;
     }
 
     /**
      * @throws \Exception
      */
-    public function deleteUsersReviewContent($userLogin, $gameId): void
+    public function deleteUsersReview($userLogin, $gameId): void
     {
         $user = $this->getEntitiesService->getUserByLogin($userLogin);
         $game = $this->getEntitiesService->getGameById($gameId);

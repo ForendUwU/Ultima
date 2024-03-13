@@ -78,7 +78,7 @@ export default function ProfilePage() {
                         throw new Error(response.status);
                     }
                 }).then(decodedResponse => {
-                    if (decodedResponse['result'] === "invalid") {
+                    if (decodedResponse['message'] === "invalid") {
                         setIsOldPasswordCorrect(false);
                     }
                 }).catch(e=>console.log(e));

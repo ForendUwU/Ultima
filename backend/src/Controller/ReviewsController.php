@@ -47,14 +47,16 @@ class ReviewsController extends AbstractController
             $this->reviewsService->createGameReview($data['content'], $decodedToken->login, $gameId);
         } catch (\Exception $exception) {
             return new JsonResponse(
-                $exception->getMessage(),
+                [
+                    'message' => $exception->getMessage()
+                ],
                 $exception->getCode()
             );
         }
 
         return new JsonResponse(
             [
-                'result' => 'Review was created successfully'
+                'message' => 'Review was created successfully'
             ],
             Response::HTTP_OK
         );
@@ -65,7 +67,7 @@ class ReviewsController extends AbstractController
         methods: ['GET']
     )]
     #[Tag('Review')]
-    public function getGameReviews(Request $request, $gameId): ?JsonResponse
+    public function getGameReviews($gameId): ?JsonResponse
     {
         $result = $this->reviewsService->getGameReviews($gameId);
 
@@ -96,18 +98,27 @@ class ReviewsController extends AbstractController
             );
         }
 
-        $this->reviewsService->changeGameReviewContent($data['content'], $decodedToken->login, $gameId);
+        try {
+            $this->reviewsService->changeGameReviewContent($data['content'], $decodedToken->login, $gameId);
+        } catch (\Exception $exception) {
+            return new JsonResponse(
+                [
+                    'message' => $exception->getMessage()
+                ],
+                $exception->getCode()
+            );
+        }
 
         return new JsonResponse(
             [
-                'result' => 'Review was successfully changed'
+                'message' => 'Review was successfully changed'
             ],
             Response::HTTP_OK
         );
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/reviews/{gameId}',
         methods: ['DELETE']
     )]
     #[Tag('Review')]
@@ -116,11 +127,20 @@ class ReviewsController extends AbstractController
         $token = $request->headers->get('Authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
-        $this->reviewsService->deleteUsersReviewContent($decodedToken->login, $gameId);
+        try {
+            $this->reviewsService->deleteUsersReview($decodedToken->login, $gameId);
+        } catch (\Exception $exception) {
+            return new JsonResponse(
+                [
+                    'message' => $exception->getMessage()
+                ],
+                $exception->getCode()
+            );
+        }
 
         return new JsonResponse(
             [
-                'result' => 'Review was successfully deleted'
+                'message' => 'Review was successfully deleted'
             ],
             Response::HTTP_OK
         );
@@ -131,7 +151,7 @@ class ReviewsController extends AbstractController
         methods: ['GET']
     )]
     #[Tag('User')]
-    public function getUserReviewByGameId(Request $request, $gameId): JsonResponse
+    public function getUserReviewContentByGameId(Request $request, $gameId): JsonResponse
     {
         $token = $request->headers->get('Authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
@@ -141,14 +161,14 @@ class ReviewsController extends AbstractController
         } catch (\Exception $exception) {
             return new JsonResponse(
                 [
-                    'result' => $exception->getMessage()
+                    'message' => $exception->getMessage()
                 ],
                 $exception->getCode()
             );
         }
 
         return $content ?
-            new JsonResponse(['result' => $content], Response::HTTP_OK) :
-            new JsonResponse(['result' => ''], Response::HTTP_OK);
+            new JsonResponse(['message' => $content], Response::HTTP_OK) :
+            new JsonResponse(['message' => ''], Response::HTTP_OK);
     }
 }

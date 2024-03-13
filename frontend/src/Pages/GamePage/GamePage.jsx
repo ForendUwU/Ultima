@@ -42,7 +42,7 @@ export default function GamePage() {
                     throw new Error();
                 }
             }).then(decodedResponse => {
-                setCurrentUserReviewContent(decodedResponse['result']);
+                setCurrentUserReviewContent(decodedResponse['message']);
             }).finally(() => {
                 setUserReviewsLoading(false);
             });
@@ -264,7 +264,7 @@ export default function GamePage() {
                             <Paper sx={{ backgroundColor: "#e9cda2", padding: "1%" }}>
                                 <Grid container justifyContent="space-between">
                                     <Grid item>
-                                        <Typography sx={{ fontSize: "150%" }}>{item.user}</Typography>
+                                        <Typography sx={{ fontSize: "150%" }}>{item.userNickname}</Typography>
                                         <Typography sx={{ fontSize: "100%" }}>{item.content}</Typography>
                                     </Grid>
                                     <Grid item>
