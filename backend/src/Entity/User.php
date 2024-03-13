@@ -105,7 +105,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?string $token = null;
 
-    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: Review::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Review::class, orphanRemoval: true)]
     private Collection $reviews;
 
     public function __construct()

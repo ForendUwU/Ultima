@@ -78,7 +78,7 @@ class Game
     #[Groups(['game:read', 'game:write'])]
     private Collection $purchasedGames;
 
-    #[ORM\OneToMany(mappedBy: 'gameId', targetEntity: Review::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: Review::class, orphanRemoval: true)]
     private Collection $reviews;
 
     public function __construct()
