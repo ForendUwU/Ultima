@@ -47,11 +47,12 @@ class PlayingControllerTest extends WebTestCase
     /**
      *  @dataProvider savePlayingTimeDataProvider
      */
-    public function testSavePlayingTime1($gameId, $time, $createFakeToken)
+    public function testSavePlayingTime($gameId, $time, $createFakeToken)
     {
         $user = UserFactory::createOne([
             'login' => 'testLogin',
-            'password' => 'testPassword1!'
+            'password' => 'testPassword1!',
+            'nickname' => 'testNickname'
         ]);
         $game = GameFactory::createOne([
             'title' => 'testTitle'

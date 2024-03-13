@@ -174,11 +174,7 @@ class Game
 
     public function addReview(Review $review): static
     {
-        if (!$this->reviews->contains($review)) {
-            $this->reviews->add($review);
-            $review->setGame($this);
-        }
-
+        $this->reviews->add($review);
         return $this;
     }
 

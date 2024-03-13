@@ -48,9 +48,6 @@ class ReviewsService
         $review->setDislikes(0);
         $review->setLikes(0);
 
-        $user->addReview($review);
-        $game->addReview($review);
-
         $this->em->persist($review);
         $this->em->flush();
     }
@@ -80,11 +77,8 @@ class ReviewsService
     {
         $user = $this->getEntitiesService->getUserByLogin($userLogin);
         $game = $this->getEntitiesService->getGameById($gameId);
-
         $review = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
         if ($review) {
-            $user->removeReview($review);
-            $game->removeReview($review);
             $this->em->remove($review);
         } else {
             throw new \Exception('User\'s review not found', Response::HTTP_NOT_FOUND);

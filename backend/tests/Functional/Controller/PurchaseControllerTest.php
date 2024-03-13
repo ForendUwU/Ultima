@@ -177,7 +177,7 @@ class PurchaseControllerTest extends WebTestCase
     /**
      *  @dataProvider deletePurchasedGameDataProvider
      */
-    public function testDeletePurchasedGame1($gameId, $createFakeToken)
+    public function testDeletePurchasedGame($gameId, $createFakeToken)
     {
         $user = UserFactory::createOne([
             'login' => 'testLogin',

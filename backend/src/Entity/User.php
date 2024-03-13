@@ -328,11 +328,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addReview(Review $review): static
     {
-        if (!$this->reviews->contains($review)) {
-            $this->reviews->add($review);
-            $review->setUser($this);
-        }
-
+        $this->reviews->add($review);
         return $this;
     }
 

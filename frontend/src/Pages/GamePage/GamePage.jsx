@@ -138,7 +138,7 @@ export default function GamePage() {
                 throw new Error();
             }
         }).then(decodedResponse => {
-            //window.location.reload();
+            window.location.reload();
         }).catch(error => {
             setError(error);
         });
