@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @extends ServiceEntityRepository<Game>
@@ -19,5 +20,18 @@ class GamesRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Game::class);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findById(int $gameId): Game
+    {
+        $game = $this->findOneBy(['id' => $gameId]);
+
+        if (!$game)
+            throw new \Exception('Game not found', Response::HTTP_NOT_FOUND);
+
+        return $game;
     }
 }

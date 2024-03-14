@@ -272,7 +272,7 @@ class ReviewsControllerTest extends WebTestCase
         } else if ($reviewContent != null && !$createFakeReview) {
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
-            $this->assertEquals('User\'s review not found', $decodedResponse['message']);
+            $this->assertEquals('Review not found', $decodedResponse['message']);
         } else if ($reviewContent == null && $createFakeReview) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
@@ -335,7 +335,7 @@ class ReviewsControllerTest extends WebTestCase
         } else if (!$createFakeReview) {
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
-            $this->assertEquals('User\'s review not found', $decodedResponse['message']);
+            $this->assertEquals('Review not found', $decodedResponse['message']);
         }
     }
 

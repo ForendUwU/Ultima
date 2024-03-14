@@ -2,52 +2,49 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Entity\Game;
-use App\Entity\PurchasedGame;
-use App\Entity\User;
-use App\Service\GetEntitiesService;
+use App\Repository\GamesRepository;
+use App\Repository\PurchasedGameRepository;
+use App\Repository\UserRepository;
 use App\Service\PlayingService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreatePurchasedGameTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class PlayingServiceTest extends TestCase
 {
-    private $emMock;
-    private $getEntitiesServiceMock;
+    use CreateUserTrait, CreateGameTrait, CreatePurchasedGameTrait;
+
+    public static $emMock;
     private PlayingService $playingService;
     public function setUp(): void
     {
-        $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
+        static::$emMock = $this->createMock(EntityManagerInterface::class);
         $this->playingService = new PlayingService(
-            $this->emMock,
-            $this->getEntitiesServiceMock
+            static::$emMock
         );
     }
 
     public function testSavePlayingTime()
     {
-        $testGame = new Game();
+        $testUser = $this->createUser();
+        $testGame = $this->createGame();
 
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $gameRepositoryMock = $this->createMock(GamesRepository::class);
+        $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
 
-        $testPurchasedGame = new PurchasedGame();
-        $testPurchasedGame->setGame($testGame);
-        $testPurchasedGame->setUser($testUser);
+        static::$emMock
+            ->expects(static::exactly(3))
+            ->method('getRepository')
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $purchasedGameRepositoryMock);
 
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getPurchasedGameByGameAndUser')
-            ->willReturn($testPurchasedGame);
+        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
+
+        $testPurchasedGame = $this->createPurchasedGame($testUser, $testGame);
+        $this->setTestPurchasedGameAsReturnFromRepositoryMock($purchasedGameRepositoryMock, $testPurchasedGame);
 
         $this->playingService->savePlayingTime($testGame->getId(), $testUser->getLogin(), 60000);
 

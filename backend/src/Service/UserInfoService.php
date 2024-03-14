@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\PurchasedGame;
-use App\Entity\Review;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -12,15 +11,14 @@ class UserInfoService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly GetEntitiesService $getEntitiesService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
 
     }
 
     public function getUserInfo($userLogin): array
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['login' => $userLogin]);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
         return [
             'login' => $user->getLogin(),
             'nickname' => $user->getNickname(),
@@ -37,7 +35,7 @@ class UserInfoService
      */
     public function getUsersMostPlayedGames($userLogin): array
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
 
         $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findBy(
             ['user' => $user],
@@ -55,13 +53,14 @@ class UserInfoService
 
     public function validatePassword($userLogin, $password): bool
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
         return $this->userPasswordHasher->isPasswordValid($user, $password);
     }
 
-    public function updateUserInfo($userLogin, $data): void
+    public function updateUserInfo($userLogin, $data): User
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+
         if ($data['nickname']) {
             $user->setNickname($data['nickname']);
         }
@@ -81,7 +80,9 @@ class UserInfoService
         if ($data['email']) {
             $user->setEmail($data['email']);
         }
-        $this->em->persist($user);
+
         $this->em->flush();
+
+        return $user;
     }
 }

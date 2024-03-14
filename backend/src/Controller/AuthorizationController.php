@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exceptions\ValidationException;
+use App\Service\TokenService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Tag;
@@ -14,13 +15,13 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\AuthorizationService;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsController]
 class AuthorizationController extends AbstractController
 {
     public function __construct(
-        private readonly AuthorizationService $authorizationService
+        private readonly AuthorizationService $authorizationService,
+        private TokenService $tokenService
     ) {
 
     }
@@ -146,10 +147,11 @@ class AuthorizationController extends AbstractController
     #[Tag('Authorization')]
     public function logout(Request $request): ?JsonResponse
     {
-        $token = $request->headers->get('authorization');
+        $token = $request->headers->get('Authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $result = $this->authorizationService->logout($token);
+            $result = $this->authorizationService->logout($decodedToken->login);
         } catch (\Exception $e) {
             return new JsonResponse(
                 [

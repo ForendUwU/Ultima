@@ -11,8 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 class PurchaseService
 {
     public function __construct(
-        private readonly EntityManagerInterface $em,
-        private readonly GetEntitiesService $getEntitiesService
+        private readonly EntityManagerInterface $em
     ) {
 
     }
@@ -22,8 +21,8 @@ class PurchaseService
      */
     public function purchase($gameId, $userLogin): string
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $user, 'game' => $game]);
 
@@ -43,6 +42,7 @@ class PurchaseService
             $purchasedGame->setGame($game);
 
             $user->addPurchasedGame($purchasedGame);
+            $game->addPurchasedGame($purchasedGame);
 
             $this->em->persist($purchasedGame);
             $this->em->flush();
@@ -53,9 +53,9 @@ class PurchaseService
 
     public function getPurchasedGames($login): array
     {
-        $user = $this->getEntitiesService->getUserByLogin($login);
+        $user = $this->em->getRepository(User::class)->findByLogin($login);
 
-        $result = $user->getPurchasedGames()->map(static fn ($purchasedGame) => [
+        $result = $user->getPurchasedGames()->map(fn ($purchasedGame) => [
             'gameId' => $purchasedGame->getGame()->getId(),
             'title' => $purchasedGame->getGame()->getTitle(),
             'hoursOfPlaying' =>  $purchasedGame->getHoursOfPlaying()
@@ -69,12 +69,14 @@ class PurchaseService
      */
     public function deletePurchasedGame($gameId, $login): void
     {
-        $user = $this->getEntitiesService->getUserByLogin($login);
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $user = $this->em->getRepository(User::class)->findByLogin($login);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
-        $purchasedGame = $this->getEntitiesService->getPurchasedGameByGameAndUser($game, $user);
+        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
 
         $user->removePurchasedGame($purchasedGame);
+        $game->removePurchasedGame($purchasedGame);
+
         $this->em->remove($purchasedGame);
 
         $this->em->flush();

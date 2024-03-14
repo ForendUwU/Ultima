@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Game;
+use App\Entity\PurchasedGame;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
 class PlayingService
@@ -9,8 +12,7 @@ class PlayingService
     private const HOUR_IN_MILLISECONDS = 3600000;
 
     public function __construct(
-        private readonly EntityManagerInterface $em,
-        private readonly GetEntitiesService $getEntitiesService
+        private readonly EntityManagerInterface $em
     ) {
 
     }
@@ -20,10 +22,10 @@ class PlayingService
      */
     public function savePlayingTime($gameId, $login, $time): void
     {
-        $user = $this->getEntitiesService->getUserByLogin($login);
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $user = $this->em->getRepository(User::class)->findByLogin($login);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
-        $purchasedGame = $this->getEntitiesService->getPurchasedGameByGameAndUser($game, $user);
+        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
 
         $purchasedGame->setHoursOfPlaying($time / self::HOUR_IN_MILLISECONDS);
         $this->em->flush();

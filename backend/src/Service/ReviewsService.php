@@ -2,15 +2,16 @@
 
 namespace App\Service;
 
+use App\Entity\Game;
 use App\Entity\Review;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReviewsService
 {
     public function __construct(
-        private readonly EntityManagerInterface $em,
-        private readonly GetEntitiesService $getEntitiesService
+        private readonly EntityManagerInterface $em
     ) {
 
     }
@@ -20,8 +21,8 @@ class ReviewsService
      */
     public function createGameReview($reviewContent, $userLogin, $gameId): Review
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $checkIfReviewExists = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
         if ($checkIfReviewExists)
@@ -42,7 +43,7 @@ class ReviewsService
 
     public function getGameReviews($gameId): array
     {
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         return array_map(function ($item) {
             return [
@@ -59,10 +60,10 @@ class ReviewsService
      */
     public function changeGameReviewContent($reviewContent, $userLogin, $gameId): Review
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
-        $review = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
+        $review = $this->em->getRepository(Review::class)->findByGameAndUser($game, $user);
         if ($review) {
             $review->setContent($reviewContent);
         } else {
@@ -79,9 +80,10 @@ class ReviewsService
      */
     public function deleteUsersReview($userLogin, $gameId): void
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
-        $game = $this->getEntitiesService->getGameById($gameId);
-        $review = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
+
+        $review = $this->em->getRepository(Review::class)->findByGameAndUser($game, $user);
         if ($review) {
             $this->em->remove($review);
         } else {
@@ -96,8 +98,8 @@ class ReviewsService
      */
     public function getUserReviewContentByUserLoginAndGameId($userLogin, $gameId): ?string
     {
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
-        $game = $this->getEntitiesService->getGameById($gameId);
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $review = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
 

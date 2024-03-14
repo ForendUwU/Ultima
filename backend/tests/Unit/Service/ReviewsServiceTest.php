@@ -2,30 +2,28 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Entity\Game;
-use App\Entity\PurchasedGame;
 use App\Entity\Review;
-use App\Entity\User;
-use App\Repository\PurchasedGameRepository;
+use App\Repository\GamesRepository;
 use App\Repository\ReviewRepository;
-use App\Service\GetEntitiesService;
-use App\Service\PlayingService;
+use App\Repository\UserRepository;
 use App\Service\ReviewsService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreateReviewTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class ReviewsServiceTest extends TestCase
 {
-    private $emMock;
-    private $getEntitiesServiceMock;
+    use CreateUserTrait, CreateGameTrait, CreateReviewTrait;
+
+    public static $emMock;
     private ReviewsService $reviewsService;
     public function setUp(): void
     {
-        $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
+        static::$emMock = $this->createMock(EntityManagerInterface::class);
         $this->reviewsService = new ReviewsService(
-            $this->emMock,
-            $this->getEntitiesServiceMock
+            static::$emMock
         );
     }
 
@@ -50,19 +48,20 @@ class ReviewsServiceTest extends TestCase
      */
     public function testCreateGameReview($reviewAlreadyExists)
     {
-        $testGame = new Game();
+        $testGame = $this->createGame();
+        $testUser = $this->createUser();
 
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $gameRepositoryMock = $this->createMock(GamesRepository::class);
+        $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
 
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
+        static::$emMock
+            ->expects($this->any())
+            ->method('getRepository')
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $reviewRepositoryMock);
+
+        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
 
         $fakeReview = null;
 
@@ -75,11 +74,6 @@ class ReviewsServiceTest extends TestCase
             $fakeReview->setContent('test content');
         }
 
-        $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
-        $this->emMock
-            ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($reviewRepositoryMock);
         $reviewRepositoryMock
             ->expects($this->once())
             ->method('findOneBy')
@@ -93,59 +87,43 @@ class ReviewsServiceTest extends TestCase
         $expectedReview->setContent('test content');
 
         if (!$reviewAlreadyExists) {
-            $result = $this->reviewsService->createGameReview('test content', $testUser, $testGame);
+            $result = $this->reviewsService->createGameReview('test content', $testUser->getLogin(), $testGame->getId());
 
             $this->assertEquals($expectedReview, $result);
         } else if ($reviewAlreadyExists) {
             $this->expectException(\Exception::class);
             $this->expectExceptionMessage('User already has review on this game');
 
-            $this->reviewsService->createGameReview('test content', $testUser, $testGame);
+            $this->reviewsService->createGameReview('test content', $testUser->getLogin(), $testGame->getId());
         }
 
     }
 
     public function testGetGameReviews()
     {
-        $testGame = new Game();
-
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-        $testUser->setNickname('testNickname');
-
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
-
-        $testReview1 = new Review();
-        $testReview1->setGame($testGame);
-        $testReview1->setUser($testUser);
-        $testReview1->setLikes(0);
-        $testReview1->setDislikes(0);
-        $testReview1->setContent('test content');
-
-        $testReview2 = new Review();
-        $testReview2->setGame($testGame);
-        $testReview2->setUser($testUser);
-        $testReview2->setLikes(0);
-        $testReview2->setDislikes(0);
-        $testReview2->setContent('test content');
+        $testGame = $this->createGame();
+        $testUser = $this->createUser();
 
         $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
-        $this->emMock
-            ->expects($this->once())
+        $gamesRepositoryMock = $this->createMock(GamesRepository::class);
+
+        static::$emMock
+            ->expects($this->any())
             ->method('getRepository')
-            ->willReturn($reviewRepositoryMock);
+            ->willReturnOnConsecutiveCalls($gamesRepositoryMock, $reviewRepositoryMock);
+
+        $testReview1 = $this->createReview($testUser, $testGame);
+        $testReview2 = $this->createReview($testUser, $testGame);
+
         $reviewRepositoryMock
             ->expects($this->once())
             ->method('findBy')
             ->willReturn([$testReview1, $testReview2]);
 
-        $result = $this->reviewsService->getGameReviews(1);
+        $result = $this->reviewsService->getGameReviews($testGame->getId());
 
         $expectedData = [
-            'content' => 'test content',
+            'content' => 'testContent',
             'likes' => 0,
             'dislikes' => 0,
             'userNickname' => 'testNickname'
@@ -165,46 +143,28 @@ class ReviewsServiceTest extends TestCase
 
     public function testChangeGameReviewContent()
     {
-        $testGame = new Game();
+        $testGame = $this->createGame();
+        $testUser = $this->createUser();
 
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-        $testUser->setNickname('testNickname');
-
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
-
-        $testReview = new Review();
-        $testReview->setGame($testGame);
-        $testReview->setUser($testUser);
-        $testReview->setLikes(0);
-        $testReview->setDislikes(0);
-        $testReview->setContent('test content');
-
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $gameRepositoryMock = $this->createMock(GamesRepository::class);
         $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
-        $this->emMock
-            ->expects($this->once())
+
+        static::$emMock
+            ->expects($this->any())
             ->method('getRepository')
-            ->willReturn($reviewRepositoryMock);
-        $reviewRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testReview);
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $reviewRepositoryMock);
+
+        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
+
+        $testReview = $this->createReview($testUser, $testGame);
+
+        $this->setTestReviewAsReturnFromRepositoryMock($reviewRepositoryMock, $testReview);
 
         $result = $this->reviewsService->changeGameReviewContent('Changed content', 'testLogin', $testGame->getId());
 
-        $expectedReview = new Review();
-        $expectedReview->setContent('Changed content');
-        $expectedReview->setLikes(0);
-        $expectedReview->setDislikes(0);
-        $expectedReview->setUser($testUser);
-        $expectedReview->setGame($testGame);
+        $expectedReview = $this->createReview($testUser, $testGame, content: 'Changed content');
 
         $this->assertNotNull($result);
         $this->assertEquals($expectedReview, $result);
@@ -212,39 +172,26 @@ class ReviewsServiceTest extends TestCase
 
     public function testDeleteUsersReviewContent()
     {
-        $testGame = new Game();
+        $testGame = $this->createGame();
+        $testUser = $this->createUser();
 
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-        $testUser->setNickname('testNickname');
-
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
-
-        $testReview = new Review();
-        $testReview->setGame($testGame);
-        $testReview->setUser($testUser);
-        $testReview->setLikes(0);
-        $testReview->setDislikes(0);
-        $testReview->setContent('test content');
-
+        $gameRepositoryMock = $this->createMock(GamesRepository::class);
+        $userRepositoryMock = $this->createMock(UserRepository::class);
         $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
-        $this->emMock
-            ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($reviewRepositoryMock);
-        $reviewRepositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testReview);
 
-        $this->emMock
+        static::$emMock
+            ->expects($this->any())
+            ->method('getRepository')
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $reviewRepositoryMock);
+
+        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
+
+        $testReview = $this->createReview($testUser, $testGame);
+
+        $this->setTestReviewAsReturnFromRepositoryMock($reviewRepositoryMock, $testReview);
+
+        static::$emMock
             ->expects($this->once())
             ->method('remove');
 
@@ -256,37 +203,26 @@ class ReviewsServiceTest extends TestCase
      */
     public function testGetUserReviewContentByUserLoginAndGameId1($reviewExists)
     {
-        $testGame = new Game();
+        $testGame = $this->createGame();
+        $testUser = $this->createUser();
 
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-        $testUser->setNickname('testNickname');
+        $gameRepositoryMock = $this->createMock(GamesRepository::class);
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
 
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
+        static::$emMock
+            ->expects($this->any())
+            ->method('getRepository')
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $reviewRepositoryMock);
+
+        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
 
         $testReview = null;
 
-        if ($reviewExists) {
-            $testReview = new Review();
-            $testReview->setGame($testGame);
-            $testReview->setUser($testUser);
-            $testReview->setLikes(0);
-            $testReview->setDislikes(0);
-            $testReview->setContent('test content');
-        }
+        if ($reviewExists)
+            $testReview = $this->createReview($testUser, $testGame);
 
-        $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
-        $this->emMock
-            ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($reviewRepositoryMock);
         $reviewRepositoryMock
             ->expects($this->once())
             ->method('findOneBy')
@@ -295,7 +231,7 @@ class ReviewsServiceTest extends TestCase
         if ($reviewExists) {
             $result = $this->reviewsService->getUserReviewContentByUserLoginAndGameId('testLogin', $testGame->getId());
 
-            $this->assertEquals('test content', $result);
+            $this->assertEquals('testContent', $result);
         } else if (!$reviewExists) {
             $result = $this->reviewsService->getUserReviewContentByUserLoginAndGameId('testLogin', $testGame->getId());
 
