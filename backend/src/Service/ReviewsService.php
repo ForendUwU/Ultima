@@ -25,8 +25,9 @@ class ReviewsService
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $checkIfReviewExists = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
-        if ($checkIfReviewExists)
+        if ($checkIfReviewExists) {
             throw new \Exception('User already has review on this game', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         $review = new Review();
         $review->setContent($reviewContent);

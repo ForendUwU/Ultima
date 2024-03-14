@@ -29,8 +29,9 @@ class GamesRepository extends ServiceEntityRepository
     {
         $game = $this->findOneBy(['id' => $gameId]);
 
-        if (!$game)
+        if (!$game) {
             throw new \Exception('Game not found', Response::HTTP_NOT_FOUND);
+        }
 
         return $game;
     }

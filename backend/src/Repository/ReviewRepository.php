@@ -31,8 +31,9 @@ class ReviewRepository extends ServiceEntityRepository
     {
         $review = $this->findOneBy(['user' => $user, 'game' => $game]);
 
-        if (!$review)
+        if (!$review){
             throw new \Exception('Review not found', Response::HTTP_NOT_FOUND);
+        }
 
         return $review;
     }

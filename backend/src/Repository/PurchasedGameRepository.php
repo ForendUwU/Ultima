@@ -31,8 +31,9 @@ class PurchasedGameRepository extends ServiceEntityRepository
     {
         $purchasedGame = $this->findOneBy(['user' => $user, 'game' => $game]);
 
-        if (!$purchasedGame)
+        if (!$purchasedGame) {
             throw new \Exception('You do not have this game', Response::HTTP_FORBIDDEN);
+        }
 
         return $purchasedGame;
     }
