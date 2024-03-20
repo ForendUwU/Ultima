@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {Grid, Typography, Button, Menu, MenuItem} from "@mui/material";
+import {Grid, Typography, Button} from "@mui/material";
 import HeaderButton from "./HeaderButton";
 import {HeaderContext, UserContext} from "../App/App";
 
@@ -16,7 +16,7 @@ export default function Header(){
                     </Typography>
                 </Button>
             </Grid>
-            {!userContext.nickname ?
+            {!userContext.userInfo ?
                 <HeaderButton link="/sign-in">
                     Sign In
                 </HeaderButton>
@@ -26,10 +26,10 @@ export default function Header(){
                         Your games
                     </HeaderButton>
                     <HeaderButton link="/profile">
-                        {userContext.nickname}
+                        {userContext.userInfo.nickname}
                     </HeaderButton>
                     <HeaderButton link="/account-funding">
-                        {userContext.balance}$
+                        {userContext.userInfo.balance}$
                     </HeaderButton>
                     <HeaderButton handler={headerContext.handleLogout}>
                         Logout

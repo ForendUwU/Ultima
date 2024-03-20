@@ -1,52 +1,32 @@
 import React, {useContext, useEffect} from "react";
-import {useNavigate} from "react-router-dom";
 import {Container, Stack, Button, Dialog, DialogTitle} from "@mui/material";
 import Cookies from 'universal-cookie';
 import {FullscreenGrid, GlowingGrid, Header, PageTitle, Stopwatch, PurchasedGameCard} from "../../Components";
 import Error from "../StatePages/Error"
 import Loading from "../StatePages/Loading";
 import {HeaderContext} from "../../App/App";
+import useFetch from "../../Hooks/useFetch";
+import {doRequest} from "../../Scripts/doRequest";
 
 export default function PurchasedGames() {
-    const [games, setGames] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState(null);
     const [showDialog, setShowDialog] = React.useState(false);
     const [currentlyPlayingGameTitle, setCurrentlyPlayingGameTitle] = React.useState();
     const [currentlyPlayingGameId, setCurrentlyPlayingGameId] = React.useState();
     const [time, setTime] = React.useState(0);
 
+    const [update, setUpdate] = React.useState(0);
+
     const cookies = new Cookies();
-    const navigate = useNavigate();
 
     const headerContext = useContext(HeaderContext);
 
     //Get games purchased by user
-    useEffect(() => {
-        fetch('https://localhost/api/purchase-game', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
-            }
-        }).then(response => {
-            if (response.ok || response.status === 401) {
-                return response.json();
-            } else {
-                throw new Error();
-            }
-        }).then(decodedResponse => {
-            if (decodedResponse.message === "Unauthorized") {
-                navigate('/');
-            } else {
-                setGames(decodedResponse);
-            }
-        }).catch(error => {
-            setError(error);
-        }).finally(()=>{
-            setLoading(false);
-        })
-    },[]);
+    const [games, error, loading] = useFetch({
+        url: 'https://localhost/api/purchase-game',
+        method: 'GET',
+        token: cookies.get('token'),
+        updateEffect: update
+    });
 
     //Stopwatch
     useEffect(() => {
@@ -65,51 +45,41 @@ export default function PurchasedGames() {
         }
     }, [showDialog]);
 
-    function handleClickLaunchButton (gameTitle, gameId, hoursOfPlaying)
-    {
+    const handleClickLaunchButton = (gameTitle, gameId, hoursOfPlaying) => {
         setTime(hoursOfPlaying * 3600000);
         setShowDialog(true);
         setCurrentlyPlayingGameTitle(gameTitle);
         setCurrentlyPlayingGameId(gameId);
     }
 
-    function handleClickDeleteButton (gameId)
+    const handleClickDeleteButton = (gameId) =>
     {
-        fetch('https://localhost/api/purchase-game', {
+        doRequest({
+            url: 'https://localhost/api/purchase-game',
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
-            },
-            body: JSON.stringify({
-                gameId: gameId,
-            }),
-        }).then(response => {
-            return response.json();
-        }).then(decodedResponse => {
-            console.log(decodedResponse);
-        }).finally(() => navigate(0));
+            token: cookies.get('token'),
+            body: {
+                gameId: gameId
+            }
+        });
+        setUpdate(update+1);
     }
 
     function handleCloseGame()
     {
         setShowDialog(false);
 
-        fetch('https://localhost/api/save-playing-time', {
+        doRequest({
+            url: 'https://localhost/api/save-playing-time',
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
-            },
-            body: JSON.stringify({
+            token: cookies.get('token'),
+            body: {
                 gameId: currentlyPlayingGameId,
                 time: time
-            }),
-        }).then(response => {
-            return response.json();
-        }).then(decodedResponse => {
-            console.log(decodedResponse);
-         }).finally(()=>navigate(0));
+            }
+        });
+
+        setUpdate(update+1);
     }
 
     if(loading || !headerContext.userLoaded) return <Loading />;
@@ -143,7 +113,7 @@ export default function PurchasedGames() {
                             <Stopwatch time={time} />
                             <Button color="success" sx={{fontSize: "100%"}} onClick={()=>{setTime(time+60000)}}>+1 minute</Button>
                             <Button color="success" sx={{fontSize: "100%"}} onClick={()=>{setTime(time+3600000)}}>+1 hour</Button>
-                            <Button color="error" sx={{fontSize: "100%"}} onClick={() => handleCloseGame()}>Close game</Button>
+                            <Button color="error" sx={{fontSize: "100%"}} onClick={handleCloseGame}>Close game</Button>
                         </Dialog>
                     }
                 </GlowingGrid>

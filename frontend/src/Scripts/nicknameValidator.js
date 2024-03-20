@@ -1,6 +1,8 @@
 export default function validateNickname(nickname)
 {
-    if (nickname.length < 2) {
+    if (!nickname) {
+        throw new Error('Nickname is empty');
+    } else if (nickname.length < 2) {
         throw new Error('Nickname must contain 2 or more characters');
     } else if (nickname.length > 20) {
         throw new Error('Nickname must contain less than 20 characters');

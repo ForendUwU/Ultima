@@ -2,7 +2,7 @@ import React from "react";
 import {Typography} from "@mui/material";
 import {Textarea} from "@mui/joy";
 
-export default function ReviewInputField({defaultValue})
+export default function ReviewInputField({defaultValue, setter})
 {
     return(
         <>
@@ -14,6 +14,7 @@ export default function ReviewInputField({defaultValue})
                 name="content"
                 id="content"
                 defaultValue={defaultValue}
+                onChange={e => setter(e.target.value)}
                 sx={{
                     fontSize: "100%",
                     width: "100%",

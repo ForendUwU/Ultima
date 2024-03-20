@@ -8,13 +8,7 @@ import {
 
 import "./App.css";
 
-import SignIn from "../Pages/AuthorizationPages/SignIn";
-import Registration from "../Pages/AuthorizationPages/Registration";
-import HomePage from "../Pages/HomePage/HomePage"
-import PurchasedGames from "../Pages/PurchasedGames/PurchasedGames";
-import AccountFundingPage from "../Pages/AccountFundingPage/AccountFundingPage";
-import GamePage from "../Pages/GamePage/GamePage";
-import ProfilePage from "../Pages/ProfilePage/ProfilePage";
+import {SignIn, Registration, HomePage, PurchasedGames, AccountFundingPage, GamePage, ProfilePage} from "../Pages";
 
 import {HandleLogout} from "../Scripts/handleLogout";
 import {GetUserInfo} from "../Scripts/getUserInfo";
@@ -22,16 +16,17 @@ import Cookies from "universal-cookie";
 import Error from "../Pages/StatePages/Error";
 
 export const HeaderContext = createContext();
-export const UserContext = createContext();
+export let UserContext = createContext();
 
 function App() {
     const [userLoaded, setUserLoaded] = React.useState(false);
-    const [error, setError] = React.useState(null);
+    const [error, setError] = React.useState(false);
     const [userInfo, setUserInfo] = React.useState(null);
 
     const cookies = new Cookies();
 
     useEffect(() => {
+        if (cookies.get('token')) {
             GetUserInfo(cookies.get('token'))
                 .then(decodedResponse => {
                     setUserInfo({
@@ -45,10 +40,11 @@ function App() {
                 })
                 .catch(error => {
                     setError(error);
-                }).finally(()=>{
+                }).finally(() => {
                 setUserLoaded(true);
             })
-        }, []);
+        } else { setUserLoaded(true); }
+    }, []);
 
     if(error) return <Error errorText={error.toString()} />;
 
@@ -57,7 +53,7 @@ function App() {
             handleLogout: HandleLogout,
             userLoaded: userLoaded
         }}>
-            <UserContext.Provider value={userInfo}>
+            <UserContext.Provider value={{userInfo, setUserInfo}}>
                 <Router>
                     <Routes>
                         <Route

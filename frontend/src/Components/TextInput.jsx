@@ -1,7 +1,7 @@
 import React from "react";
 import {OutlinedInput} from "@mui/material";
 
-export default function TextInput({inputName, type, defaultValue = null, required = true})
+export default function TextInput({inputName, type, setter, defaultValue = null, required = true})
 {
     return(
         <OutlinedInput
@@ -11,6 +11,7 @@ export default function TextInput({inputName, type, defaultValue = null, require
             id={inputName}
             name={inputName}
             type={type || inputName}
+            onChange={e => setter && setter(e.target.value)}
             sx={{
                 height: "6vh",
                 fontSize: "100%",
