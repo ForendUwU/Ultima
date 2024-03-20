@@ -32,7 +32,7 @@ class PlayingController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['gameId'] || !$data['time']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -46,7 +46,7 @@ class PlayingController extends AbstractController
         try {
             $this->playingService->savePlayingTime($data['gameId'], $decodedToken->login, $data['time']);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -54,7 +54,7 @@ class PlayingController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Successfully updated'
             ],

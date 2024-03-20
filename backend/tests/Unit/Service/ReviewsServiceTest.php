@@ -56,7 +56,7 @@ class ReviewsServiceTest extends TestCase
         $reviewRepositoryMock = $this->createMock(ReviewRepository::class);
 
         static::$emMock
-            ->expects($this->any())
+            ->expects($this->exactly(3))
             ->method('getRepository')
             ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $reviewRepositoryMock);
 
@@ -69,8 +69,6 @@ class ReviewsServiceTest extends TestCase
             $fakeReview = new Review();
             $fakeReview->setGame($testGame);
             $fakeReview->setUser($testUser);
-            $fakeReview->setLikes(0);
-            $fakeReview->setDislikes(0);
             $fakeReview->setContent('test content');
         }
 
@@ -82,8 +80,6 @@ class ReviewsServiceTest extends TestCase
         $expectedReview = new Review();
         $expectedReview->setGame($testGame);
         $expectedReview->setUser($testUser);
-        $expectedReview->setLikes(0);
-        $expectedReview->setDislikes(0);
         $expectedReview->setContent('test content');
 
         if (!$reviewAlreadyExists) {

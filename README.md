@@ -6,23 +6,14 @@ To run containers with application
 docker compose up -d
 ~~~
 
-To stop containers
+To stop and remove containers and networks
 ~~~shell
 docker compose down
-~~~
-
-To clean dokcer images and containers
-~~~shell
-docker system prune -af
 ~~~
 
 To enter docker container with symfony
 ~~~shell
 docker exec -it ultima_php_1 sh
-~~~
-or
-~~~shell
-docker exec -it ultima_php_1 bash
 ~~~
 
 To set up test databse and fixtures
@@ -32,18 +23,9 @@ php bin/console doctrine:schema:update --env=test --force
 php bin/console doctrine:fixtures:load --env=test --group=CheckRelationFixtures
 ~~~
 
-You'll get the message
-~~~shell
-Careful, database "db_test" will be purged. Do you want to continue? (yes/no) [no]:
-~~~
-say
-~~~shell
-yes
-~~~
-
 To run tests
 ~~~shell
-php bin/phpunit --process-isolation
+php bin/phpunit
 ~~~
 
 To run tests with coverage and report

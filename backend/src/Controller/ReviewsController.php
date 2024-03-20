@@ -35,7 +35,7 @@ class ReviewsController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['content']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -46,7 +46,7 @@ class ReviewsController extends AbstractController
         try {
             $this->reviewsService->createGameReview($data['content'], $decodedToken->login, $gameId);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -54,7 +54,7 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Review was created successfully'
             ],
@@ -71,7 +71,7 @@ class ReviewsController extends AbstractController
     {
         $result = $this->reviewsService->getGameReviews($gameId);
 
-        return new JsonResponse(
+        return $this->json(
             $result,
             Response::HTTP_OK
         );
@@ -90,7 +90,7 @@ class ReviewsController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['content']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -101,7 +101,7 @@ class ReviewsController extends AbstractController
         try {
             $this->reviewsService->changeGameReviewContent($data['content'], $decodedToken->login, $gameId);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -109,7 +109,7 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Review was successfully changed'
             ],
@@ -130,7 +130,7 @@ class ReviewsController extends AbstractController
         try {
             $this->reviewsService->deleteUsersReview($decodedToken->login, $gameId);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -138,7 +138,7 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Review was successfully deleted'
             ],
@@ -159,7 +159,7 @@ class ReviewsController extends AbstractController
         try {
             $content = $this->reviewsService->getUserReviewContentByUserLoginAndGameId($decodedToken->login, $gameId);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -168,7 +168,7 @@ class ReviewsController extends AbstractController
         }
 
         return $content ?
-            new JsonResponse(['message' => $content], Response::HTTP_OK) :
-            new JsonResponse(['message' => ''], Response::HTTP_OK);
+            $this->json(['message' => $content], Response::HTTP_OK) :
+            $this->json(['message' => ''], Response::HTTP_OK);
     }
 }

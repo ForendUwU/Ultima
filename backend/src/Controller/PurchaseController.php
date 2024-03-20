@@ -32,7 +32,7 @@ class PurchaseController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['gameId']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -46,7 +46,7 @@ class PurchaseController extends AbstractController
         try {
             $result = $this->purchaseService->purchase($data['gameId'], $decodedToken->login);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -54,7 +54,7 @@ class PurchaseController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => $result
             ],
@@ -74,7 +74,7 @@ class PurchaseController extends AbstractController
 
         $result = $this->purchaseService->getPurchasedGames($decodedToken->login);
 
-        return new JsonResponse(
+        return $this->json(
             $result,
             Response::HTTP_OK
         );
@@ -90,7 +90,7 @@ class PurchaseController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !isset($data['gameId'])) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -104,7 +104,7 @@ class PurchaseController extends AbstractController
         try {
             $this->purchaseService->deletePurchasedGame($data['gameId'], $decodedToken->login);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -112,7 +112,7 @@ class PurchaseController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Successfully deleted'
             ],

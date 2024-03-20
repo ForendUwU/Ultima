@@ -11,7 +11,8 @@ class UserInfoService
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly AuthorizationService $authorizationService,
     ) {
 
     }
@@ -43,18 +44,12 @@ class UserInfoService
             5
         );
 
-        return array_map(function($item){
+        return array_map(function($item) {
             return [
                 'title' => $item->getGame()->getTitle(),
                 'hoursOfPlaying' => $item->getHoursOfPlaying()
             ];
         }, $purchasedGames);
-    }
-
-    public function validatePassword($userLogin, $password): bool
-    {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
-        return $this->userPasswordHasher->isPasswordValid($user, $password);
     }
 
     public function updateUserInfo($userLogin, $data): User
@@ -64,15 +59,12 @@ class UserInfoService
         if ($data['nickname']) {
             $user->setNickname($data['nickname']);
         }
-        if ($data['password']) {
-            $user->setPassword($data['password']);
-        }
-        if ($data['firstName']) {
+        if (isset($data['firstName'])) {
             $user->setFirstName($data['firstName']);
         } else {
             $user->setFirstName('');
         }
-        if ($data['lastName']) {
+        if (isset($data['lastName'])) {
             $user->setLastName($data['lastName']);
         } else {
             $user->setLastName('');
@@ -84,5 +76,30 @@ class UserInfoService
         $this->em->flush();
 
         return $user;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function updatePassword($userLogin, $oldPassword, $newPassword): User
+    {
+        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+
+        if ($this->userPasswordHasher->isPasswordValid($user, $oldPassword)) {
+            $this->authorizationService->validatePassword($newPassword);
+
+            $user->setPassword(
+                $this->userPasswordHasher->hashPassword(
+                    $user,
+                    $newPassword
+                )
+            );
+
+            $this->em->flush();
+
+            return $user;
+        } else {
+            throw new \Exception('Old password incorrect');
+        }
     }
 }

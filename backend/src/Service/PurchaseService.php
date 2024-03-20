@@ -74,9 +74,6 @@ class PurchaseService
 
         $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
 
-        $user->removePurchasedGame($purchasedGame);
-        $game->removePurchasedGame($purchasedGame);
-
         $this->em->remove($purchasedGame);
 
         $this->em->flush();

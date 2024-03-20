@@ -26,9 +26,6 @@ class AuthorizationController extends AbstractController
 
     }
 
-    /**
-     * @throws \Exception
-     */
     #[Route(
         "/api/login",
         methods: ['POST']
@@ -84,10 +81,10 @@ class AuthorizationController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['login'] || !$data['password']){
-            return new JsonResponse(
-                    [
-                        'message' => 'Missing data'
-                    ],
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
                 Response::HTTP_BAD_REQUEST
             );
         }
@@ -95,7 +92,7 @@ class AuthorizationController extends AbstractController
         try {
             $result = $this->authorizationService->login($data['login'], $data['password']);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -103,7 +100,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'token' => $result,
             ],
@@ -153,7 +150,7 @@ class AuthorizationController extends AbstractController
         try {
             $result = $this->authorizationService->logout($decodedToken->login);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -161,7 +158,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
             'message' => $result
             ],
@@ -240,7 +237,7 @@ class AuthorizationController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -256,14 +253,14 @@ class AuthorizationController extends AbstractController
                 $data['nickname']
             );
         } catch (UniqueConstraintViolationException $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'This login is already in use'
                 ],
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (ValidationException $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -271,7 +268,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'token' => $result
             ],

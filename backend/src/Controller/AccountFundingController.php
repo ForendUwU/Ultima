@@ -32,7 +32,7 @@ class AccountFundingController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['amount']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -44,10 +44,10 @@ class AccountFundingController extends AbstractController
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $this->accountFundingService->fund($data['amount'], $decodedToken->login);
+            $result = $this->accountFundingService->fund($data['amount'], $decodedToken->login);
         }
         catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -55,9 +55,9 @@ class AccountFundingController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
-                'message' => 'Successfully funded'
+                'newAmount' => $result
             ],
             Response::HTTP_OK
         );

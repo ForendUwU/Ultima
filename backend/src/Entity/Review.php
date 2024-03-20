@@ -23,12 +23,6 @@ class Review
     #[ORM\Column(length: 255)]
     private ?string $content = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $likes = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $dislikes = null;
-
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -50,30 +44,6 @@ class Review
     public function setContent(string $content): static
     {
         $this->content = $content;
-
-        return $this;
-    }
-
-    public function getLikes(): ?int
-    {
-        return $this->likes;
-    }
-
-    public function setLikes(?int $likes): static
-    {
-        $this->likes = $likes;
-
-        return $this;
-    }
-
-    public function getDislikes(): ?int
-    {
-        return $this->dislikes;
-    }
-
-    public function setDislikes(?int $dislikes): static
-    {
-        $this->dislikes = $dislikes;
 
         return $this;
     }

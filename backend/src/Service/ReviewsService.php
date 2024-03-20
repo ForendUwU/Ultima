@@ -33,8 +33,6 @@ class ReviewsService
         $review->setContent($reviewContent);
         $review->setUser($user);
         $review->setGame($game);
-        $review->setDislikes(0);
-        $review->setLikes(0);
 
         $this->em->persist($review);
         $this->em->flush();
@@ -48,10 +46,9 @@ class ReviewsService
 
         return array_map(function ($item) {
             return [
+                'id' => $item->getId(),
                 'content' => $item->getContent(),
-                'likes' => $item->getLikes(),
-                'dislikes' => $item->getDislikes(),
-                'userNickname' => $item->getUser()->getNickname(),
+                'userNickname' => $item->getUser()->getNickname()
             ];
         }, $this->em->getRepository(Review::class)->findBy(['game' => $game]));
     }
