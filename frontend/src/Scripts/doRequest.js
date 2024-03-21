@@ -1,6 +1,5 @@
 export function doRequest({
     url: url,
-    urlProp: urlProp = '',
     method: method,
     token: token = null,
     body: body = null,
@@ -19,7 +18,7 @@ export function doRequest({
         };
 
         if (token || tokenFlag) {
-            data = fetch(url + urlProp, {
+            data = fetch(url, {
                 method: method,
                 body: JSON.stringify(body),
                 headers: requestHeaders

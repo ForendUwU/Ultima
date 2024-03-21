@@ -4,25 +4,27 @@ import Cookies from 'universal-cookie';
 import {FullscreenGrid, GlowingGrid, Header, PageTitle, Stopwatch, PurchasedGameCard} from "../../Components";
 import Error from "../StatePages/Error"
 import Loading from "../StatePages/Loading";
-import {HeaderContext} from "../../App/App";
+import {HeaderContext, UserContext} from "../../App/App";
 import useFetch from "../../Hooks/useFetch";
 import {doRequest} from "../../Scripts/doRequest";
 
 export default function PurchasedGames() {
     const [showDialog, setShowDialog] = React.useState(false);
     const [currentlyPlayingGameTitle, setCurrentlyPlayingGameTitle] = React.useState();
-    const [currentlyPlayingGameId, setCurrentlyPlayingGameId] = React.useState();
+    const [currentlyPlayingPurchasedGameId, setCurrentlyPlayingPurchasedGameId] = React.useState();
     const [time, setTime] = React.useState(0);
-
     const [update, setUpdate] = React.useState(0);
 
     const cookies = new Cookies();
 
     const headerContext = useContext(HeaderContext);
+    const userContext = useContext(UserContext);
+
+    const userId = userContext.userInfo ? userContext.userInfo.id : null;
 
     //Get games purchased by user
     const [games, error, loading] = useFetch({
-        url: 'https://localhost/api/purchase-game',
+        url:'https://localhost/api/user/'+userId+'/purchased-games',
         method: 'GET',
         token: cookies.get('token'),
         updateEffect: update
@@ -49,17 +51,17 @@ export default function PurchasedGames() {
         setTime(hoursOfPlaying * 3600000);
         setShowDialog(true);
         setCurrentlyPlayingGameTitle(gameTitle);
-        setCurrentlyPlayingGameId(gameId);
+        setCurrentlyPlayingPurchasedGameId(gameId);
     }
 
-    const handleClickDeleteButton = (gameId) =>
+    const handleClickDeleteButton = (purchasedGameId) =>
     {
         doRequest({
-            url: 'https://localhost/api/purchase-game',
+            url: 'https://localhost/api/purchased-games',
             method: 'DELETE',
             token: cookies.get('token'),
             body: {
-                gameId: gameId
+                purchasedGameId: purchasedGameId
             }
         });
         setUpdate(update+1);
@@ -74,16 +76,16 @@ export default function PurchasedGames() {
             method: 'POST',
             token: cookies.get('token'),
             body: {
-                gameId: currentlyPlayingGameId,
-                time: time
+                purchasedGameId: currentlyPlayingPurchasedGameId,
+                time: time,
             }
         });
 
         setUpdate(update+1);
     }
 
-    if(loading || !headerContext.userLoaded) return <Loading />;
-    if(error) return <Error errorText={error.toString()} />;
+    if(loading || !headerContext.userLoaded || games === undefined) return <Loading />;
+    //if(error) return <Error errorText={error.toString()} />;
 
     return (
         <FullscreenGrid>
@@ -94,10 +96,10 @@ export default function PurchasedGames() {
                     {games && games.length !== 0 ?
                         <Stack spacing={2}>
                             {
-                                games.map((item, index) => (
+                                games.map((item) => (
                                     <PurchasedGameCard
                                         item={item}
-                                        index={index}
+                                        key={item.id}
                                         launchHandler={handleClickLaunchButton}
                                         deleteHandler={handleClickDeleteButton}
                                     />

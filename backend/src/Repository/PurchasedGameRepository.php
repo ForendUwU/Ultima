@@ -37,4 +37,18 @@ class PurchasedGameRepository extends ServiceEntityRepository
 
         return $purchasedGame;
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function findById(int $id): PurchasedGame
+    {
+        $purchasedGame = $this->findOneBy(['id' => $id]);
+
+        if (!$purchasedGame) {
+            throw new \Exception('You do not have this game', Response::HTTP_FORBIDDEN);
+        }
+
+        return $purchasedGame;
+    }
 }

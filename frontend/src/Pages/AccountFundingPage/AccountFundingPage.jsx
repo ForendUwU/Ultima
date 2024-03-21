@@ -16,7 +16,7 @@ export default function AccountFundingPage() {
 
     function handleClick (amount) {
         const [data, error] = doRequest({
-            url: 'https://localhost/api/fund',
+            url: 'https://localhost/api/'+userContext.userInfo.id+'/fund',
             method: 'PATCH',
             token: cookies.get('token'),
             body: {amount: amount},

@@ -7,7 +7,7 @@ import Loading from "../StatePages/Loading";
 import Error from "../StatePages/Error";
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
 import {useNavigate} from 'react-router-dom';
-import {HeaderContext} from "../../App/App";
+import {HeaderContext, UserContext} from "../../App/App";
 import useFetch from "../../Hooks/useFetch";
 import GameDescription from "./GameDescription";
 import Reviews from "./Reviews";
@@ -18,28 +18,29 @@ export default function GamePage() {
     const [updateEffect, setUpdateEffect] = React.useState(0);
 
     const { gameId } = useParams();
-    const headerContext = useContext(HeaderContext);
     const navigate = useNavigate();
     const cookies = new Cookies();
 
+    const headerContext = useContext(HeaderContext);
+    const userContext = useContext(UserContext);
+
+    const userId = userContext.userInfo ? userContext.userInfo.id : null;
+
     const [gameInfo, gameInfoError, gameInfoLoading] = useFetch({
-        url: 'https://localhost/api/games/',
-        urlProp: gameId,
+        url: 'https://localhost/api/games/'+gameId,
         method: 'GET'
     });
      gameInfoError && setError(error.toString() + "\n" + gameInfoError.toString());
 
     const [reviews, reviewsError, reviewsLoading] = useFetch({
-        url: 'https://localhost/api/reviews/',
-        urlProp: gameId,
+        url: 'https://localhost/api/games/'+gameId+'/reviews',
         method: 'GET',
         updateEffect: updateEffect
     });
     reviewsError && setError(error.toString() + "\n" + reviewsError.toString());
 
     const [currentUserReviewContent, userReviewError, userReviewLoading] = useFetch({
-        url: 'https://localhost/api/user/review/',
-        urlProp: gameId,
+        url: 'https://localhost/api/user/'+userId+'/games/'+gameId+'/review',
         method: 'GET',
         token: cookies.get('token'),
         tokenFlag: false,
@@ -50,7 +51,7 @@ export default function GamePage() {
     const HandlePurchase = () => {
         if (cookies.get('token')) {
             const [data] = doRequest({
-                url: 'https://localhost/api/purchase-game',
+                url: 'https://localhost/api/user/'+userId+'/purchase-game',
                 method: 'POST',
                 token: cookies.get('token'),
                 body: {gameId: gameId},
@@ -71,8 +72,7 @@ export default function GamePage() {
 
     const handleDelete = () => {
         doRequest({
-            url: 'https://localhost/api/reviews/',
-            urlProp: gameId,
+            url: 'https://localhost/api/user/'+userContext.userInfo.id+'/games/'+gameId+'/review',
             method: 'DELETE',
             token: cookies.get('token'),
             tokenFlag: false,
@@ -93,8 +93,7 @@ export default function GamePage() {
         if (validated) {
             if (!currentUserReviewContent?.message) {
                 doRequest({
-                    url: 'https://localhost/api/reviews/',
-                    urlProp: gameId,
+                    url: 'https://localhost/api/user/'+userContext.userInfo.id+'/games/'+gameId+'/review',
                     method: 'POST',
                     token: cookies.get('token'),
                     body: {content: reviewData},
@@ -103,8 +102,7 @@ export default function GamePage() {
                 toast.success('Review created');
             } else {
                 doRequest({
-                    url: 'https://localhost/api/reviews/',
-                    urlProp: gameId,
+                    url: 'https://localhost/api/user/'+userContext.userInfo.id+'/games/'+gameId+'/review',
                     method: 'PATCH',
                     token: cookies.get('token'),
                     body: {content: reviewData},

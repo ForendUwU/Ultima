@@ -19,9 +19,9 @@ class ReviewsService
     /**
      * @throws \Exception
      */
-    public function createGameReview($reviewContent, $userLogin, $gameId): Review
+    public function createGameReview($reviewContent, $userId, $gameId): Review
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $checkIfReviewExists = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
@@ -56,9 +56,9 @@ class ReviewsService
     /**
      * @throws \Exception
      */
-    public function changeGameReviewContent($reviewContent, $userLogin, $gameId): Review
+    public function changeGameReviewContent($reviewContent, $userId, $gameId): Review
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $review = $this->em->getRepository(Review::class)->findByGameAndUser($game, $user);
@@ -76,9 +76,9 @@ class ReviewsService
     /**
      * @throws \Exception
      */
-    public function deleteUsersReview($userLogin, $gameId): void
+    public function deleteUsersReview($userId, $gameId): void
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $review = $this->em->getRepository(Review::class)->findByGameAndUser($game, $user);
@@ -94,9 +94,9 @@ class ReviewsService
     /**
      * @throws \Exception
      */
-    public function getUserReviewContentByUserLoginAndGameId($userLogin, $gameId): ?string
+    public function getUserReviewContentByUserLoginAndGameId($userId, $gameId): ?string
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $review = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);

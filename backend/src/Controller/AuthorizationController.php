@@ -20,8 +20,7 @@ use App\Service\AuthorizationService;
 class AuthorizationController extends AbstractController
 {
     public function __construct(
-        private readonly AuthorizationService $authorizationService,
-        private TokenService $tokenService
+        private readonly AuthorizationService $authorizationService
     ) {
 
     }
@@ -144,11 +143,19 @@ class AuthorizationController extends AbstractController
     #[Tag('Authorization')]
     public function logout(Request $request): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !$data['userId']){
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
 
         try {
-            $result = $this->authorizationService->logout($decodedToken->login);
+            $result = $this->authorizationService->logout($data['userId']);
         } catch (\Exception $e) {
             return $this->json(
                 [

@@ -16,9 +16,9 @@ class AccountFundingService
     /**
      * @throws \Exception
      */
-    public function fund($amount, $login): ?string
+    public function fund($amount, $userId): ?string
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($login);
+        $user = $this->em->getRepository(User::class)->findById($userId);
         $user->setBalance(bcadd($user->getBalance(), $amount, 2));
         $this->em->flush();
         return $user->getBalance();

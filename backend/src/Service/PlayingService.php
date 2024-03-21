@@ -20,12 +20,9 @@ class PlayingService
     /**
      * @throws \Exception
      */
-    public function savePlayingTime($gameId, $login, $time): void
+    public function savePlayingTime($purchasedGameId, $time): void
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($login);
-        $game = $this->em->getRepository(Game::class)->findById($gameId);
-
-        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
+        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findById($purchasedGameId);
 
         $purchasedGame->setHoursOfPlaying($time / self::HOUR_IN_MILLISECONDS);
         $this->em->flush();

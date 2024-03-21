@@ -16,22 +16,18 @@ use Symfony\Component\Routing\Attribute\Route;
 class ReviewsController extends AbstractController
 {
     public function __construct(
-        private readonly ReviewsService $reviewsService,
-        private readonly TokenService $tokenService
+        private readonly ReviewsService $reviewsService
     ) {
 
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/user/{userId}/games/{gameId}/review',
         methods: ['POST']
     )]
     #[Tag('Review')]
-    public function createGameReview(Request $request, $gameId): ?JsonResponse
+    public function createGameReview(Request $request, $userId, $gameId): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['content']){
@@ -44,7 +40,7 @@ class ReviewsController extends AbstractController
         }
 
         try {
-            $this->reviewsService->createGameReview($data['content'], $decodedToken->login, $gameId);
+            $this->reviewsService->createGameReview($data['content'], $userId, $gameId);
         } catch (\Exception $exception) {
             return $this->json(
                 [
@@ -63,7 +59,7 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/games/{gameId}/reviews',
         methods: ['GET']
     )]
     #[Tag('Review')]
@@ -78,15 +74,12 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/user/{userId}/games/{gameId}/review',
         methods: ['PATCH']
     )]
     #[Tag('Review')]
-    public function changeGameReviewContent(Request $request, $gameId): ?JsonResponse
+    public function changeGameReviewContent(Request $request, $userId, $gameId): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['content']){
@@ -99,7 +92,7 @@ class ReviewsController extends AbstractController
         }
 
         try {
-            $this->reviewsService->changeGameReviewContent($data['content'], $decodedToken->login, $gameId);
+            $this->reviewsService->changeGameReviewContent($data['content'], $userId, $gameId);
         } catch (\Exception $exception) {
             return $this->json(
                 [
@@ -118,17 +111,14 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        '/api/reviews/{gameId}',
+        '/api/user/{userId}/games/{gameId}/review',
         methods: ['DELETE']
     )]
     #[Tag('Review')]
-    public function deleteUsersReview(Request $request, $gameId): ?JsonResponse
+    public function deleteUsersReview(Request $request, $userId, $gameId): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         try {
-            $this->reviewsService->deleteUsersReview($decodedToken->login, $gameId);
+            $this->reviewsService->deleteUsersReview($userId, $gameId);
         } catch (\Exception $exception) {
             return $this->json(
                 [
@@ -147,17 +137,14 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        "/api/user/review/{gameId}",
+        "/api/user/{userId}/games/{gameId}/review",
         methods: ['GET']
     )]
     #[Tag('User')]
-    public function getUserReviewContentByGameId(Request $request, $gameId): JsonResponse
+    public function getUserReviewContentByGameId(Request $request, $userId, $gameId): JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         try {
-            $content = $this->reviewsService->getUserReviewContentByUserLoginAndGameId($decodedToken->login, $gameId);
+            $content = $this->reviewsService->getUserReviewContentByUserLoginAndGameId($userId, $gameId);
         } catch (\Exception $exception) {
             return $this->json(
                 [

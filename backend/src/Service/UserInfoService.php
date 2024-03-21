@@ -21,6 +21,7 @@ class UserInfoService
     {
         $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
         return [
+            'id' => $user->getId(),
             'login' => $user->getLogin(),
             'nickname' => $user->getNickname(),
             'balance' => $user->getBalance(),
@@ -34,9 +35,9 @@ class UserInfoService
     /**
      * @throws \Exception
      */
-    public function getUsersMostPlayedGames($userLogin): array
+    public function getUsersMostPlayedGames($userId): array
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
 
         $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findBy(
             ['user' => $user],
@@ -52,9 +53,9 @@ class UserInfoService
         }, $purchasedGames);
     }
 
-    public function updateUserInfo($userLogin, $data): User
+    public function updateUserInfo($userId, $data): User
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
 
         if ($data['nickname']) {
             $user->setNickname($data['nickname']);
@@ -81,9 +82,9 @@ class UserInfoService
     /**
      * @throws \Exception
      */
-    public function updatePassword($userLogin, $oldPassword, $newPassword): User
+    public function updatePassword($userId, $oldPassword, $newPassword): User
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
 
         if ($this->userPasswordHasher->isPasswordValid($user, $oldPassword)) {
             $this->authorizationService->validatePassword($newPassword);

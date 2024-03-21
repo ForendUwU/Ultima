@@ -40,17 +40,14 @@ class UserInfoController extends AbstractController
     }
 
     #[Route(
-        "/api/user/get-most-played-games",
+        "/api/user/{userId}/most-played-games",
         methods: ['GET']
     )]
     #[Tag('User')]
-    public function getUsersMostPlayedGames(Request $request): JsonResponse
+    public function getUsersMostPlayedGames(Request $request, $userId): JsonResponse
     {
-        $token = $request->headers->get('authorization');
-
-        $decodedToken = $this->tokenService->decodeLongToken($token);
         try {
-            $result = $this->userInfoService->getUsersMostPlayedGames($decodedToken->login);
+            $result = $this->userInfoService->getUsersMostPlayedGames($userId);
         } catch (\Exception $e) {
             return $this->json(
                 [
@@ -67,11 +64,11 @@ class UserInfoController extends AbstractController
     }
 
     #[Route(
-        "/api/user/change-data/{login}",
+        "/api/user/{userId}/change-data",
         methods: ['PATCH']
     )]
     #[Tag('User')]
-    public function updateUserInfo(Request $request, $login): JsonResponse
+    public function updateUserInfo(Request $request, $userId): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -84,7 +81,7 @@ class UserInfoController extends AbstractController
             );
         }
 
-        $this->userInfoService->updateUserInfo($login, $data);
+        $this->userInfoService->updateUserInfo($userId, $data);
 
         return $this->json(
             [
@@ -94,11 +91,11 @@ class UserInfoController extends AbstractController
     }
 
     #[Route(
-        "/api/user/change-pass/{login}",
+        "/api/user/{userId}/change-pass",
         methods: ['PATCH']
     )]
     #[Tag('User')]
-    public function updatePassword(Request $request, $login): JsonResponse
+    public function updatePassword(Request $request, $userId): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -112,7 +109,7 @@ class UserInfoController extends AbstractController
         }
 
         try {
-            $this->userInfoService->updatePassword($login, $data['oldPassword'], $data['newPassword']);
+            $this->userInfoService->updatePassword($userId, $data['oldPassword'], $data['newPassword']);
         } catch (\Exception $e) {
             return $this->json(
                 [

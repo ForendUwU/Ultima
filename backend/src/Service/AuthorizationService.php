@@ -39,9 +39,9 @@ class AuthorizationService
     /**
      * @throws \Exception
      */
-    public function logout(string $userLogin): string
+    public function logout($userId): string
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
 
         if (!$user->getToken()){
             throw new \Exception('User already unauthorized', Response::HTTP_FORBIDDEN);

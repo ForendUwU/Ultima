@@ -34,8 +34,10 @@ export default function ProfilePage() {
 
     const cookies = new Cookies();
 
+    const userId = userContext.userInfo ? userContext.userInfo.id : null;
+
     const [games, error, loading] = useFetch({
-        url: 'https://localhost/api/user/get-most-played-games',
+        url: 'https://localhost/api/user/'+userId+'/most-played-games',
         method: 'GET',
         token: cookies.get('token'),
     });
@@ -61,8 +63,7 @@ export default function ProfilePage() {
 
         if (validated) {
                 doRequest({
-                    url: 'https://localhost/api/user/change-data/',
-                    urlProp: userContext.userInfo.login,
+                    url: 'https://localhost/api/user/'+userContext.userInfo.id+'/change-data',
                     method: 'PATCH',
                     token: cookies.get('token'),
                     body: {
@@ -100,8 +101,7 @@ export default function ProfilePage() {
 
         if (validated) {
             const [data] = doRequest({
-                url: 'https://localhost/api/user/change-pass/',
-                urlProp: userContext.userInfo.login,
+                url: 'https://localhost/api/user/'+userContext.userInfo.id+'/change-pass',
                 method: 'PATCH',
                 token: cookies.get('token'),
                 body: {
@@ -119,8 +119,8 @@ export default function ProfilePage() {
         }
     }
 
-    if(loading || !headerContext.userLoaded) return <Loading />
-    if(error) return <Error errorText={error.toString()} />;
+    if(loading || !headerContext.userLoaded || !games) return <Loading />
+    //if(error) return <Error errorText={error.toString()} />;
 
     return(
         <FullscreenGrid>

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 export default function useFetch({
     url: url,
-    urlProp: urlProp = '',
     method: method,
     token: token = null,
     body: body = null,
@@ -28,9 +27,8 @@ export default function useFetch({
         } : null;
 
     useEffect(() => {
-        console.log(token || tokenFlag);
         if (token || tokenFlag) {
-            fetch(url + urlProp, {
+            fetch(url, {
                 method: method,
                 requestBody,
                 headers: requestHeaders

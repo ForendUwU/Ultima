@@ -19,12 +19,12 @@ class PurchaseService
     /**
      * @throws \Exception
      */
-    public function purchase($gameId, $userLogin): string
+    public function purchase($gameId, $userId): string
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
-        $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $user, 'game' => $game]);
+        $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
 
         if ($purchasedGames) {
             throw new \Exception('Game already purchased', Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -51,11 +51,12 @@ class PurchaseService
         }
     }
 
-    public function getPurchasedGames($login): array
+    public function getPurchasedGames($userId): array
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($login);
+        $user = $this->em->getRepository(User::class)->findById($userId);
 
         $result = $user->getPurchasedGames()->map(fn ($purchasedGame) => [
+            'id' => $purchasedGame->getId(),
             'gameId' => $purchasedGame->getGame()->getId(),
             'title' => $purchasedGame->getGame()->getTitle(),
             'hoursOfPlaying' =>  $purchasedGame->getHoursOfPlaying()
@@ -67,12 +68,9 @@ class PurchaseService
     /**
      * @throws \Exception
      */
-    public function deletePurchasedGame($gameId, $login): void
+    public function deletePurchasedGame($purchasedGameId): void
     {
-        $user = $this->em->getRepository(User::class)->findByLogin($login);
-        $game = $this->em->getRepository(Game::class)->findById($gameId);
-
-        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
+        $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findById($purchasedGameId);
 
         $this->em->remove($purchasedGame);
 
