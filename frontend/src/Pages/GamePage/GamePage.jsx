@@ -39,22 +39,22 @@ export default function GamePage() {
     });
     reviewsError && setError(error.toString() + "\n" + reviewsError.toString());
 
-    const [currentUserReviewContent, userReviewError, userReviewLoading] = useFetch({
-        url: 'https://localhost/api/user/'+userId+'/games/'+gameId+'/review',
+    const [currentUserReview, userReviewError, userReviewLoading] = useFetch({
+        url: 'https://localhost/api/games/'+gameId+'/review',
         method: 'GET',
         token: cookies.get('token'),
         tokenFlag: false,
         updateEffect: updateEffect
     });
+    console.log(currentUserReview);
     userReviewError && setError(error.toString() + "\n" + userReviewError.toString());
 
     const HandlePurchase = () => {
         if (cookies.get('token')) {
             const [data] = doRequest({
-                url: 'https://localhost/api/user/'+userId+'/purchase-game',
+                url: 'https://localhost/api/game/'+gameId+'/purchase',
                 method: 'POST',
                 token: cookies.get('token'),
-                body: {gameId: gameId},
                 tokenFlag: false
             });
 
@@ -72,9 +72,12 @@ export default function GamePage() {
 
     const handleDelete = () => {
         doRequest({
-            url: 'https://localhost/api/user/'+userContext.userInfo.id+'/games/'+gameId+'/review',
+            url: 'https://localhost/api/games/'+gameId+'/review',
             method: 'DELETE',
             token: cookies.get('token'),
+            body: {
+                reviewId: currentUserReview.reviewId
+            },
             tokenFlag: false,
         });
         toast.success('Review deleted');
@@ -91,21 +94,26 @@ export default function GamePage() {
         }
 
         if (validated) {
-            if (!currentUserReviewContent?.message) {
+            if (!currentUserReview.reviewId) {
                 doRequest({
-                    url: 'https://localhost/api/user/'+userContext.userInfo.id+'/games/'+gameId+'/review',
+                    url: 'https://localhost/api/games/'+gameId+'/review',
                     method: 'POST',
                     token: cookies.get('token'),
-                    body: {content: reviewData},
+                    body: {
+                        content: reviewData
+                    },
                     tokenFlag: false,
                 });
                 toast.success('Review created');
             } else {
                 doRequest({
-                    url: 'https://localhost/api/user/'+userContext.userInfo.id+'/games/'+gameId+'/review',
+                    url: 'https://localhost/api/games/'+gameId+'/review',
                     method: 'PATCH',
                     token: cookies.get('token'),
-                    body: {content: reviewData},
+                    body: {
+                        reviewId: currentUserReview.reviewId,
+                        content: reviewData
+                    },
                     tokenFlag: false,
                 });
                 toast.success('Review updated');
@@ -129,7 +137,7 @@ export default function GamePage() {
                         handleCreateOrUpdateReview={handleCreateOrUpdateReview}
                         handleDelete={handleDelete}
                         reviews={reviews}
-                        currentUserReviewContent={currentUserReviewContent}
+                        currentUserReview={currentUserReview}
                     />
                 </GlowingGrid>
             </Container>

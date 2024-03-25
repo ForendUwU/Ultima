@@ -24,7 +24,7 @@ class PurchaseService
         $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
-        $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findByGameAndUser($game, $user);
+        $purchasedGames = $this->em->getRepository(PurchasedGame::class)->findOneBy(['game' => $game, 'user' => $user]);
 
         if ($purchasedGames) {
             throw new \Exception('Game already purchased', Response::HTTP_UNPROCESSABLE_ENTITY);

@@ -56,18 +56,11 @@ class ReviewsService
     /**
      * @throws \Exception
      */
-    public function changeGameReviewContent($reviewContent, $userId, $gameId): Review
+    public function changeGameReviewContent($reviewContent, $reviewId): Review
     {
-        $user = $this->em->getRepository(User::class)->findById($userId);
-        $game = $this->em->getRepository(Game::class)->findById($gameId);
+        $review = $this->em->getRepository(Review::class)->findById($reviewId);
 
-        $review = $this->em->getRepository(Review::class)->findByGameAndUser($game, $user);
-        if ($review) {
-            $review->setContent($reviewContent);
-        } else {
-            throw new \Exception('User\'s review not found', Response::HTTP_NOT_FOUND);
-        }
-
+        $review->setContent($reviewContent);
         $this->em->flush();
 
         return $review;
@@ -76,31 +69,27 @@ class ReviewsService
     /**
      * @throws \Exception
      */
-    public function deleteUsersReview($userId, $gameId): void
+    public function deleteUsersReview($reviewId): void
     {
-        $user = $this->em->getRepository(User::class)->findById($userId);
-        $game = $this->em->getRepository(Game::class)->findById($gameId);
+        $review = $this->em->getRepository(Review::class)->findById($reviewId);
 
-        $review = $this->em->getRepository(Review::class)->findByGameAndUser($game, $user);
-        if ($review) {
-            $this->em->remove($review);
-        } else {
-            throw new \Exception('User\'s review not found', Response::HTTP_NOT_FOUND);
-        }
-
+        $this->em->remove($review);
         $this->em->flush();
     }
 
     /**
      * @throws \Exception
      */
-    public function getUserReviewContentByUserLoginAndGameId($userId, $gameId): ?string
+    public function getUserReview($userId, $gameId): ?array
     {
         $user = $this->em->getRepository(User::class)->findById($userId);
         $game = $this->em->getRepository(Game::class)->findById($gameId);
 
         $review = $this->em->getRepository(Review::class)->findOneBy(['user' => $user, 'game' => $game]);
 
-        return $review ? $review->getContent() : null;
+        return $review ? [
+            'id' => $review->getId(),
+            'content' => $review->getContent()
+        ] : null;
     }
 }

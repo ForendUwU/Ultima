@@ -11,15 +11,11 @@ trait CreateReviewTrait
     public static function createReview(
         $user,
         $game,
-        $likes = 0,
-        $dislikes = 0,
         $content = 'testContent',
     ): Review {
         $testReview = new Review();
         $testReview->setUser($user ?: self::createUser());
         $testReview->setGame($game ?: self::createGame());
-        $testReview->setLikes($likes);
-        $testReview->setDislikes($dislikes);
         $testReview->setContent($content);
 
         return $testReview;
@@ -33,11 +29,19 @@ trait CreateReviewTrait
             ->willReturn($reviewRepositoryMock);
     }
 
-    public static function setTestReviewAsReturnFromRepositoryMock($reviewRepositoryMock, $testReview): void
+    public static function setTestReviewAsReturnFromRepositoryMockByGameAndUser($reviewRepositoryMock, $testReview): void
     {
         $reviewRepositoryMock
             ->expects(static::once())
             ->method('findByGameAndUser')
+            ->willReturn($testReview);
+    }
+
+    public static function setTestReviewAsReturnFromRepositoryMockById($reviewRepositoryMock, $testReview): void
+    {
+        $reviewRepositoryMock
+            ->expects(static::once())
+            ->method('findById')
             ->willReturn($testReview);
     }
 }

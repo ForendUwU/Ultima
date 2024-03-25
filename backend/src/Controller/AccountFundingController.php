@@ -16,19 +16,23 @@ use Symfony\Component\Routing\Attribute\Route;
 class AccountFundingController extends AbstractController
 {
     public function __construct(
-        private readonly AccountFundingService $accountFundingService
+        private readonly AccountFundingService $accountFundingService,
+        private readonly TokenService $tokenService
     ) {
 
     }
 
     #[Route(
-        "/api/{userId}/fund",
-        methods: ['PATCH']
+        "/api/user/fund",
+        methods: ['POST']
     )]
     #[Tag('AccountFunding')]
-    public function fund(Request $request, $userId): JsonResponse
+    public function fund(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
 
         if (!$data || !$data['amount']){
             return $this->json(
@@ -40,7 +44,7 @@ class AccountFundingController extends AbstractController
         }
 
         try {
-            $result = $this->accountFundingService->fund($data['amount'], $userId);
+            $result = $this->accountFundingService->fund($data['amount'], $decodedToken->id);
         }
         catch (\Exception $e) {
             return $this->json(

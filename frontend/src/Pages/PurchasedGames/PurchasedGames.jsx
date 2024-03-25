@@ -18,13 +18,10 @@ export default function PurchasedGames() {
     const cookies = new Cookies();
 
     const headerContext = useContext(HeaderContext);
-    const userContext = useContext(UserContext);
-
-    const userId = userContext.userInfo ? userContext.userInfo.id : null;
 
     //Get games purchased by user
     const [games, error, loading] = useFetch({
-        url:'https://localhost/api/user/'+userId+'/purchased-games',
+        url:'https://localhost/api/user/purchased-games',
         method: 'GET',
         token: cookies.get('token'),
         updateEffect: update

@@ -188,11 +188,8 @@ class Game
 
     public function removeReview(Review $review): static
     {
-        if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
-            if ($review->getGame() === $this) {
-                $review->setGame(null);
-            }
+        if ($this->reviews->removeElement($review) && $review->getGame() === $this) {
+            $review->setGame(null);
         }
 
         return $this;

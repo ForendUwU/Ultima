@@ -71,7 +71,7 @@ class AuthorizationServiceTest extends TestCase
 
         $userRepositoryMock = $this->createMock(UserRepository::class);
         $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
-        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestUserAsReturnFromRepositoryMockByLogin($userRepositoryMock, $testUser);
 
         if ($password === 'testPassword') {
             $this->tokenServiceMock
@@ -112,10 +112,10 @@ class AuthorizationServiceTest extends TestCase
 
         $userRepositoryMock = $this->createMock(UserRepository::class);
         $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
-        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
 
         if ($token) {
-            $result = $this->authService->logout($testUser->getLogin());
+            $result = $this->authService->logout($testUser->getId());
 
             $this->assertNotNull($result);
             $this->assertEquals('Logout successfully', $result);
@@ -123,7 +123,7 @@ class AuthorizationServiceTest extends TestCase
             $this->expectException(\Exception::class);
             $this->expectExceptionMessage('User already unauthorized');
 
-            $this->authService->logout($testUser->getLogin());
+            $this->authService->logout($testUser->getId());
         }
     }
 

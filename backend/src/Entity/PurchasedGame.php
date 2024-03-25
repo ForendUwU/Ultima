@@ -56,7 +56,7 @@ class PurchasedGame
     private ?Game $game = null;
 
     #[ORM\Column]
-    private ?int $UndefinedLikedDisliked = 0;
+    private ?int $undefinedLikedDisliked = 0;
 
     public function __construct()
     {
@@ -112,12 +112,12 @@ class PurchasedGame
 
     public function getUndefinedLikedDisliked(): ?int
     {
-        return $this->UndefinedLikedDisliked;
+        return $this->undefinedLikedDisliked;
     }
 
-    public function setUndefinedLikedDisliked(int $UndefinedLikedDisliked): static
+    public function setUndefinedLikedDisliked(int $undefinedLikedDisliked): static
     {
-        $this->UndefinedLikedDisliked = $UndefinedLikedDisliked;
+        $this->undefinedLikedDisliked = $undefinedLikedDisliked;
 
         return $this;
     }

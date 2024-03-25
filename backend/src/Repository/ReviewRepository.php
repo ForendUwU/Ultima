@@ -37,4 +37,18 @@ class ReviewRepository extends ServiceEntityRepository
 
         return $review;
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function findById(int $id): Review
+    {
+        $review = $this->findOneBy(['id' => $id]);
+
+        if (!$review){
+            throw new \Exception('Review not found', Response::HTTP_NOT_FOUND);
+        }
+
+        return $review;
+    }
 }

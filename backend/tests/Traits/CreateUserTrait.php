@@ -14,7 +14,7 @@ trait CreateUserTrait
         $firstName = 'testFirstName',
         $lastName = 'testLastName',
         $password = 'testPassword',
-        $token = 'testToken' //TODO add func to create user token
+        $token = 'testToken'
     ): User {
         $testUser = new User();
         $testUser->setLogin($login);
@@ -29,6 +29,13 @@ trait CreateUserTrait
         return $testUser;
     }
 
+    public static function addTokenToUser(User $user): string
+    {
+        $token = static::$tokenService->createToken($user);
+        $user->setToken($token);
+        return $token;
+    }
+
     public static function setUserRepositoryAsReturnFromEntityManager($userRepositoryMock): void
     {
         static::$emMock
@@ -37,11 +44,19 @@ trait CreateUserTrait
             ->willReturn($userRepositoryMock);
     }
 
-    public static function setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser): void
+    public static function setTestUserAsReturnFromRepositoryMockByLogin($userRepositoryMock, $testUser): void
     {
         $userRepositoryMock
             ->expects(static::once())
             ->method('findByLogin')
+            ->willReturn($testUser);
+    }
+
+    public static function setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser): void
+    {
+        $userRepositoryMock
+            ->expects(static::once())
+            ->method('findById')
             ->willReturn($testUser);
     }
 }

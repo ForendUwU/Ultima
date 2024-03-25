@@ -26,9 +26,9 @@ class AccountFundingServiceTest extends TestCase
 
         $userRepositoryMock = $this->createMock(UserRepository::class);
         $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
-        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
 
-        $this->accountFuncdingService->fund(10, $testUser->getLogin());
+        $this->accountFuncdingService->fund(10, $testUser->getId());
 
         $this->assertEquals('10.00', $testUser->getBalance());
     }

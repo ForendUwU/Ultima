@@ -29,11 +29,19 @@ trait CreatePurchasedGameTrait
             ->willReturn($purchasedGameRepositoryMock);
     }
 
-    public static function setTestPurchasedGameAsReturnFromRepositoryMock($purchasedGameRepositoryMock, $testPurchasedGame): void
+    public static function setTestPurchasedGameAsReturnFromRepositoryMockByGameAndUser($purchasedGameRepositoryMock, $testPurchasedGame): void
     {
         $purchasedGameRepositoryMock
             ->expects(static::once())
             ->method('findByGameAndUser')
+            ->willReturn($testPurchasedGame);
+    }
+
+    public static function setTestPurchasedGameAsReturnFromRepositoryMockById($purchasedGameRepositoryMock, $testPurchasedGame): void
+    {
+        $purchasedGameRepositoryMock
+            ->expects(static::once())
+            ->method('findById')
             ->willReturn($testPurchasedGame);
     }
 }

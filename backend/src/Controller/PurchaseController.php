@@ -16,31 +16,24 @@ use Symfony\Component\Routing\Attribute\Route;
 class PurchaseController extends AbstractController
 {
     public function __construct(
-        private readonly PurchaseService $purchaseService
+        private readonly PurchaseService $purchaseService,
+        private readonly TokenService $tokenService
     ) {
 
     }
 
     #[Route(
-        "/api/user/{userId}/purchase-game",
+        "/api/game/{gameId}/purchase",
         methods: ['POST']
     )]
     #[Tag('Purchase')]
-    public function purchase(Request $request, $userId): JsonResponse
+    public function purchase(Request $request, $gameId): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!$data || !$data['gameId']){
-            return $this->json(
-                [
-                    'message' => 'Missing data'
-                ],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $result = $this->purchaseService->purchase($data['gameId'], $userId);
+            $result = $this->purchaseService->purchase($gameId, $decodedToken->id);
         } catch (\Exception $e) {
             return $this->json(
                 [
@@ -59,16 +52,16 @@ class PurchaseController extends AbstractController
     }
 
     #[Route(
-        '/api/user/{userId}/purchased-games',
+        '/api/user/purchased-games',
         methods: ['GET']
     )]
     #[Tag('Purchase')]
-    public function getUsersPurchasedGames(Request $request, $userId): ?JsonResponse
+    public function getUsersPurchasedGames(Request $request): ?JsonResponse
     {
-//        $token = $request->headers->get('authorization');
-//        $decodedToken = $this->tokenService->decodeLongToken($token);
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
 
-        $result = $this->purchaseService->getPurchasedGames($userId);
+        $result = $this->purchaseService->getPurchasedGames($decodedToken->id);
 
         return $this->json(
             $result,

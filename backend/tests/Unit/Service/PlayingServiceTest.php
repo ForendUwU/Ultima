@@ -31,22 +31,18 @@ class PlayingServiceTest extends TestCase
         $testUser = $this->createUser();
         $testGame = $this->createGame();
 
-        $userRepositoryMock = $this->createMock(UserRepository::class);
-        $gameRepositoryMock = $this->createMock(GamesRepository::class);
         $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
 
         static::$emMock
-            ->expects(static::exactly(3))
+            ->expects(static::once())
             ->method('getRepository')
-            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $purchasedGameRepositoryMock);
+            ->willReturnOnConsecutiveCalls($purchasedGameRepositoryMock);
 
-        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
-        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
 
         $testPurchasedGame = $this->createPurchasedGame($testUser, $testGame);
-        $this->setTestPurchasedGameAsReturnFromRepositoryMock($purchasedGameRepositoryMock, $testPurchasedGame);
+        $this->setTestPurchasedGameAsReturnFromRepositoryMockById($purchasedGameRepositoryMock, $testPurchasedGame);
 
-        $this->playingService->savePlayingTime($testGame->getId(), $testUser->getLogin(), 60000);
+        $this->playingService->savePlayingTime($testGame->getId(), 60000);
 
         $this->assertEquals(60000 / 3600000, $testPurchasedGame->getHoursOfPlaying());
     }

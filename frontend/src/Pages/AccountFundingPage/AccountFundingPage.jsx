@@ -16,11 +16,10 @@ export default function AccountFundingPage() {
 
     function handleClick (amount) {
         const [data, error] = doRequest({
-            url: 'https://localhost/api/'+userContext.userInfo.id+'/fund',
-            method: 'PATCH',
+            url: 'https://localhost/api/user/fund',
+            method: 'POST',
             token: cookies.get('token'),
-            body: {amount: amount},
-            tokenFlag: false,
+            body: {amount: amount}
         });
 
         setFundingError(error);

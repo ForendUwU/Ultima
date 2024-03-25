@@ -29,9 +29,9 @@ class UserInfoController extends AbstractController
     public function getUserInfo(Request $request): ?JsonResponse
     {
         $token = $request->headers->get('authorization');
-
         $decodedToken = $this->tokenService->decodeLongToken($token);
-        $result = $this->userInfoService->getUserInfo($decodedToken->login);
+
+        $result = $this->userInfoService->getUserInfo($decodedToken->id);
 
         return $this->json(
             $result,
@@ -40,14 +40,17 @@ class UserInfoController extends AbstractController
     }
 
     #[Route(
-        "/api/user/{userId}/most-played-games",
+        "/api/user/most-played-games",
         methods: ['GET']
     )]
     #[Tag('User')]
-    public function getUsersMostPlayedGames(Request $request, $userId): JsonResponse
+    public function getUsersMostPlayedGames(Request $request): JsonResponse
     {
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
+
         try {
-            $result = $this->userInfoService->getUsersMostPlayedGames($userId);
+            $result = $this->userInfoService->getUsersMostPlayedGames($decodedToken->id);
         } catch (\Exception $e) {
             return $this->json(
                 [
@@ -64,12 +67,15 @@ class UserInfoController extends AbstractController
     }
 
     #[Route(
-        "/api/user/{userId}/change-data",
-        methods: ['PATCH']
+        "/api/user/change-data",
+        methods: ['POST']
     )]
     #[Tag('User')]
-    public function updateUserInfo(Request $request, $userId): JsonResponse
+    public function updateUserInfo(Request $request): JsonResponse
     {
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
+
         $data = json_decode($request->getContent(), true);
 
         if (!$data){
@@ -81,7 +87,7 @@ class UserInfoController extends AbstractController
             );
         }
 
-        $this->userInfoService->updateUserInfo($userId, $data);
+        $this->userInfoService->updateUserInfo($decodedToken->id, $data);
 
         return $this->json(
             [

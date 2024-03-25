@@ -34,10 +34,8 @@ export default function ProfilePage() {
 
     const cookies = new Cookies();
 
-    const userId = userContext.userInfo ? userContext.userInfo.id : null;
-
     const [games, error, loading] = useFetch({
-        url: 'https://localhost/api/user/'+userId+'/most-played-games',
+        url: 'https://localhost/api/user/most-played-games',
         method: 'GET',
         token: cookies.get('token'),
     });
@@ -63,8 +61,8 @@ export default function ProfilePage() {
 
         if (validated) {
                 doRequest({
-                    url: 'https://localhost/api/user/'+userContext.userInfo.id+'/change-data',
-                    method: 'PATCH',
+                    url: 'https://localhost/api/user/change-data',
+                    method: 'POST',
                     token: cookies.get('token'),
                     body: {
                         nickname: localNickname,

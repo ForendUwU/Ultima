@@ -4,11 +4,10 @@ namespace App\Tests\Functional\Controller;
 
 use App\Entity\Game;
 use App\Entity\Review;
-use App\Entity\User;
-use App\Factory\GameFactory;
-use App\Factory\ReviewFactory;
-use App\Factory\UserFactory;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreateReviewTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -17,18 +16,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ReviewsControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    use ResetDatabase, CreateUserTrait, CreateGameTrait, CreateReviewTrait;
 
     protected KernelBrowser $client;
     protected EntityManager $em;
-    protected TokenService $tokenService;
+    protected static TokenService $tokenService;
 
     public function setUp(): void
     {
         $this->client = static::createClient();
         $container = static::getContainer();
 
-        $this->tokenService = $container->get(TokenService::class);
+        static::$tokenService = $container->get(TokenService::class);
         $this->em = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -81,37 +80,26 @@ class ReviewsControllerTest extends WebTestCase
      */
     public function testCreateGameReview($reviewContent, $createFakeReview)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword',
-            'balance' => '999'
-        ]);
-
-        GameFactory::createOne([
-            'title' => 'testTitle1',
-            'price' => '99'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
+        $testUser = $this->createUser();
         $this->em->persist($testUser);
         $this->em->flush();
+        $testToken = $this->addTokenToUser($testUser);
 
-        $testGame = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle1']);
+        $testGame = $this->createGame();
+        $this->em->persist($testGame);
 
         if ($createFakeReview) {
-            ReviewFactory::createOne([
-                'user' => $testUser,
-                'game' => $testGame
-            ]);
+            $testReview = $this->createReview($testUser, $testGame);
+            $this->em->persist($testReview);
         }
+
+        $this->em->flush();
+
+        $testGameId = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle'])->getId();
 
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/reviews/1',
+            'https://localhost/api/games/'.$testGameId.'/review',
             [
                 'content' => $reviewContent
             ],
@@ -153,37 +141,24 @@ class ReviewsControllerTest extends WebTestCase
      */
     public function testGetGameReviews($createFakeReview)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
+        $testUser = $this->createUser();
+        $testGame = $this->createGame();
 
-        GameFactory::createOne([
-            'title' => 'testTitle'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testGame = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle']);
-
-        if ($createFakeReview) {
-            ReviewFactory::createOne([
-                'user' => $testUser,
-                'game' => $testGame,
-                'likes' => 0,
-                'dislikes' => 0
-            ]);
-        }
-
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
+        $this->addTokenToUser($testUser);
 
         $this->em->persist($testUser);
+        $this->em->persist($testGame);
+
+        if ($createFakeReview) {
+            $testReview = $this->createReview($testUser, $testGame);
+            $this->em->persist($testReview);
+        }
+
         $this->em->flush();
 
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/reviews/1'
+            'https://localhost/api/games/'.$testGame->getId().'/reviews'
         );
 
         $response = $this->client->getResponse();
@@ -196,12 +171,8 @@ class ReviewsControllerTest extends WebTestCase
             $this->assertArrayHasKey(0, $decodedResponse);
             $this->assertNotEmpty($decodedResponse[0]);
             $this->assertArrayHasKey('content', $decodedResponse[0]);
-            $this->assertArrayHasKey('likes', $decodedResponse[0]);
-            $this->assertArrayHasKey('dislikes', $decodedResponse[0]);
             $this->assertArrayHasKey('userNickname', $decodedResponse[0]);
             $this->assertNotNull($decodedResponse[0]['content']);
-            $this->assertEquals(0, $decodedResponse[0]['likes']);
-            $this->assertEquals(0, $decodedResponse[0]['dislikes']);
             $this->assertEquals($testUser->getNickname(), $decodedResponse[0]['userNickname']);
         } else if (!$createFakeReview) {
             $this->assertEmpty($decodedResponse);
@@ -211,40 +182,31 @@ class ReviewsControllerTest extends WebTestCase
     /**
      *  @dataProvider changeGameReviewDataProvider
      */
-    public function testChangeGameReviewContent($reviewContent, $createFakeReview)
+    public function testChangeGameReviewContent($reviewContent, $createTestReview)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword',
-            'balance' => '999'
-        ]);
-
-        GameFactory::createOne([
-            'title' => 'testTitle1',
-            'price' => '99'
-        ]);
-
-        $testGame = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle1']);
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
+        $testUser = $this->createUser();
         $this->em->persist($testUser);
         $this->em->flush();
+        $testToken = $this->addTokenToUser($testUser);
 
-        if ($createFakeReview) {
-            ReviewFactory::createOne([
-                'user' => $testUser,
-                'game' => $testGame,
-                'content' => 'content before change'
-            ]);
+        $testGame = $this->createGame();
+        $this->em->persist($testGame);
+
+        if ($createTestReview) {
+            $testReview = $this->createReview(
+                user: $testUser,
+                game: $testGame
+            );
+            $this->em->persist($testReview);
         }
+
+        $this->em->flush();
 
         $this->client->jsonRequest(
             'PATCH',
-            'https://localhost/api/reviews/1',
+            'https://localhost/api/games/'.$testGame->getId().'/review',
             [
+                'reviewId' => isset($testReview) ? $testReview->getId() : 999,
                 'content' => $reviewContent
             ],
             [
@@ -255,7 +217,7 @@ class ReviewsControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($reviewContent != null && $createFakeReview) {
+        if ($reviewContent != null && $createTestReview) {
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Review was successfully changed', $decodedResponse['message']);
@@ -269,11 +231,11 @@ class ReviewsControllerTest extends WebTestCase
             $this->assertEquals($testGame, $review->getGame());
             $this->assertEquals($testUser, $review->getUser());
             $this->assertEquals($reviewContent, $review->getContent());
-        } else if ($reviewContent != null && !$createFakeReview) {
+        } else if ($reviewContent != null && !$createTestReview) {
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Review not found', $decodedResponse['message']);
-        } else if ($reviewContent == null && $createFakeReview) {
+        } else if ($reviewContent == null && $createTestReview) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Missing data', $decodedResponse['message']);
@@ -285,37 +247,31 @@ class ReviewsControllerTest extends WebTestCase
      */
     public function testDeleteReview($createFakeReview)
     {
-        $user = UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword',
-        ]);
-
-        $game = GameFactory::createOne([
-            'title' => 'testTitle1',
-            'price' => '99'
-        ]);
-
-        $testGame = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle1']);
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
+        $testUser = $this->createUser();
         $this->em->persist($testUser);
         $this->em->flush();
+        $testToken = $this->addTokenToUser($testUser);
+
+        $testGame = $this->createGame();
+
+        $this->em->persist($testGame);
 
         if ($createFakeReview) {
-            ReviewFactory::createOne([
-                'game' => $game,
-                'user' => $user
-            ]);
+            $testReview = $this->createReview(
+                user: $testUser,
+                game: $testGame
+            );
+            $this->em->persist($testReview);
         }
+
+        $this->em->flush();
 
         $this->client->jsonRequest(
             'DELETE',
-            'https://localhost/api/reviews/1',
-            [],
+            'https://localhost/api/games/'.$testGame->getId().'/review',
+            [
+                'reviewId' => isset($testReview) ? $testReview->getId() : 999
+            ],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
             ]
@@ -344,37 +300,27 @@ class ReviewsControllerTest extends WebTestCase
      */
     public function testGetUserReviewContentByGameId($createFakeReview)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
+        $testUser = $this->createUser();
+        $this->em->persist($testUser);
+        $this->em->flush();
+        $testToken = $this->addTokenToUser($testUser);
 
-        GameFactory::createOne([
-            'title' => 'testTitle'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testGame = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle']);
+        $testGame = $this->createGame();
+        $this->em->persist($testGame);
 
         if ($createFakeReview) {
-            ReviewFactory::createOne([
-                'user' => $testUser,
-                'game' => $testGame,
-                'likes' => 0,
-                'dislikes' => 0
-            ]);
+            $testReview = $this->createReview(
+                user: $testUser,
+                game: $testGame
+            );
+            $this->em->persist($testReview);
         }
 
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
-        $this->em->persist($testUser);
         $this->em->flush();
 
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/user/review/1',
+            'https://localhost/api/games/'.$testGame->getId().'/review',
             [],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -388,12 +334,18 @@ class ReviewsControllerTest extends WebTestCase
 
         if ($createFakeReview) {
             $this->assertNotEmpty($decodedResponse);
-            $this->assertArrayHasKey('message', $decodedResponse);
-            $this->assertNotNull($decodedResponse['message']);
+            $this->assertArrayHasKey('reviewId', $decodedResponse);
+            $this->assertArrayHasKey('reviewContent', $decodedResponse);
+            $this->assertNotNull($decodedResponse['reviewId']);
+            $this->assertNotNull($decodedResponse['reviewContent']);
+            $this->assertEquals($testReview->getId(), $decodedResponse['reviewId']);
+            $this->assertEquals($testReview->getContent(), $decodedResponse['reviewContent']);
         } else if (!$createFakeReview) {
             $this->assertNotEmpty($decodedResponse);
-            $this->assertArrayHasKey('message', $decodedResponse);
-            $this->assertEmpty($decodedResponse['message']);
+            $this->assertArrayHasKey('reviewId', $decodedResponse);
+            $this->assertArrayHasKey('reviewContent', $decodedResponse);
+            $this->assertEmpty($decodedResponse['reviewId']);
+            $this->assertEmpty($decodedResponse['reviewContent']);
         }
     }
 }

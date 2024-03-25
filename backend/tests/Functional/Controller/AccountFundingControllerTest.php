@@ -3,9 +3,9 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Entity\User;
-use App\Factory\UserFactory;
 use App\Service\AccountFundingService;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -14,18 +14,18 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 
 class AccountFundingControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    use ResetDatabase, CreateUserTrait;
 
     protected KernelBrowser $client;
     protected EntityManager $em;
-    protected TokenService $tokenService;
+    protected static TokenService $tokenService;
     protected AccountFundingService $accountFundingService;
     public function setUp(): void
     {
         $this->client = static::createClient();
         $container = static::getContainer();
 
-        $this->tokenService = $container->get(TokenService::class);
+        static::$tokenService = $container->get(TokenService::class);
         $this->accountFundingService = $container->get(AccountFundingService::class);
         $this->em = $this->client->getContainer()
             ->get('doctrine')
@@ -37,39 +37,33 @@ class AccountFundingControllerTest extends WebTestCase
         return [
             'success' => ['10', false],
             'missing data' => ['', false],
-            'unauthorized ' => ['', true]
+            'unauthorized ' => ['10', true]
         ];
     }
 
     /**
      *  @dataProvider fundDataProvider
      */
-    public function testFund($amount, $createFakeToken)
+    public function testFund($amount, $unauthorizedUser)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword1!',
-            'balance' => '0.00'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
+        $testUser = $this->createUser();
 
         $this->em->persist($testUser);
         $this->em->flush();
 
-        if ($createFakeToken) {
-            $fakeUser = new User();
-            $fakeUser->setLogin('fakeLogin');
+        $testUser = $this->em->getRepository(User::class)->findByLogin('testLogin');
 
-            $testToken = $this->tokenService->createToken($fakeUser);
+        $testToken = $this->addTokenToUser($testUser);
+
+        if ($unauthorizedUser) {
+            $testUser->setToken(null);
         }
 
+        $this->em->flush();
+
         $this->client->jsonRequest(
-            'PATCH',
-            'https://localhost/api/fund',
+            'POST',
+            'https://localhost/api/user/fund',
             [
                 'amount' => $amount
             ],
@@ -81,21 +75,21 @@ class AccountFundingControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($amount === '10' && !$createFakeToken) {
+        if ($amount === '10' && !$unauthorizedUser) {
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-            $this->assertArrayHasKey('message', $decodedResponse);
-            $this->assertNotEmpty($decodedResponse['message']);
-            $this->assertEquals('Successfully funded', $decodedResponse['message']);
+            $this->assertArrayHasKey('newAmount', $decodedResponse);
+            $this->assertNotEmpty($decodedResponse['newAmount']);
+            $this->assertEquals('10.00', $decodedResponse['newAmount']);
 
             $actualUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
 
             $this->assertEquals('10.00', $actualUser->getBalance());
-        } else if ($amount === '' && !$createFakeToken) {
+        } else if ($amount === '' && !$unauthorizedUser) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
             $this->assertArrayHasKey('message', $decodedResponse);
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Missing data', $decodedResponse['message']);
-        } else if ($createFakeToken) {
+        } else if ($unauthorizedUser) {
             $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
             $this->assertArrayHasKey('message', $decodedResponse);
             $this->assertNotEmpty($decodedResponse['message']);

@@ -3,7 +3,7 @@ import {PageTitle, ReviewInputField} from "../../Components";
 import React from "react";
 import Cookies from "universal-cookie";
 
-export default function Reviews({handleCreateOrUpdateReview, handleDelete, reviews,  currentUserReviewContent}) {
+export default function Reviews({handleCreateOrUpdateReview, handleDelete, reviews,  currentUserReview}) {
     const [inputData, setInputData] = React.useState();
 
     const cookies = new Cookies();
@@ -12,17 +12,17 @@ export default function Reviews({handleCreateOrUpdateReview, handleDelete, revie
     <>
         {cookies.get('token') &&
             <Stack sx={{marginBottom:"3%"}}>
-                <ReviewInputField setter={setInputData} defaultValue={currentUserReviewContent.message} />
+                <ReviewInputField setter={setInputData} defaultValue={currentUserReview.reviewContent} />
                 <Grid>
                     <Button
                         variant="outlined"
                         color="success"
                         onClick={() => handleCreateOrUpdateReview(inputData)}
-                        sx={{ fontSize: "120%", width: currentUserReviewContent.message ?  "49%" : "100%" }}
+                        sx={{ fontSize: "120%", width: currentUserReview.reviewId ?  "49%" : "100%" }}
                     >
-                        {currentUserReviewContent.message ?  "Change review" : "Create review"}
+                        {currentUserReview.reviewId ?  "Change review" : "Create review"}
                     </Button>
-                    {currentUserReviewContent.message &&
+                    {currentUserReview.reviewId &&
                         <Button
                             variant="outlined"
                             color="error"

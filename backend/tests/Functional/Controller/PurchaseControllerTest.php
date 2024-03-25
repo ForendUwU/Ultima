@@ -5,10 +5,10 @@ namespace App\Tests\Functional\Controller;
 use App\Entity\Game;
 use App\Entity\PurchasedGame;
 use App\Entity\User;
-use App\Factory\GameFactory;
-use App\Factory\PurchasedGameFactory;
-use App\Factory\UserFactory;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreatePurchasedGameTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -17,18 +17,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PurchaseControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    use ResetDatabase, CreateUserTrait, CreateGameTrait, CreatePurchasedGameTrait;
 
     protected KernelBrowser $client;
     protected EntityManager $em;
-    protected TokenService $tokenService;
+    protected static TokenService $tokenService;
 
     public function setUp(): void
     {
         $this->client = static::createClient();
         $container = static::getContainer();
 
-        $this->tokenService = $container->get(TokenService::class);
+        static::$tokenService = $container->get(TokenService::class);
         $this->em = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -38,7 +38,6 @@ class PurchaseControllerTest extends WebTestCase
     {
         return [
            'success' => [1],
-           'missing data' => [null],
            'not enough money' => [2]
         ];
     }
@@ -57,36 +56,35 @@ class PurchaseControllerTest extends WebTestCase
      */
     public function testPurchase($gameId)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword',
-            'balance' => '999'
-        ]);
-
-        GameFactory::createOne([
-            'title' => 'testTitle1',
-            'price' => '99'
-        ]);
-
-        GameFactory::createOne([
-            'title' => 'testTitle2',
-            'price' => '9999'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
+        $testUser = $this->createUser(
+            balance: 999
+        );
 
         $this->em->persist($testUser);
         $this->em->flush();
 
+        $testGame = $this->createGame(
+            title: 'testTitle1',
+            price: 99
+        );
+
+        $testGame2 = $this->createGame(
+            title: 'testTitle2',
+            price: 9999
+        );
+
+        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
+
+        $testToken = $this->addTokenToUser($testUser);
+
+        $this->em->persist($testGame);
+        $this->em->persist($testGame2);
+        $this->em->flush();
+
         $this->client->jsonRequest(
             'POST',
-            'https://localhost/api/purchase-game',
-            [
-                'gameId' => $gameId
-            ],
+            'https://localhost/api/game/'.$gameId.'/purchase',
+            [],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
             ]
@@ -113,42 +111,34 @@ class PurchaseControllerTest extends WebTestCase
             $this->assertEquals(Response::HTTP_FORBIDDEN, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Not enough money', $decodedResponse['message']);
-        } else if (!$gameId) {
-            $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-            $this->assertNotEmpty($decodedResponse['message']);
-            $this->assertEquals('Missing data', $decodedResponse['message']);
         }
     }
 
     public function testGetPurchasedGamesSuccess()
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
-
-        GameFactory::createOne([
-            'title' => 'testTitle'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testGame = $this->em->getRepository(Game::class)->findOneBy(['title' => 'testTitle']);
-
-        PurchasedGameFactory::createOne([
-            'user' => $testUser,
-            'game' => $testGame
-        ]);
-
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
+        $testUser = $this->createUser();
 
         $this->em->persist($testUser);
         $this->em->flush();
 
+        $testGame = $this->createGame();
+        $testPurchasedGame = $this->createPurchasedGame(
+            user: $testUser,
+            game: $testGame
+        );
+
+        $testUser = $this->em->getRepository(User::class)->findOneByLogin($testUser->getLogin());
+        $testToken = $this->addTokenToUser($testUser);
+
+        $testUser->addPurchasedGame($testPurchasedGame);
+
+        $this->em->persist($testGame);
+        $this->em->persist($testPurchasedGame);
+        $this->em->flush();
+
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/purchase-game',
+            'https://localhost/api/user/purchased-games',
             [],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -177,46 +167,37 @@ class PurchaseControllerTest extends WebTestCase
     /**
      *  @dataProvider deletePurchasedGameDataProvider
      */
-    public function testDeletePurchasedGame($gameId, $createFakeToken)
+    public function testDeletePurchasedGame($purchasedGameId, $createFakeToken)
     {
-        $user = UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword',
-            'balance' => '999'
-        ]);
-
-        $game = GameFactory::createOne([
-            'title' => 'testTitle1',
-            'price' => '99'
-        ]);
-
-        PurchasedGameFactory::createOne([
-            'game' => $game,
-            'user' => $user,
-            'hoursOfPlaying' => '0'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
+        $testUser = $this->createUser();
 
         $this->em->persist($testUser);
         $this->em->flush();
 
-        if ($createFakeToken) {
-            $fakeUser = new User();
-            $fakeUser->setLogin('fakeLogin');
+        $testGame = $this->createGame();
+        $testPurchasedGame = $this->createPurchasedGame(
+            user: $testUser,
+            game: $testGame
+        );
 
-            $testToken = $this->tokenService->createToken($fakeUser);
+        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
+
+        $testToken = $this->addTokenToUser($testUser);
+
+        $this->em->persist($testGame);
+        $this->em->persist($testPurchasedGame);
+
+        if ($createFakeToken) {
+            $testUser->setToken(null);
         }
+
+        $this->em->flush();
 
         $this->client->jsonRequest(
             'DELETE',
-            'https://localhost/api/purchase-game',
+            'https://localhost/api/purchased-games',
             [
-                'gameId' => $gameId
+                'purchasedGameId' => $purchasedGameId
             ],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -226,7 +207,7 @@ class PurchaseControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($gameId && !$createFakeToken) {
+        if ($purchasedGameId && !$createFakeToken) {
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Successfully deleted', $decodedResponse['message']);
@@ -234,11 +215,11 @@ class PurchaseControllerTest extends WebTestCase
             $purchasedGame = $this->em->getRepository(PurchasedGame::class)->findOneBy(['user' => $testUser]);
 
             $this->assertNull($purchasedGame);
-        } else if (!$gameId && !$createFakeToken) {
+        } else if (!$purchasedGameId && !$createFakeToken) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Missing data', $decodedResponse['message']);
-        } else if (!$gameId && $createFakeToken) {
+        } else if (!$purchasedGameId && $createFakeToken) {
             $this->assertEquals(Response::HTTP_UNAUTHORIZED, $response->getStatusCode());
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Unauthorized', $decodedResponse['message']);

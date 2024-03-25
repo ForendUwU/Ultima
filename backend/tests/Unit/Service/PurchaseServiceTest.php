@@ -58,7 +58,7 @@ class PurchaseServiceTest extends TestCase
             ->method('getRepository')
             ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $purchasedGameRepositoryMock);
 
-        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
         $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
         $purchasedGameRepositoryMock
             ->expects($this->once())
@@ -99,9 +99,9 @@ class PurchaseServiceTest extends TestCase
         $userRepositoryMock = $this->createMock(UserRepository::class);
 
         $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
-        $this->setTestUserAsReturnFromRepositoryMock($userRepositoryMock, $testUser);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
 
-        $result = $this->purchaseService->getPurchasedGames($testUser->getLogin());
+        $result = $this->purchaseService->getPurchasedGames($testUser->getId());
 
         $this->assertNotEmpty($result);
         $this->assertArrayHasKey(0, $result);
