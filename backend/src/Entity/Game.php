@@ -74,12 +74,20 @@ class Game
     #[Groups(['game:read'])]
     private ?\DateTimeImmutable $publishedAt;
 
-    #[ORM\OneToMany(mappedBy: 'game', targetEntity: PurchasedGame::class)]
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: PurchasedGame::class, orphanRemoval: true)]
     #[Groups(['game:read', 'game:write'])]
     private Collection $purchasedGames;
 
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Review::class, orphanRemoval: true)]
     private Collection $reviews;
+
+    #[ORM\Column]
+    #[Groups(['game:read'])]
+    private ?int $likes = 0;
+
+    #[ORM\Column]
+    #[Groups(['game:read'])]
+    private ?int $dislikes = 0;
 
     public function __construct()
     {
@@ -180,12 +188,33 @@ class Game
 
     public function removeReview(Review $review): static
     {
-        if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
-            if ($review->getGame() === $this) {
-                $review->setGame(null);
-            }
+        if ($this->reviews->removeElement($review) && $review->getGame() === $this) {
+            $review->setGame(null);
         }
+
+        return $this;
+    }
+
+    public function getLikes(): ?int
+    {
+        return $this->likes;
+    }
+
+    public function setLikes(int $likes): static
+    {
+        $this->likes = $likes;
+
+        return $this;
+    }
+
+    public function getDislikes(): ?int
+    {
+        return $this->dislikes;
+    }
+
+    public function setDislikes(int $dislikes): static
+    {
+        $this->dislikes = $dislikes;
 
         return $this;
     }

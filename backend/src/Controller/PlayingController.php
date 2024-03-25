@@ -16,8 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 class PlayingController extends AbstractController
 {
     public function __construct(
-        private readonly PlayingService $playingService,
-        private TokenService $tokenService
+        private readonly PlayingService $playingService
     ) {
 
     }
@@ -31,8 +30,8 @@ class PlayingController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data || !$data['gameId'] || !$data['time']){
-            return new JsonResponse(
+        if (!$data || !$data['purchasedGameId'] || !$data['time']){
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -40,13 +39,10 @@ class PlayingController extends AbstractController
             );
         }
 
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         try {
-            $this->playingService->savePlayingTime($data['gameId'], $decodedToken->login, $data['time']);
+            $this->playingService->savePlayingTime($data['purchasedGameId'], $data['time']);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -54,7 +50,7 @@ class PlayingController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Successfully updated'
             ],

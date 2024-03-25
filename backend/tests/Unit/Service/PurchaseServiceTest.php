@@ -2,51 +2,40 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Entity\Game;
-use App\Entity\PurchasedGame;
-use App\Entity\User;
 use App\Repository\GamesRepository;
 use App\Repository\PurchasedGameRepository;
 use App\Repository\UserRepository;
-use App\Service\AuthorizationService;
-use App\Service\GetEntitiesService;
 use App\Service\PurchaseService;
-use App\Service\TokenService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreatePurchasedGameTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use Symfony\Component\HttpFoundation\Response;
 
 class PurchaseServiceTest extends TestCase
 {
-    private $emMock;
-    private $getEntitiesServiceMock;
+    use CreateUserTrait, CreateGameTrait, CreatePurchasedGameTrait;
+
+    public static $emMock;
     private PurchaseService $purchaseService;
 
     public function setUp(): void
     {
-        $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
-        $this->purchaseService = new PurchaseService($this->emMock, $this->getEntitiesServiceMock);
+        static::$emMock = $this->createMock(EntityManagerInterface::class);
+        $this->purchaseService = new PurchaseService(
+            static::$emMock
+        );
     }
 
     public function purchaseDataProvider(): array
     {
-        $testUserWithMoney = new User();
-        $testUserWithMoney->setLogin('testLogin');
-        $testUserWithMoney->setBalance('999');
+        $testUserWithMoney = $this->createUser(balance: 999);
 
-        $testUserWithoutMoney = new User();
-        $testUserWithoutMoney->setLogin('testLogin');
-        $testUserWithoutMoney->setBalance('0');
+        $testUserWithoutMoney = $this->createUser(balance: 0);
 
-        $testGame = new Game();
-        $testGame->setTitle('testTitle');
-        $testGame->setPrice('99');
+        $testGame = $this->createGame(price: 99);
 
-        $testPurchasedGame = new PurchasedGame();
-        $testPurchasedGame->setUser($testUserWithMoney);
-        $testPurchasedGame->setGame($testGame);
+        $testPurchasedGame = $this->createPurchasedGame($testUserWithMoney, $testGame);
 
         return [
             'success' => [$testUserWithMoney, $testGame, null],
@@ -60,21 +49,17 @@ class PurchaseServiceTest extends TestCase
      */
     public function testPurchase($testUser, $testGame, $testPurchasedGame)
     {
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $gameRepositoryMock = $this->createMock(GamesRepository::class);
         $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
 
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getGameById')
-            ->willReturn($testGame);
-
-        $this->emMock
-            ->expects($this->any())
+        static::$emMock
+            ->expects($this->exactly(3))
             ->method('getRepository')
-            ->willReturn($purchasedGameRepositoryMock);
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $gameRepositoryMock, $purchasedGameRepositoryMock);
+
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
+        $this->setTestGameAsReturnFromRepositoryMock($gameRepositoryMock, $testGame);
         $purchasedGameRepositoryMock
             ->expects($this->once())
             ->method('findOneBy')
@@ -98,34 +83,25 @@ class PurchaseServiceTest extends TestCase
         }
     }
 
-    public function testGetPurchasedGamesSuccess()
+    public function testGetPurchasedGames()
     {
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-        $testUser->setToken('someToken');
+        $testUser = $this->createUser();
 
-        $testGame = new Game();
-        $testGame->setTitle('testTitle');
-        $testGame2 = new Game();
-        $testGame2->setTitle('testTitle2');
+        $testGame1 = $this->createGame(title: 'testTitle1');
+        $testGame2 = $this->createGame(title: 'testTitle2');
 
-        $testPurchasedGame = new PurchasedGame();
-        $testPurchasedGame->setGame($testGame);
-        $testPurchasedGame->setUser($testUser);
+        $testPurchasedGame1 = $this->createPurchasedGame($testUser, $testGame1);
+        $testPurchasedGame2 = $this->createPurchasedGame($testUser, $testGame2);
 
-        $testPurchasedGame2 = new PurchasedGame();
-        $testPurchasedGame2->setGame($testGame2);
-        $testPurchasedGame2->setUser($testUser);
-
-        $testUser->addPurchasedGame($testPurchasedGame);
+        $testUser->addPurchasedGame($testPurchasedGame1);
         $testUser->addPurchasedGame($testPurchasedGame2);
 
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
+        $userRepositoryMock = $this->createMock(UserRepository::class);
 
-        $result = $this->purchaseService->getPurchasedGames('someToken');
+        $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
+
+        $result = $this->purchaseService->getPurchasedGames($testUser->getId());
 
         $this->assertNotEmpty($result);
         $this->assertArrayHasKey(0, $result);
@@ -134,8 +110,8 @@ class PurchaseServiceTest extends TestCase
         $this->assertArrayHasKey('gameId', $result[0]);
         $this->assertArrayHasKey('title', $result[0]);
         $this->assertArrayHasKey('hoursOfPlaying', $result[0]);
-        $this->assertEquals($testGame->getId(), $result[0]['gameId']);
-        $this->assertEquals($testGame->getTitle(), $result[0]['title']);
+        $this->assertEquals($testGame1->getId(), $result[0]['gameId']);
+        $this->assertEquals($testGame1->getTitle(), $result[0]['title']);
         $this->assertEquals(0, $result[0]['hoursOfPlaying']);
     }
 }

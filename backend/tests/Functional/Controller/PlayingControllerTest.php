@@ -3,12 +3,11 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Entity\PurchasedGame;
-use App\Entity\User;
-use App\Factory\GameFactory;
-use App\Factory\PurchasedGameFactory;
-use App\Factory\UserFactory;
 use App\Service\PlayingService;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreatePurchasedGameTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -17,18 +16,18 @@ use Zenstruck\Foundry\Test\ResetDatabase;
 
 class PlayingControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    use ResetDatabase, CreateUserTrait, CreateGameTrait, CreatePurchasedGameTrait;
 
     protected KernelBrowser $client;
     protected EntityManager $em;
-    protected TokenService $tokenService;
+    protected static TokenService $tokenService;
     protected PlayingService $playingService;
     public function setUp(): void
     {
         $this->client = static::createClient();
         $container = static::getContainer();
 
-        $this->tokenService = $container->get(TokenService::class);
+        static::$tokenService = $container->get(TokenService::class);
         $this->playingService = $container->get(PlayingService::class);
         $this->em = $this->client->getContainer()
             ->get('doctrine')
@@ -49,40 +48,30 @@ class PlayingControllerTest extends WebTestCase
      */
     public function testSavePlayingTime($gameId, $time, $createFakeToken)
     {
-        $user = UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword1!',
-            'nickname' => 'testNickname'
-        ]);
-        $game = GameFactory::createOne([
-            'title' => 'testTitle'
-        ]);
-        PurchasedGameFactory::createOne([
-            'game' => $game,
-            'user' => $user,
-            'hoursOfPlaying' => '0'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
+        $testUser = $this->createUser();
 
         $this->em->persist($testUser);
         $this->em->flush();
 
-        if ($createFakeToken) {
-            $fakeUser = new User();
-            $fakeUser->setLogin('fakeLogin');
+        $testGame = $this->createGame();
+        $testPurchasedGame = $this->createPurchasedGame($testUser, $testGame);
 
-            $testToken = $this->tokenService->createToken($fakeUser);
+        $testToken = $this->addTokenToUser($testUser);
+
+        $this->em->persist($testGame);
+        $this->em->persist($testPurchasedGame);
+
+        if ($createFakeToken) {
+            $testUser->setToken(null);
         }
+
+        $this->em->flush();
 
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/save-playing-time',
             [
-                'gameId' => $gameId,
+                'purchasedGameId' => $testPurchasedGame->getId(),
                 'time' => $time
             ],
             [

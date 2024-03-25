@@ -23,30 +23,19 @@ class PurchaseController extends AbstractController
     }
 
     #[Route(
-        "/api/purchase-game",
+        "/api/game/{gameId}/purchase",
         methods: ['POST']
     )]
     #[Tag('Purchase')]
-    public function purchase(Request $request): JsonResponse
+    public function purchase(Request $request, $gameId): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!$data || !$data['gameId']){
-            return new JsonResponse(
-                [
-                    'message' => 'Missing data'
-                ],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
-
-        $token = $request->headers->get('Authorization');
+        $token = $request->headers->get('authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $result = $this->purchaseService->purchase($data['gameId'], $decodedToken->login);
+            $result = $this->purchaseService->purchase($gameId, $decodedToken->id);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -54,7 +43,7 @@ class PurchaseController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => $result
             ],
@@ -63,34 +52,34 @@ class PurchaseController extends AbstractController
     }
 
     #[Route(
-        "/api/purchase-game",
+        '/api/user/purchased-games',
         methods: ['GET']
     )]
     #[Tag('Purchase')]
-    public function getPurchasedGames(Request $request): ?JsonResponse
+    public function getUsersPurchasedGames(Request $request): ?JsonResponse
     {
         $token = $request->headers->get('authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
-        $result = $this->purchaseService->getPurchasedGames($decodedToken->login);
+        $result = $this->purchaseService->getPurchasedGames($decodedToken->id);
 
-        return new JsonResponse(
+        return $this->json(
             $result,
             Response::HTTP_OK
         );
     }
 
     #[Route(
-        "/api/purchase-game",
+        "/api/purchased-games",
         methods: ['DELETE']
     )]
     #[Tag('Purchase')]
-    public function deletePurchasedGames(Request $request): ?JsonResponse
+    public function deletePurchasedGame(Request $request): ?JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!$data || !isset($data['gameId'])) {
-            return new JsonResponse(
+        if (!$data || !isset($data['purchasedGameId'])) {
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -98,13 +87,10 @@ class PurchaseController extends AbstractController
             );
         }
 
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         try {
-            $this->purchaseService->deletePurchasedGame($data['gameId'], $decodedToken->login);
+            $this->purchaseService->deletePurchasedGame($data['purchasedGameId']);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -112,7 +98,7 @@ class PurchaseController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Successfully deleted'
             ],

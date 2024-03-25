@@ -23,19 +23,19 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/games/{gameId}/review',
         methods: ['POST']
     )]
     #[Tag('Review')]
     public function createGameReview(Request $request, $gameId): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
+        $token = $request->headers->get('authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['content']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -44,9 +44,9 @@ class ReviewsController extends AbstractController
         }
 
         try {
-            $this->reviewsService->createGameReview($data['content'], $decodedToken->login, $gameId);
+            $this->reviewsService->createGameReview($data['content'], $decodedToken->id, $gameId);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -54,7 +54,7 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Review was created successfully'
             ],
@@ -63,7 +63,7 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/games/{gameId}/reviews',
         methods: ['GET']
     )]
     #[Tag('Review')]
@@ -71,26 +71,23 @@ class ReviewsController extends AbstractController
     {
         $result = $this->reviewsService->getGameReviews($gameId);
 
-        return new JsonResponse(
+        return $this->json(
             $result,
             Response::HTTP_OK
         );
     }
 
     #[Route(
-        "/api/reviews/{gameId}",
+        '/api/games/{gameId}/review',
         methods: ['PATCH']
     )]
     #[Tag('Review')]
-    public function changeGameReviewContent(Request $request, $gameId): ?JsonResponse
+    public function changeGameReviewContent(Request $request): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         $data = json_decode($request->getContent(), true);
 
-        if (!$data || !$data['content']){
-            return new JsonResponse(
+        if (!$data || !$data['content'] || !$data['reviewId']){
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -99,9 +96,9 @@ class ReviewsController extends AbstractController
         }
 
         try {
-            $this->reviewsService->changeGameReviewContent($data['content'], $decodedToken->login, $gameId);
+            $this->reviewsService->changeGameReviewContent($data['content'], $data['reviewId']);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -109,7 +106,7 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Review was successfully changed'
             ],
@@ -118,19 +115,27 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        '/api/reviews/{gameId}',
+        '/api/games/{gameId}/review',
         methods: ['DELETE']
     )]
     #[Tag('Review')]
-    public function deleteUsersReview(Request $request, $gameId): ?JsonResponse
+    public function deleteUsersReview(Request $request): ?JsonResponse
     {
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !$data['reviewId']){
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
 
         try {
-            $this->reviewsService->deleteUsersReview($decodedToken->login, $gameId);
+            $this->reviewsService->deleteUsersReview($data['reviewId']);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -138,7 +143,7 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'message' => 'Review was successfully deleted'
             ],
@@ -147,19 +152,19 @@ class ReviewsController extends AbstractController
     }
 
     #[Route(
-        "/api/user/review/{gameId}",
+        "/api/games/{gameId}/review",
         methods: ['GET']
     )]
     #[Tag('User')]
-    public function getUserReviewContentByGameId(Request $request, $gameId): JsonResponse
+    public function getUserReview(Request $request, $gameId): JsonResponse
     {
-        $token = $request->headers->get('Authorization');
+        $token = $request->headers->get('authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
         try {
-            $content = $this->reviewsService->getUserReviewContentByUserLoginAndGameId($decodedToken->login, $gameId);
+            $result = $this->reviewsService->getUserReview($decodedToken->id, $gameId);
         } catch (\Exception $exception) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $exception->getMessage()
                 ],
@@ -167,8 +172,16 @@ class ReviewsController extends AbstractController
             );
         }
 
-        return $content ?
-            new JsonResponse(['message' => $content], Response::HTTP_OK) :
-            new JsonResponse(['message' => ''], Response::HTTP_OK);
+        return $result ?
+            $this->json(
+                [
+                    'reviewId' => $result['id'],
+                    'reviewContent' => $result['content']
+                ], Response::HTTP_OK) :
+            $this->json(
+                [
+                    'reviewId' => '',
+                    'reviewContent' => ''
+                ], Response::HTTP_OK);
     }
 }

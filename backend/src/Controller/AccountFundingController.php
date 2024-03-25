@@ -16,23 +16,26 @@ use Symfony\Component\Routing\Attribute\Route;
 class AccountFundingController extends AbstractController
 {
     public function __construct(
-        private readonly TokenService $tokenService,
-        private readonly AccountFundingService $accountFundingService
+        private readonly AccountFundingService $accountFundingService,
+        private readonly TokenService $tokenService
     ) {
 
     }
 
     #[Route(
-        "/api/fund",
-        methods: ['PATCH']
+        "/api/user/fund",
+        methods: ['POST']
     )]
     #[Tag('AccountFunding')]
     public function fund(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
+
         if (!$data || !$data['amount']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -40,14 +43,11 @@ class AccountFundingController extends AbstractController
             );
         }
 
-        $token = $request->headers->get('Authorization');
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-
         try {
-            $this->accountFundingService->fund($data['amount'], $decodedToken->login);
+            $result = $this->accountFundingService->fund($data['amount'], $decodedToken->id);
         }
         catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -55,9 +55,9 @@ class AccountFundingController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
-                'message' => 'Successfully funded'
+                'newAmount' => $result
             ],
             Response::HTTP_OK
         );

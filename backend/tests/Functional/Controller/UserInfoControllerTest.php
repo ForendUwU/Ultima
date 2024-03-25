@@ -3,13 +3,11 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Entity\User;
-use App\Factory\GameFactory;
-use App\Factory\PurchasedGameFactory;
-use App\Factory\UserFactory;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreatePurchasedGameTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\NotSupported;
-use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -17,18 +15,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserInfoControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    use ResetDatabase, CreateUserTrait, CreateGameTrait, CreatePurchasedGameTrait;
 
     protected KernelBrowser $client;
     protected EntityManager $em;
-    protected TokenService $tokenService;
+    protected static TokenService $tokenService;
 
     public function setUp(): void
     {
         $this->client = static::createClient();
         $container = static::getContainer();
 
-        $this->tokenService = $container->get(TokenService::class);
+        static::$tokenService = $container->get(TokenService::class);
         $this->em = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -42,19 +40,13 @@ class UserInfoControllerTest extends WebTestCase
         ];
     }
 
-    public function testGetUserInfoSuccess()
+    public function testGetUserInfo()
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
+        $testUser = $this->createUser();
         $this->em->persist($testUser);
+        $this->em->flush();
+
+        $testToken = $this->addTokenToUser($testUser);
         $this->em->flush();
 
         $this->client->jsonRequest(
@@ -89,51 +81,47 @@ class UserInfoControllerTest extends WebTestCase
     /**
      *  @dataProvider getUsersMostPlayedGamesDataProvider
      */
-    public function testGetUsersMostPlayedGames1($createFakeToken)
+    public function testGetUsersMostPlayedGames($createFakeToken)
     {
-        $testUser = UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword'
-        ]);
-
-        $testGame1 = GameFactory::createOne([
-            'title' => 'testTitle1'
-        ]);
-
-        $testGame2 = GameFactory::createOne([
-            'title' => 'testTitle2'
-        ]);
-
-        PurchasedGameFactory::createOne([
-            'user' => $testUser,
-            'game' => $testGame1,
-            'hoursOfPlaying' => 1
-        ]);
-
-        PurchasedGameFactory::createOne([
-            'user' => $testUser,
-            'game' => $testGame2,
-            'hoursOfPlaying' => 2
-        ]);
-
-        $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
-
-        $testUser->setToken($testToken);
-
+        $testUser = $this->createUser();
         $this->em->persist($testUser);
         $this->em->flush();
+        $testToken = $this->addTokenToUser($testUser);
+
+        $testGame1 = $this->createGame(
+            title: 'testTitle1'
+        );
+
+        $testGame2 = $this->createGame(
+            title: 'testTitle2'
+        );
+
+        $testPurchasedGame1 = $this->createPurchasedGame(
+            user: $testUser,
+            game: $testGame1,
+            hoursOfPlaying: 1
+        );
+
+        $testPurchasedGame2 = $this->createPurchasedGame(
+            user: $testUser,
+            game: $testGame2,
+            hoursOfPlaying: 2
+        );
+
+        $this->em->persist($testGame1);
+        $this->em->persist($testGame2);
+        $this->em->persist($testPurchasedGame1);
+        $this->em->persist($testPurchasedGame2);
 
         if ($createFakeToken) {
-            $fakeUser = new User();
-            $fakeUser->setLogin('fakeLogin');
-
-            $testToken = $this->tokenService->createToken($fakeUser);
+            $testUser->setToken(null);
         }
+
+        $this->em->flush();
 
         $this->client->jsonRequest(
             'GET',
-            'https://localhost/api/user/get-most-played-games',
+            'https://localhost/api/user/most-played-games',
             [],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -163,5 +151,43 @@ class UserInfoControllerTest extends WebTestCase
             $this->assertNotEmpty($decodedResponse['message']);
             $this->assertEquals('Unauthorized', $decodedResponse['message']);
         }
+    }
+
+    public function testUpdateUserInfo()
+    {
+        $testUser = $this->createUser();
+        $this->em->persist($testUser);
+        $this->em->flush();
+        $testToken = $this->addTokenToUser($testUser);
+        $this->em->flush();
+
+        $this->client->jsonRequest(
+            'POST',
+            'https://localhost/api/user/change-data',
+            [
+                'nickname' => 'newNickname',
+                'firstName' => '',
+                'lastName' => '',
+                'email' => ''
+            ],
+            [
+                'HTTP_Authorization' => 'Bearer '.$testToken
+            ]
+        );
+
+        $response = $this->client->getResponse();
+        $decodedResponse = json_decode($response->getContent(), true);
+
+        $this->assertNotNull($decodedResponse);
+        $this->assertArrayHasKey('result', $decodedResponse);
+        $this->assertNotNull($decodedResponse['result']);
+        $this->assertEquals('Successfully updated', $decodedResponse['result']);
+
+        $updatedUser = $this->em->getRepository(User::class)->findById($testUser->getId());
+
+        $this->assertEquals('newNickname', $updatedUser->getNickname());
+        $this->assertEquals($testUser->getFirstName(), $updatedUser->getFirstName());
+        $this->assertEquals($testUser->getLastName(), $updatedUser->getLastName());
+        $this->assertEquals($testUser->getEmail(), $updatedUser->getEmail());
     }
 }

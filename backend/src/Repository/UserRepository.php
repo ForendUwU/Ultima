@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -38,5 +39,33 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findByLogin(string $userLogin): User
+    {
+        $user = $this->findOneBy(['login' => $userLogin]);
+
+        if (!$user) {
+            throw new \Exception('User not found', Response::HTTP_NOT_FOUND);
+        }
+
+        return $user;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findById(int $userId): User
+    {
+        $user = $this->findOneBy(['id' => $userId]);
+
+        if (!$user) {
+            throw new \Exception('User not found', Response::HTTP_NOT_FOUND);
+        }
+
+        return $user;
     }
 }

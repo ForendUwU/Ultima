@@ -2,68 +2,51 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Entity\User;
 use App\Exceptions\ValidationException;
 use App\Repository\UserRepository;
 use App\Service\AuthorizationService;
-use App\Service\GetEntitiesService;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AuthorizationServiceTest extends TestCase
 {
+    use CreateUserTrait;
+
+    public static $emMock;
+
     private AuthorizationService $authService;
     private $tokenServiceMock;
-    private $emMock;
     private $userPasswordHasherMock;
-    private $getEntitiesServiceMock;
 
     public function setUp(): void
     {
+        static::$emMock = $this->createMock(EntityManagerInterface::class);
+
         $this->tokenServiceMock = $this->createMock(TokenService::class);
-        $this->emMock = $this->createMock(EntityManagerInterface::class);
         $this->userPasswordHasherMock = $this->createMock(UserPasswordHasherInterface::class);
-        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
         $this->authService = new AuthorizationService(
-            $this->emMock,
+            static::$emMock,
             $this->tokenServiceMock,
-            $this->userPasswordHasherMock,
-            $this->getEntitiesServiceMock
+            $this->userPasswordHasherMock
         );
     }
 
     public function loginDataProvider(): array
     {
-        $expectedToken = 'test';
-        $password = 'test';
-        $wrongPassword = 'wrongPassword';
-
-        $testUser = new User();
-        $testUser->setPassword($password);
-        $testUser->setToken($expectedToken);
-
         return [
-            'success' => [$testUser, $password, $expectedToken],
-            'wrong password' => [$testUser, $wrongPassword,  $expectedToken]
+            'success' => ['testPassword'],
+            'wrong password' => ['wrongPassword']
         ];
     }
 
     public function logoutDataProvider(): array
     {
-        $testUser = new User();
-        $testUser->setPassword('test');
-        $testUser->setToken('test');
-
-        $testUserWithoutToken = new User();
-        $testUserWithoutToken->setPassword('test');
-        $testUserWithoutToken->setToken('test');
-
         return [
-            'success' => [$testUser],
-            'user already unauthorized' => [$testUserWithoutToken]
+            'success' => [true],
+            'user already unauthorized' => [false]
         ];
     }
 
@@ -82,14 +65,15 @@ class AuthorizationServiceTest extends TestCase
     /**
      *  @dataProvider loginDataProvider
      */
-    public function testLogin($testUser, $password, $expectedToken)
+    public function testLogin($password)
     {
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
+        $testUser = $this->createUser();
 
-        if ($testUser && $password == 'test') {
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
+        $this->setTestUserAsReturnFromRepositoryMockByLogin($userRepositoryMock, $testUser);
+
+        if ($password === 'testPassword') {
             $this->tokenServiceMock
                 ->expects($this->once())
                 ->method('createToken')
@@ -103,8 +87,8 @@ class AuthorizationServiceTest extends TestCase
             $result = $this->authService->login('test', $password);
 
             $this->assertNotNull($result);
-            $this->assertEquals($expectedToken, $result);
-        } else {
+            $this->assertEquals('test', $result);
+        } else if ($password === 'wrongPassword') {
             $this->userPasswordHasherMock
                 ->expects($this->any())
                 ->method('isPasswordValid')
@@ -113,6 +97,33 @@ class AuthorizationServiceTest extends TestCase
             $this->expectException(\Exception::class);
             $this->expectExceptionMessage('Wrong login or password');
             $this->authService->login('test', $password);
+        }
+    }
+
+    /**
+     *  @dataProvider logoutDataProvider
+     */
+    public function testLogout($token)
+    {
+        $testUser = $this->createUser();
+
+        if (!$token)
+            $testUser->setToken(null);
+
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
+
+        if ($token) {
+            $result = $this->authService->logout($testUser->getId());
+
+            $this->assertNotNull($result);
+            $this->assertEquals('Logout successfully', $result);
+        }  elseif (!$token) {
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessage('User already unauthorized');
+
+            $this->authService->logout($testUser->getId());
         }
     }
 
@@ -127,37 +138,6 @@ class AuthorizationServiceTest extends TestCase
 
         $this->assertNotNull($result);
         $this->assertEquals('test', $result);
-    }
-
-    /**
-     *  @dataProvider logoutDataProvider
-     */
-    public function testLogout($testUser)
-    {
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-
-        $fakeDecodedToken = new StdClass();
-        $fakeDecodedToken->login = 'testLogin';
-
-        $this->tokenServiceMock
-            ->expects($this->once())
-            ->method('decodeLongToken')
-            ->willReturn($fakeDecodedToken);
-
-        if ($testUser) {
-            $result = $this->authService->logout('test');
-
-            $this->assertNotNull($result);
-            $this->assertEquals('Logout successfully', $result);
-        }  elseif (!$testUser->getToken()) {
-            $this->expectException(\Exception::class);
-            $this->expectExceptionMessage('User already unauthorized');
-
-            $this->authService->logout('test');
-        }
     }
 
     /**

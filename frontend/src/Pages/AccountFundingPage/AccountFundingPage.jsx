@@ -1,45 +1,46 @@
 import React, {useContext} from "react";
-import Error from "../StatePages/Error"
 import {Container, Stack} from "@mui/material";
 import {FullscreenGrid, GlowingGrid, Header, PageTitle, FundingButton} from "../../Components";
 import Loading from "../StatePages/Loading";
 import Cookies from 'universal-cookie';
-import {useNavigate} from "react-router-dom";
-import {HeaderContext} from "../../App/App";
+import {HeaderContext, UserContext} from "../../App/App";
+import {doRequest} from "../../Scripts/doRequest";
+import Error from "../StatePages/Error"
 
 export default function AccountFundingPage() {
-    const [error, setError] = React.useState(null);
-
     const cookies = new Cookies();
-    const navigate = useNavigate();
+    const [fundingError, setFundingError] = React.useState();
 
     const headerContext = useContext(HeaderContext);
+    const userContext = useContext(UserContext);
 
     function handleClick (amount) {
-            fetch('https://localhost/api/fund', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + cookies.get('token')
-                },
-                body: JSON.stringify({
-                    amount: amount
-                })
-            }).then(response => {
-                return response.json();
-            }).then(decodedResponse => {
-                console.log(decodedResponse);
-            }).finally(()=>{navigate(0);});
+        const [data, error] = doRequest({
+            url: 'https://localhost/api/user/fund',
+            method: 'POST',
+            token: cookies.get('token'),
+            body: {amount: amount}
+        });
+
+        setFundingError(error);
+
+        data.then(
+            decodedResponse => {
+                userContext.setUserInfo((previousInfo) => ({
+                    ...previousInfo,
+                    balance: decodedResponse['newAmount']}))
+            }
+        );
     }
 
     if(!headerContext.userLoaded) return <Loading />;
-    if(error) return <Error errorText={error.toString()} />;
+    if(fundingError) return <Error errorText={fundingError.toString()} />;
 
     return (
         <FullscreenGrid>
             <Container maxWidth="lg">
                 <GlowingGrid>
-                    <Header />
+                    <Header updatedUserContext={userContext} />
                     <PageTitle>Account funding</PageTitle>
                     <Stack spacing={2}>
                         <FundingButton amount={5} handleClick={() => handleClick(5)} />

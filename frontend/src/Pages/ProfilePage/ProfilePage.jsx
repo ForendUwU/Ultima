@@ -1,14 +1,6 @@
-import React, {useContext, useEffect} from "react";
-import {Avatar, Container, Grid, Typography, Button, ImageListItem, ImageList} from "@mui/material";
-import {
-    FullscreenGrid,
-    GameButtonText,
-    GlowingGrid,
-    Header,
-    PageTitle,
-    SubmitButton,
-    TextInput
-} from "../../Components";
+import React, {useContext} from "react";
+import {Container, Grid, ImageList} from "@mui/material";
+import {FullscreenGrid, GameCard, GlowingGrid, Header, PageTitle, SubmitButton} from "../../Components";
 import Loading from "../StatePages/Loading";
 import Error from "../StatePages/Error";
 import {HeaderContext, UserContext} from "../../App/App";
@@ -16,117 +8,117 @@ import Cookies from 'universal-cookie';
 import validateNickname from "../../Scripts/nicknameValidator";
 import validatePassword from "../../Scripts/passwordValidator";
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
+import useFetch from "../../Hooks/useFetch";
+import {doRequest} from "../../Scripts/doRequest";
+import validateName from "../../Scripts/nameValidator";
+import validateEmail from "../../Scripts/emailValidator";
+import UserData from "./UserData"
+import ChangeTypeOfChangingForm from "./ChangeTypeOfChangingForm"
+import ChangeDataForm from "./ChangeDataForm"
+import ChangePasswordForm from "./ChangePasswordForm"
 
 export default function ProfilePage() {
-    const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState(null);
-    const [games, setGames] = React.useState([]);
     const [isProfileSettingsOpened, setIsProfileSettingsOpened] = React.useState(false);
-    const [isOldPasswordCorrect, setIsOldPasswordCorrect] = React.useState();
+    const [isChangePassword, setIsChangePassword] = React.useState(false);
 
     const headerContext = useContext(HeaderContext);
     const userContext = useContext(UserContext);
 
+    const [nickname, setNickname] = React.useState();
+    const [firstName, setFirstName] = React.useState();
+    const [lastName , setLastName] = React.useState();
+    const [email, setEmail] = React.useState();
+    const [oldPassword, setOldPassword] = React.useState();
+    const [newPassword, setNewPassword] = React.useState();
+    const [repeatPassword, setRepeatPassword] = React.useState();
+
     const cookies = new Cookies();
 
-    useEffect(() => {
-        fetch('https://localhost/api/user/get-most-played-games', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
+    const [games, error, loading] = useFetch({
+        url: 'https://localhost/api/user/most-played-games',
+        method: 'GET',
+        token: cookies.get('token'),
+    });
+
+    const handleChangeData = () => {
+        let localNickname = nickname !== undefined ? nickname : userContext.userInfo.nickname;
+        let localFirstName = firstName !== undefined ? firstName : userContext.userInfo.firstName;
+        let localLastName = lastName !== undefined ? lastName : userContext.userInfo.lastName;
+        let localEmail = email !== undefined ? email : userContext.userInfo.email;
+
+        let validated = false;
+        try {
+            if (validateNickname(localNickname)
+                && validateName(localFirstName, true)
+                && validateName(localLastName, true)
+                && validateEmail(localEmail)
+            ) {
+                validated = true;
             }
-        }).then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error();
-            }
-        }).then(decodedResponse => {
-            setGames(decodedResponse);
-        }).catch(error => {
-            setError(error);
-        }).finally(()=>{
-            setLoading(false);
-        });
-    }, []);
+        } catch (e) {
+            toast.error(e.message);
+        }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        let { nickname, firstName, lastName, oldPassword, newPassword, repeatPassword, email  } = document.forms[0];
-
-        nickname.value = nickname.value ? nickname.value : null;
-        firstName.value = firstName.value ? firstName.value : null;
-        lastName.value = lastName.value ? lastName.value : null;
-        email.value = email.value ? email.value : null;
-
-        if (oldPassword.value && newPassword.value && repeatPassword.value) {
-            try {
-                fetch('https://localhost/api/user/check-pass', {
+        if (validated) {
+                doRequest({
+                    url: 'https://localhost/api/user/change-data',
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + cookies.get('token')
-                    },
-                    body: JSON.stringify({
-                        password: newPassword.value,
-                    })
-                }).then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error(response.status);
+                    token: cookies.get('token'),
+                    body: {
+                        nickname: localNickname,
+                        firstName: localFirstName,
+                        lastName: localLastName,
+                        email: localEmail
                     }
-                }).then(decodedResponse => {
-                    if (decodedResponse['message'] === "invalid") {
-                        setIsOldPasswordCorrect(false);
-                    }
-                }).catch(e=>console.log(e));
-
-                if (!isOldPasswordCorrect) {
-                    toast('Old password is not correct');
-                } else {
-                    validatePassword(newPassword.value, repeatPassword.value, oldPassword.value);
-                }
-            } catch (e) {
-                toast(e.message);
-                newPassword.value = null;
-            }
+                });
+                userContext.setUserInfo((previousInfo) => ({
+                    ...previousInfo,
+                    nickname: localNickname,
+                    firstName: localFirstName,
+                    lastName: localLastName,
+                    email: localEmail
+                }))
+                toast.success('Successfully updated');
         }
-
-        if (nickname.value) {
-            try {
-                validateNickname(nickname.value);
-            } catch (e) {
-                toast(e.message);
-                nickname.value = null;
-            }
-        }
-
-        fetch('https://localhost/api/user/change-data/'+userContext.login, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + cookies.get('token')
-            },
-            body: JSON.stringify({
-                nickname: nickname.value,
-                password: newPassword.value,
-                firstName: firstName.value,
-                lastName: lastName.value,
-                email: email.value
-            })
-        }).then(response => {
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                console.log(response);
-            }
-        })
     }
 
-    if(loading || !headerContext.userLoaded) return <Loading />;
-    if(error) return <Error errorText={error.toString()} />;
+    const handleChangePassword = () => {
+        let validated = false;
+        try {
+            if (oldPassword) {
+                if (validatePassword(newPassword, repeatPassword)
+                ) {
+                    validated = true;
+                }
+            } else {
+                toast.error('Old password mustn\'t be empty');
+            }
+        } catch (e) {
+            toast.error(e.message);
+        }
+
+        if (validated) {
+            const [data] = doRequest({
+                url: 'https://localhost/api/user/'+userContext.userInfo.id+'/change-pass',
+                method: 'PATCH',
+                token: cookies.get('token'),
+                body: {
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                }
+            });
+            data.then(decodedResponse => {
+                if (decodedResponse['message'] !== 'successfully updated') {
+                    toast.error(decodedResponse['message']);
+                } else {
+                    toast.success('Successfully updated');
+                }
+            })
+        }
+    }
+
+    if(loading || !headerContext.userLoaded || !games) return <Loading />
+    //if(error) return <Error errorText={error.toString()} />;
 
     return(
         <FullscreenGrid>
@@ -134,68 +126,47 @@ export default function ProfilePage() {
                 <GlowingGrid>
                     <Header />
                     <PageTitle>Profile</PageTitle>
-                    <Grid container alignItems="center" direction="column">
-                        <Grid item>
-                            <Avatar alt={userContext.nickname} src="/static/images/avatar/1.jpg" sx={{fontSize: "190%", width: 180, height: 180}} />
-                        </Grid>
-                        <Grid item>
-                            <Typography variant="h3" sx={{paddingTop: "20%"}}>{userContext.nickname}</Typography>
-                        </Grid>
-                        <Grid item>
-                            <Button variant="outlined" color="success" sx={{marginTop: "10%", fontSize: "100%"}} onClick={() => setIsProfileSettingsOpened(!isProfileSettingsOpened)}>Profile settings</Button>
-                        </Grid>
-                    </Grid>
+                    <UserData
+                        setIsProfileSettingsOpened={setIsProfileSettingsOpened}
+                        isProfileSettingsOpened={isProfileSettingsOpened}
+                        userContext={userContext}
+                    />
                     {isProfileSettingsOpened &&
-                        <form onSubmit={handleSubmit}>
-                        <Grid container alignItems="center" justifyContent="space-between">
-                                <Grid item>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>Nickname</Typography>
-                                    <TextInput required={false} inputName="nickname" defaultValue={userContext.nickname}/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>First name</Typography>
-                                    <TextInput required={false} inputName="firstName" defaultValue={userContext.firstName}/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>Last name</Typography>
-                                    <TextInput required={false} inputName="lastName" defaultValue={userContext.lastName}/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>Old password</Typography>
-                                    <TextInput required={false} inputName="oldPassword"/>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>New password</Typography>
-                                    <TextInput required={false} inputName="newPassword"/>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>Repeat new password</Typography>
-                                    <TextInput required={false} inputName="repeatPassword"/>
-                                </Grid>
-                                <Grid item>
-                                    <Typography variant="h5" style={{marginLeft: "1%"}}>Email</Typography>
-                                    <TextInput required={false} inputName="email" defaultValue={userContext.email}/>
-                                </Grid>
-                                <SubmitButton buttonText="Change data"/>
-                        </Grid>
-                        </form>
+                        <>
+                            <ChangeTypeOfChangingForm
+                                setIsChangePassword={setIsChangePassword}
+                                isChangePassword={isChangePassword}
+                            />
+                            <Grid container alignItems="center" justifyContent="space-between">
+                                {!isChangePassword ?
+                                    <ChangeDataForm
+                                        setNickname={setNickname}
+                                        setFirstName={setFirstName}
+                                        setLastName={setLastName}
+                                        setEmail={setEmail}
+                                        userContext={userContext}
+                                    />
+                                    :
+                                    <ChangePasswordForm
+                                        setOldPassword={setOldPassword}
+                                        setNewPassword={setNewPassword}
+                                        setRepeatPassword={setRepeatPassword}
+                                    />
+                                }
+                                <SubmitButton
+                                    clickHandler={!isChangePassword ? handleChangeData : handleChangePassword}
+                                    buttonText="Change data"
+                                />
+                            </Grid>
+                        </>
                     }
                     <Grid container direction="column" alignItems="center">
-                        <Grid item>
-                            <Typography sx={{marginTop: "10%", marginBottom: "10%"}} variant="h3">Your the most played games</Typography>
-                        </Grid>
-                        <Grid item>
-                            <ImageList cols={5} sx={{padding: "1%"}}>
-                                {games.map((item, index) => (
-                                    <Button disabled key={index} sx={{ backgroundColor: "#9ED2C6", boxShadow: "0.1vh 0.1vh 0.3vh #e42323" }}>
-                                        <ImageListItem>
-                                            <img
-                                                src={'https://source.unsplash.com/random/200x200?sig='+index}
-                                                alt="Game image"
-                                            />
-                                            <GameButtonText>{item.title}</GameButtonText>
-                                            <GameButtonText>{item.hoursOfPlaying.toFixed(2)} hours</GameButtonText>
-                                        </ImageListItem>
-                                    </Button>
-                                ))}
-                            </ImageList>
-                        </Grid>
+                        <PageTitle>Your the most played games</PageTitle>
+                        <ImageList cols={5} sx={{padding: "1%"}}>
+                            {games.map((item) => (
+                                <GameCard item={item} showPrice={false} showPlayingTime={true} />
+                            ))}
+                        </ImageList>
                     </Grid>
                     <Toaster>
                         {(t) => (

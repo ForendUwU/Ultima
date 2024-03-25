@@ -97,7 +97,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email]
     private ?string $email = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PurchasedGame::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PurchasedGame::class, cascade: ['persist'], orphanRemoval: true)]
     #[Groups(['user:read', 'user:write'])]
     private Collection $purchasedGames;
 
@@ -334,11 +334,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeReview(Review $review): static
     {
-        if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
-            if ($review->getUser() === $this) {
-                $review->setUser(null);
-            }
+        if ($this->reviews->removeElement($review) && $review->getUser() === $this) {
+            $review->setUser(null);
         }
 
         return $this;

@@ -2,38 +2,33 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Service\AccountFundingService;
-use App\Service\GetEntitiesService;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 
 class AccountFundingServiceTest extends TestCase
 {
-    private $emMock;
-    private $getEntitiesServiceMock;
-    private $accountFuncdingService;
+    use CreateUserTrait;
+    public static $emMock;
+    private AccountFundingService $accountFuncdingService;
+
     public function setUp(): void
     {
-        $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
-        $this->accountFuncdingService = new AccountFundingService(
-            $this->emMock,
-            $this->getEntitiesServiceMock
-        );
+        static::$emMock = $this->createMock(EntityManagerInterface::class);
+        $this->accountFuncdingService = new AccountFundingService(static::$emMock);
     }
 
     public function testFund()
     {
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
+        $testUser = $this->createUser();
 
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
 
-        $this->accountFuncdingService->fund(10, $testUser->getLogin());
+        $this->accountFuncdingService->fund(10, $testUser->getId());
 
         $this->assertEquals('10.00', $testUser->getBalance());
     }

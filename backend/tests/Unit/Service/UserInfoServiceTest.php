@@ -2,50 +2,48 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Entity\Game;
-use App\Entity\PurchasedGame;
-use App\Entity\User;
 use App\Repository\PurchasedGameRepository;
 use App\Repository\UserRepository;
-use App\Service\GetEntitiesService;
+use App\Service\AuthorizationService;
 use App\Service\UserInfoService;
+use App\Tests\Traits\CreateGameTrait;
+use App\Tests\Traits\CreatePurchasedGameTrait;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserInfoServiceTest extends TestCase
 {
+    use CreateUserTrait, CreateGameTrait, CreatePurchasedGameTrait;
+
     private UserInfoService $userInfoService;
-    private $emMock;
-    private $getEntitiesServiceMock;
+    public static $emMock;
     private $userPasswordHasherMock;
+    private $authorizationServiceMock;
 
     public function setUp(): void
     {
-        $this->emMock = $this->createMock(EntityManagerInterface::class);
-        $this->getEntitiesServiceMock = $this->createMock(GetEntitiesService::class);
+        static::$emMock = $this->createMock(EntityManagerInterface::class);
         $this->userPasswordHasherMock = $this->createMock(UserPasswordHasherInterface::class);
-        $this->userInfoService = new UserInfoService($this->emMock, $this->getEntitiesServiceMock, $this->userPasswordHasherMock);
+        $this->authorizationServiceMock = $this->createMock(AuthorizationService::class);
+        $this->userInfoService = new UserInfoService(
+            static::$emMock,
+            $this->userPasswordHasherMock,
+            $this->authorizationServiceMock
+        );
     }
 
     public function testGetUserInfo()
     {
-        $testUser = new User();
-        $testUser->setPassword('test');
-        $testUser->setToken('test');
+        $testUser = $this->createUser();
 
-        $repositoryMock = $this->createMock(UserRepository::class);
+        $userRepositoryMock = $this->createMock(UserRepository::class);
 
-        $this->emMock
-            ->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($repositoryMock);
-        $repositoryMock
-            ->expects($this->once())
-            ->method('findOneBy')
-            ->willReturn($testUser);
+        $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
 
-        $result = $this->userInfoService->getUserInfo(0);
+        $result = $this->userInfoService->getUserInfo($testUser->getId());
 
         $this->assertNotEmpty($result);
         $this->assertArrayHasKey('login', $result);
@@ -66,43 +64,30 @@ class UserInfoServiceTest extends TestCase
 
     public function testGetUsersMostPlayedGames()
     {
-        $testUser = new User();
-        $testUser->setLogin('testLogin');
-        $testUser->setPassword('test');
-        $testUser->setToken('test');
+        $testUser = $this->createUser();
 
-        $testGame1 = new Game();
-        $testGame1->setTitle('testTitle1');
-        $testGame2 = new Game();
-        $testGame2->setTitle('testTitle2');
+        $testGame1 = $this->createGame(title: 'testTitle1');
+        $testGame2 = $this->createGame(title: 'testTitle2');
 
-        $testPurchasedGame1 = new PurchasedGame();
-        $testPurchasedGame1->setGame($testGame1);
-        $testPurchasedGame1->setUser($testUser);
-        $testPurchasedGame1->setHoursOfPlaying(1);
+        $testPurchasedGame1 = $this->createPurchasedGame($testUser, $testGame1, 1);
+        $testPurchasedGame2 = $this->createPurchasedGame($testUser, $testGame2, 2);
 
-        $testPurchasedGame2 = new PurchasedGame();
-        $testPurchasedGame2->setGame($testGame2);
-        $testPurchasedGame2->setUser($testUser);
-        $testPurchasedGame2->setHoursOfPlaying(2);
-
-        $this->getEntitiesServiceMock
-            ->expects($this->once())
-            ->method('getUserByLogin')
-            ->willReturn($testUser);
-
+        $userRepositoryMock = $this->createMock(UserRepository::class);
         $purchasedGameRepositoryMock = $this->createMock(PurchasedGameRepository::class);
 
-        $this->emMock
+        static::$emMock
             ->expects($this->any())
             ->method('getRepository')
-            ->willReturn($purchasedGameRepositoryMock);
+            ->willReturnOnConsecutiveCalls($userRepositoryMock, $purchasedGameRepositoryMock);
+
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
+
         $purchasedGameRepositoryMock
             ->expects($this->once())
             ->method('findBy')
             ->willReturn([$testPurchasedGame2, $testPurchasedGame1]);
 
-        $result = $this->userInfoService->getUsersMostPlayedGames('testLogin');
+        $result = $this->userInfoService->getUsersMostPlayedGames($testUser->getId());
 
         $this->assertNotEmpty($result);
         $this->assertArrayHasKey(0, $result);
@@ -117,5 +102,28 @@ class UserInfoServiceTest extends TestCase
         $this->assertEquals('2', $result[0]['hoursOfPlaying']);
         $this->assertEquals('testTitle1', $result[1]['title']);
         $this->assertEquals('1', $result[1]['hoursOfPlaying']);
+    }
+
+    public function testUpdateUserInfo()
+    {
+        $testUser = $this->createUser();
+
+        $testData = [
+            'nickname' => 'anotherNickname',
+            'firstName' => 'anotherFirstName',
+            'lastName' => 'anotherLastName',
+            'email' => 'anotherEmail'
+        ];
+
+        $userRepositoryMock = $this->createMock(UserRepository::class);
+        $this->setUserRepositoryAsReturnFromEntityManager($userRepositoryMock);
+        $this->setTestUserAsReturnFromRepositoryMockById($userRepositoryMock, $testUser);
+
+        $result = $this->userInfoService->updateUserInfo($testUser->getId(), $testData);
+
+        $this->assertEquals($testData['nickname'], $result->getNickname());
+        $this->assertEquals($testData['firstName'], $result->getFirstName());
+        $this->assertEquals($testData['lastName'], $result->getLastName());
+        $this->assertEquals($testData['email'], $result->getEmail());
     }
 }

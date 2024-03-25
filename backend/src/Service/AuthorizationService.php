@@ -7,17 +7,13 @@ use App\Exceptions\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 class AuthorizationService
 {
-    use ResetDatabase;
-
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly TokenService $tokenService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly GetEntitiesService $getEntitiesService
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
 
     }
@@ -27,7 +23,7 @@ class AuthorizationService
      */
     public function login(string $login, string $password): string
     {
-        $user = $this->getEntitiesService->getUserByLogin($login);
+        $user = $this->em->getRepository(User::class)->findByLogin($login);
 
         if (!$this->userPasswordHasher->isPasswordValid($user, $password)){
             throw new \Exception('Wrong login or password', Response::HTTP_UNAUTHORIZED);
@@ -43,12 +39,9 @@ class AuthorizationService
     /**
      * @throws \Exception
      */
-    public function logout(string $token): string
+    public function logout($userId): string
     {
-        $decodedToken = $this->tokenService->decodeLongToken($token);
-        $userLogin = $decodedToken->login;
-
-        $user = $this->getEntitiesService->getUserByLogin($userLogin);
+        $user = $this->em->getRepository(User::class)->findById($userId);
 
         if (!$user->getToken()){
             throw new \Exception('User already unauthorized', Response::HTTP_FORBIDDEN);

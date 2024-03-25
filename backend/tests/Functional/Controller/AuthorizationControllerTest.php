@@ -3,28 +3,32 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Entity\User;
-use App\Factory\UserFactory;
 use App\Service\TokenService;
+use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Zenstruck\Foundry\Test\ResetDatabase;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthorizationControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    use ResetDatabase, CreateUserTrait;
 
     protected KernelBrowser $client;
     protected EntityManager $em;
-    protected TokenService $tokenService;
+    protected static TokenService $tokenService;
+    protected UserPasswordHasherInterface $passwordHasher;
 
     public function setUp(): void
     {
         $this->client = static::createClient();
         $container = static::getContainer();
 
-        $this->tokenService = $container->get(TokenService::class);
+        $this->passwordHasher = $container->get(UserPasswordHasherInterface::class);
+        static::$tokenService = $container->get(TokenService::class);
         $this->em = $this->client->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -33,7 +37,7 @@ class AuthorizationControllerTest extends WebTestCase
     public function loginDataProvider(): array
     {
         return [
-            'success' => ['testLogin', 'testPassword1!'],
+            'success' => ['testLogin', 'testPassword'],
             'wrong password' => ['testLogin', 'wrongPassword'],
             'missing data' => ['', '']
         ];
@@ -53,10 +57,12 @@ class AuthorizationControllerTest extends WebTestCase
      */
     public function testLogin($testLogin, $testPassword)
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword1!'
-        ]);
+
+        $testUser = $this->createUser();
+        $testPasswordHashed= $this->passwordHasher->hashPassword($testUser, 'testPassword');
+        $testUser->setPassword($testPasswordHashed);
+        $this->em->persist($testUser);
+        $this->em->flush();
 
         $this->client->jsonRequest(
             'POST',
@@ -70,7 +76,7 @@ class AuthorizationControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($testLogin && $testPassword === 'testPassword1!') {
+        if ($testLogin && $testPassword === 'testPassword') {
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertArrayHasKey('token', $decodedResponse);
             $this->assertNotEmpty($decodedResponse['token']);
@@ -88,15 +94,14 @@ class AuthorizationControllerTest extends WebTestCase
 
     public function testLogout()
     {
-        UserFactory::createOne([
-            'login' => 'testLogin',
-            'password' => 'testPassword1!'
-        ]);
+        $testUser = $this->createUser();
+
+        $this->em->persist($testUser);
+        $this->em->flush();
 
         $testUser = $this->em->getRepository(User::class)->findOneBy(['login' => 'testLogin']);
-        $testToken = $this->tokenService->createToken($testUser);
 
-        $testUser->setToken($testToken);
+        $testToken = $this->addTokenToUser($testUser);
 
         $this->em->persist($testUser);
         $this->em->flush();
@@ -104,7 +109,9 @@ class AuthorizationControllerTest extends WebTestCase
         $this->client->jsonRequest(
             'POST',
             'https://localhost/api/logout',
-            [],
+            [
+                'userId' => $testUser->getId()
+            ],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
             ]
@@ -121,14 +128,15 @@ class AuthorizationControllerTest extends WebTestCase
     /**
      *  @dataProvider registerDataProvider
      */
-    public function testRegister1($testLogin, $testPassword, $testEmail, $testNickname)
+    public function testRegister($testLogin, $testPassword, $testEmail, $testNickname)
     {
         if ($testLogin === 'sameLogin') {
-            $testUser = new User();
-            $testUser->setLogin('sameLogin');
-            $testUser->setPassword('somePassword123!');
-            $testUser->setNickname('someNickname');
-            $testUser->setEmail('someemail@mail.com');
+            $testUser = $this->createUser(
+                login: 'sameLogin',
+                nickname: 'someNickname',
+                email: 'someemail@mail.com',
+                password: 'somePassword123!'
+            );
             $this->em->persist($testUser);
             $this->em->flush();
         }
@@ -151,7 +159,7 @@ class AuthorizationControllerTest extends WebTestCase
             $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
             $this->assertNotNull($decodedResponse['token']);
 
-            $decodedToken = $this->tokenService->decode($decodedResponse['token']);
+            $decodedToken = static::$tokenService->decode($decodedResponse['token']);
 
             $this->assertEquals($testLogin, $decodedToken->login);
             $this->assertEquals($testEmail, $decodedToken->email);

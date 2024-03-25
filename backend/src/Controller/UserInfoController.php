@@ -29,30 +29,30 @@ class UserInfoController extends AbstractController
     public function getUserInfo(Request $request): ?JsonResponse
     {
         $token = $request->headers->get('authorization');
-
         $decodedToken = $this->tokenService->decodeLongToken($token);
-        $result = $this->userInfoService->getUserInfo($decodedToken->login);
 
-        return new JsonResponse(
+        $result = $this->userInfoService->getUserInfo($decodedToken->id);
+
+        return $this->json(
             $result,
             Response::HTTP_OK
         );
     }
 
     #[Route(
-        "/api/user/get-most-played-games",
+        "/api/user/most-played-games",
         methods: ['GET']
     )]
     #[Tag('User')]
     public function getUsersMostPlayedGames(Request $request): JsonResponse
     {
         $token = $request->headers->get('authorization');
-
         $decodedToken = $this->tokenService->decodeLongToken($token);
+
         try {
-            $result = $this->userInfoService->getUsersMostPlayedGames($decodedToken->login);
+            $result = $this->userInfoService->getUsersMostPlayedGames($decodedToken->id);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -60,65 +60,26 @@ class UserInfoController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             $result,
             Response::HTTP_OK
         );
     }
 
     #[Route(
-        "/api/user/check-pass",
+        "/api/user/change-data",
         methods: ['POST']
     )]
     #[Tag('User')]
-    public function validatePassword(Request $request): JsonResponse
+    public function updateUserInfo(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!$data || !$data['password']){
-            return new JsonResponse(
-                [
-                    'message' => 'Missing data'
-                ],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
-
         $token = $request->headers->get('authorization');
         $decodedToken = $this->tokenService->decodeLongToken($token);
 
-        try {
-            $result = $this->userInfoService->validatePassword($decodedToken->login, $data['password']);
-        } catch (\Exception $e) {
-            return new JsonResponse(
-                [
-                    'message' => $e->getMessage()
-                ],
-                $e->getCode()
-            );
-        }
-
-        return $result ?
-            new JsonResponse(
-                ['result' => 'valid'],
-                Response::HTTP_OK
-            ) : new JsonResponse(
-                ['result' => 'invalid'],
-                Response::HTTP_OK
-            );
-    }
-
-    #[Route(
-        "/api/user/change-data/{login}",
-        methods: ['PATCH']
-    )]
-    #[Tag('User')]
-    public function updateUserInfo(Request $request, $login): JsonResponse
-    {
         $data = json_decode($request->getContent(), true);
 
         if (!$data){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -126,11 +87,47 @@ class UserInfoController extends AbstractController
             );
         }
 
-        $this->userInfoService->updateUserInfo($login, $data);
+        $this->userInfoService->updateUserInfo($decodedToken->id, $data);
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'result' => 'Successfully updated'
+            ], Response::HTTP_OK
+        );
+    }
+
+    #[Route(
+        "/api/user/{userId}/change-pass",
+        methods: ['PATCH']
+    )]
+    #[Tag('User')]
+    public function updatePassword(Request $request, $userId): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !$data['oldPassword'] || !$data['newPassword']){
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        try {
+            $this->userInfoService->updatePassword($userId, $data['oldPassword'], $data['newPassword']);
+        } catch (\Exception $e) {
+            return $this->json(
+                [
+                    'message' => $e->getMessage()
+                ],
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
+        return $this->json(
+            [
+                'message' => 'successfully updated'
             ], Response::HTTP_OK
         );
     }

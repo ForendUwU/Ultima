@@ -2,9 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\Game;
 use App\Entity\Review;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @extends ServiceEntityRepository<Review>
@@ -21,28 +24,31 @@ class ReviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Review::class);
     }
 
-//    /**
-//     * @return Review[] Returns an array of Review objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @throws \Exception
+     */
+    public function findByGameAndUser(Game $game, User $user): Review
+    {
+        $review = $this->findOneBy(['user' => $user, 'game' => $game]);
 
-//    public function findOneBySomeField($value): ?Review
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if (!$review){
+            throw new \Exception('Review not found', Response::HTTP_NOT_FOUND);
+        }
+
+        return $review;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function findById(int $id): Review
+    {
+        $review = $this->findOneBy(['id' => $id]);
+
+        if (!$review){
+            throw new \Exception('Review not found', Response::HTTP_NOT_FOUND);
+        }
+
+        return $review;
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exceptions\ValidationException;
+use App\Service\TokenService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Tag;
@@ -14,7 +15,6 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use App\Service\AuthorizationService;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsController]
 class AuthorizationController extends AbstractController
@@ -25,9 +25,6 @@ class AuthorizationController extends AbstractController
 
     }
 
-    /**
-     * @throws \Exception
-     */
     #[Route(
         "/api/login",
         methods: ['POST']
@@ -83,10 +80,10 @@ class AuthorizationController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['login'] || !$data['password']){
-            return new JsonResponse(
-                    [
-                        'message' => 'Missing data'
-                    ],
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
                 Response::HTTP_BAD_REQUEST
             );
         }
@@ -94,7 +91,7 @@ class AuthorizationController extends AbstractController
         try {
             $result = $this->authorizationService->login($data['login'], $data['password']);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -102,7 +99,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'token' => $result,
             ],
@@ -146,12 +143,21 @@ class AuthorizationController extends AbstractController
     #[Tag('Authorization')]
     public function logout(Request $request): ?JsonResponse
     {
-        $token = $request->headers->get('authorization');
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !$data['userId']){
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
 
         try {
-            $result = $this->authorizationService->logout($token);
+            $result = $this->authorizationService->logout($data['userId']);
         } catch (\Exception $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -159,7 +165,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
             'message' => $result
             ],
@@ -238,7 +244,7 @@ class AuthorizationController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !$data['login'] || !$data['password'] || !$data['email'] || !$data['nickname']){
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'Missing data'
                 ],
@@ -254,14 +260,14 @@ class AuthorizationController extends AbstractController
                 $data['nickname']
             );
         } catch (UniqueConstraintViolationException $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => 'This login is already in use'
                 ],
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
         } catch (ValidationException $e) {
-            return new JsonResponse(
+            return $this->json(
                 [
                     'message' => $e->getMessage()
                 ],
@@ -269,7 +275,7 @@ class AuthorizationController extends AbstractController
             );
         }
 
-        return new JsonResponse(
+        return $this->json(
             [
                 'token' => $result
             ],

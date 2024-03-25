@@ -1,6 +1,10 @@
 export default function validatePassword(password, confirmationPassword )
 {
-    if (password.length < 6) {
+    if (!password) {
+        throw new Error('Password mustn\'t be empty');
+    } else if (!confirmationPassword) {
+        throw new Error('Confirmation password mustn\'t be empty');
+    } else if (password.length < 6) {
         throw new Error('Password must contain 6 or more characters');
     } else if (password.length > 50) {
         throw new Error('Password must contain less than 50 characters');
