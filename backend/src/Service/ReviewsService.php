@@ -5,13 +5,20 @@ namespace App\Service;
 use App\Entity\Game;
 use App\Entity\Review;
 use App\Entity\User;
+use App\Message\Rating;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ReviewsService
 {
     public function __construct(
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private MessageBusInterface $bus
     ) {
 
     }
@@ -30,7 +37,15 @@ class ReviewsService
         }
 
         $review = new Review();
-        $review->setContent($reviewContent);
+
+        if ($reviewContent !== '') {
+            $review->setContent($reviewContent);
+            $review->setFull(true);
+        } else {
+            $review->setContent('');
+            $review->setFull(false);
+        }
+
         $review->setUser($user);
         $review->setGame($game);
 
@@ -48,7 +63,8 @@ class ReviewsService
             return [
                 'id' => $item->getId(),
                 'content' => $item->getContent(),
-                'userNickname' => $item->getUser()->getNickname()
+                'userNickname' => $item->getUser()->getNickname(),
+                'isFull' => $item->isFull()
             ];
         }, $this->em->getRepository(Review::class)->findBy(['game' => $game]));
     }
@@ -60,7 +76,11 @@ class ReviewsService
     {
         $review = $this->em->getRepository(Review::class)->findById($reviewId);
 
-        $review->setContent($reviewContent);
+        if ($reviewContent != '') {
+            $review->setContent($reviewContent);
+            $review->setFull(true);
+        }
+
         $this->em->flush();
 
         return $review;
@@ -72,9 +92,10 @@ class ReviewsService
     public function deleteUsersReview($reviewId): void
     {
         $review = $this->em->getRepository(Review::class)->findById($reviewId);
-
+        $rating = new Rating(null, $reviewId);
+        $this->bus->dispatch($rating);
         $this->em->remove($review);
-        $this->em->flush();
+        sleep(1);
     }
 
     /**
@@ -89,7 +110,20 @@ class ReviewsService
 
         return $review ? [
             'id' => $review->getId(),
-            'content' => $review->getContent()
+            'content' => $review->getContent(),
+            'rating' => $review->getRating()
         ] : null;
+    }
+
+    public function sendRating(int $reviewId, ?int $rating): void
+    {
+        $review = $this->em->getRepository(Review::class)->findById($reviewId);
+
+        if ($review->getRating() === $rating) {
+            throw new \Exception('Already has this rate', Response::HTTP_FORBIDDEN);
+        }
+
+        $this->bus->dispatch(new Rating($rating, $reviewId));
+        sleep(1);
     }
 }

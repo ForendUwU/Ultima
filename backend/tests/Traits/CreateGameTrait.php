@@ -10,11 +10,15 @@ trait CreateGameTrait
         $title = 'testTitle',
         $price = 0,
         $description = 'testDescription',
+        $likes = 0,
+        $dislikes = 0
     ): Game {
         $testGame = new Game();
         $testGame->setTitle($title);
         $testGame->setPrice($price);
         $testGame->setDescription($description);
+        $testGame->setLikes($likes);
+        $testGame->setDislikes($dislikes);
 
         return $testGame;
     }

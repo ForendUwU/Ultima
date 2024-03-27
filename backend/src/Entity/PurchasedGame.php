@@ -55,9 +55,6 @@ class PurchasedGame
     #[Groups(['user:read', 'purchasedGame:read', 'user:write'])]
     private ?Game $game = null;
 
-    #[ORM\Column]
-    private ?int $undefinedLikedDisliked = 0;
-
     public function __construct()
     {
         $this->boughtAt = new \DateTimeImmutable();
@@ -106,18 +103,6 @@ class PurchasedGame
     public function setGame(?Game $game): static
     {
         $this->game = $game;
-
-        return $this;
-    }
-
-    public function getUndefinedLikedDisliked(): ?int
-    {
-        return $this->undefinedLikedDisliked;
-    }
-
-    public function setUndefinedLikedDisliked(int $undefinedLikedDisliked): static
-    {
-        $this->undefinedLikedDisliked = $undefinedLikedDisliked;
 
         return $this;
     }

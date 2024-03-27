@@ -12,11 +12,15 @@ trait CreateReviewTrait
         $user,
         $game,
         $content = 'testContent',
+        $isFull = true,
+        $rating = null
     ): Review {
         $testReview = new Review();
         $testReview->setUser($user ?: self::createUser());
         $testReview->setGame($game ?: self::createGame());
         $testReview->setContent($content);
+        $testReview->setFull($isFull);
+        $testReview->setRating($rating);
 
         return $testReview;
     }

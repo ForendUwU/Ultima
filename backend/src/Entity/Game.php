@@ -218,4 +218,24 @@ class Game
 
         return $this;
     }
+
+    public function increaseLikes()
+    {
+        $this->likes = $this->likes + 1;
+    }
+
+    public function decreaseLikes()
+    {
+        $this->likes = $this->likes - 1;
+    }
+
+    public function increaseDislikes()
+    {
+        $this->dislikes = $this->dislikes + 1;
+    }
+
+    public function decreaseDislikes()
+    {
+        $this->dislikes = $this->dislikes - 1;
+    }
 }

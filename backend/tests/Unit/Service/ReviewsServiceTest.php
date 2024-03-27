@@ -12,6 +12,7 @@ use App\Tests\Traits\CreateReviewTrait;
 use App\Tests\Traits\CreateUserTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ReviewsServiceTest extends TestCase
 {
@@ -19,11 +20,14 @@ class ReviewsServiceTest extends TestCase
 
     public static $emMock;
     private ReviewsService $reviewsService;
+    private MessageBusInterface $bus;
     public function setUp(): void
     {
         static::$emMock = $this->createMock(EntityManagerInterface::class);
+        $this->bus = $this->createMock(MessageBusInterface::class);
         $this->reviewsService = new ReviewsService(
-            static::$emMock
+            static::$emMock,
+            $this->bus
         );
     }
 
@@ -81,6 +85,7 @@ class ReviewsServiceTest extends TestCase
         $expectedReview->setGame($testGame);
         $expectedReview->setUser($testUser);
         $expectedReview->setContent('test content');
+        $expectedReview->setFull(true);
 
         if (!$reviewAlreadyExists) {
             $result = $this->reviewsService->createGameReview('test content', $testUser->getId(), $testGame->getId());
