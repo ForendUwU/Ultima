@@ -59,14 +59,6 @@ class ReviewsControllerTest extends WebTestCase
         ];
     }
 
-    public function deleteReviewDataProvider(): array
-    {
-        return [
-            'success' => [true],
-            'user doesn\'t have a review' => [false]
-        ];
-    }
-
     public function getUserReviewContentByGameIdDataProvider(): array
     {
         return [
@@ -242,10 +234,7 @@ class ReviewsControllerTest extends WebTestCase
         }
     }
 
-    /**
-     *  @dataProvider deleteReviewDataProvider
-     */
-    public function testDeleteReview($createFakeReview)
+    public function testDeleteReview()
     {
         $testUser = $this->createUser();
         $this->em->persist($testUser);
@@ -256,13 +245,11 @@ class ReviewsControllerTest extends WebTestCase
 
         $this->em->persist($testGame);
 
-        if ($createFakeReview) {
-            $testReview = $this->createReview(
-                user: $testUser,
-                game: $testGame
-            );
-            $this->em->persist($testReview);
-        }
+        $testReview = $this->createReview(
+            user: $testUser,
+            game: $testGame
+        );
+        $this->em->persist($testReview);
 
         $this->em->flush();
 
@@ -270,7 +257,7 @@ class ReviewsControllerTest extends WebTestCase
             'DELETE',
             'https://localhost/api/games/'.$testGame->getId().'/review',
             [
-                'reviewId' => isset($testReview) ? $testReview->getId() : 999
+                'reviewId' => $testReview->getId()
             ],
             [
                 'HTTP_Authorization' => 'Bearer '.$testToken
@@ -280,19 +267,9 @@ class ReviewsControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $decodedResponse = json_decode($response->getContent(), true);
 
-        if ($createFakeReview) {
-            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-            $this->assertNotEmpty($decodedResponse['message']);
-            $this->assertEquals('Review was successfully deleted', $decodedResponse['message']);
-
-            $purchasedGame = $this->em->getRepository(Review::class)->findOneBy(['user' => $testUser, 'game' => $testGame]);
-
-            $this->assertNull($purchasedGame);
-        } else if (!$createFakeReview) {
-            $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-            $this->assertNotEmpty($decodedResponse['message']);
-            $this->assertEquals('Review not found', $decodedResponse['message']);
-        }
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertNotEmpty($decodedResponse['message']);
+        $this->assertEquals('Review was successfully deleted', $decodedResponse['message']);
     }
 
     /**

@@ -20,7 +20,7 @@ class Review
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
@@ -30,6 +30,12 @@ class Review
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Game $game = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $rating = null;
+
+    #[ORM\Column]
+    private ?bool $full = null;
 
     public function getId(): ?int
     {
@@ -41,7 +47,7 @@ class Review
         return $this->content;
     }
 
-    public function setContent(string $content): static
+    public function setContent(?string $content): static
     {
         $this->content = $content;
 
@@ -68,6 +74,30 @@ class Review
     public function setGame(?Game $game): static
     {
         $this->game = $game;
+
+        return $this;
+    }
+
+    public function getRating(): ?int
+    {
+        return $this->rating;
+    }
+
+    public function setRating(?int $rating): static
+    {
+        $this->rating = $rating;
+
+        return $this;
+    }
+
+    public function isFull(): ?bool
+    {
+        return $this->full;
+    }
+
+    public function setFull(bool $full): static
+    {
+        $this->full = $full;
 
         return $this;
     }

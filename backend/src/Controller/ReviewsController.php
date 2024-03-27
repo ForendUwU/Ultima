@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\ReviewRepository;
 use App\Service\ReviewsService;
 use App\Service\TokenService;
 use OpenApi\Attributes\Tag;
@@ -17,6 +18,7 @@ class ReviewsController extends AbstractController
 {
     public function __construct(
         private readonly ReviewsService $reviewsService,
+        private ReviewRepository $reviewRepository,
         private readonly TokenService $tokenService
     ) {
 
@@ -176,12 +178,54 @@ class ReviewsController extends AbstractController
             $this->json(
                 [
                     'reviewId' => $result['id'],
-                    'reviewContent' => $result['content']
+                    'reviewContent' => $result['content'],
+                    'rating' => $result['rating']
                 ], Response::HTTP_OK) :
             $this->json(
                 [
                     'reviewId' => '',
-                    'reviewContent' => ''
+                    'reviewContent' => '',
+                    'rating' => ''
                 ], Response::HTTP_OK);
+    }
+
+    #[Route(
+        "/api/rate",
+        methods: ['POST']
+    )]
+    #[Tag('User')]
+    public function rateGame(Request $request): JsonResponse
+    {
+        $token = $request->headers->get('authorization');
+        $decodedToken = $this->tokenService->decodeLongToken($token);
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !$data['rating'] || !$data['gameId']){
+            return $this->json(
+                [
+                    'message' => 'Missing data'
+                ],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        if ($data['reviewId']) {
+            $review = $this->reviewRepository->findById($data['reviewId']);
+        } else {
+            $review = $this->reviewsService->createGameReview('', $decodedToken->id, $data['gameId']);
+        }
+
+        try {
+            $this->reviewsService->sendRating($review->getId(), $data['rating']);
+        } catch (\Exception $e) {
+            return $this->json([
+                'message' => $e->getMessage()
+            ], $e->getCode());
+        }
+
+        return $this->json([
+            'message' => 'rated successfully'
+        ], Response::HTTP_OK);
     }
 }

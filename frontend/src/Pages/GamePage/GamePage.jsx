@@ -28,7 +28,8 @@ export default function GamePage() {
 
     const [gameInfo, gameInfoError, gameInfoLoading] = useFetch({
         url: 'https://localhost/api/games/'+gameId,
-        method: 'GET'
+        method: 'GET',
+        updateEffect: updateEffect
     });
      gameInfoError && setError(error.toString() + "\n" + gameInfoError.toString());
 
@@ -46,7 +47,7 @@ export default function GamePage() {
         tokenFlag: false,
         updateEffect: updateEffect
     });
-    console.log(currentUserReview);
+
     userReviewError && setError(error.toString() + "\n" + userReviewError.toString());
 
     const HandlePurchase = () => {
@@ -122,6 +123,20 @@ export default function GamePage() {
         }
     }
 
+    const handleRate = (rate) => {
+        doRequest({
+            url: 'https://localhost/api/rate',
+            method: 'POST',
+            token: cookies.get('token'),
+            body: {
+                rating: rate,
+                reviewId: currentUserReview.reviewId,
+                gameId: gameId
+            }
+        });
+        setUpdateEffect(updateEffect+1);
+    }
+
     if(reviewsLoading || userReviewLoading || !headerContext.userLoaded || gameInfoLoading) return <Loading />;
     if(error) return <Error errorText={error} />;
 
@@ -138,6 +153,7 @@ export default function GamePage() {
                         handleDelete={handleDelete}
                         reviews={reviews}
                         currentUserReview={currentUserReview}
+                        handleRate={handleRate}
                     />
                 </GlowingGrid>
             </Container>

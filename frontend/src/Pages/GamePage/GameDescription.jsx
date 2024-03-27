@@ -4,7 +4,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import React from "react";
 
-export default function GameDescription({gameInfo, HandlePurchase}) {
+export default function GameDescription({gameInfo, handlePurchase}) {
     return (
         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }} justifyContent="center">
             <Grid item xs={6}>
@@ -16,7 +16,7 @@ export default function GameDescription({gameInfo, HandlePurchase}) {
                         <Typography variant="h4">{gameInfo.description}</Typography>
                     </Grid>
                     <Grid item>
-                        <PurchasedGameButton handler={HandlePurchase} color="success">{"Buy for "+gameInfo.price + "$"}</PurchasedGameButton>
+                        <PurchasedGameButton handler={handlePurchase} color="success">{"Buy for "+gameInfo.price + "$"}</PurchasedGameButton>
                     </Grid>
                 </Grid>
             </Grid>

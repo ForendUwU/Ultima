@@ -30,6 +30,8 @@ RUN set -eux; \
 		intl \
 		opcache \
 		zip \
+        amqp \
+        sockets \
 	;
 
 ###> recipes ###

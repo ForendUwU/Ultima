@@ -70,6 +70,12 @@ services:
     expose:
       - 33060
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
 volumes:
   caddy_data:
   caddy_config:

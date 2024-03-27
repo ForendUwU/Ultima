@@ -21,6 +21,7 @@ class UserInfoController extends AbstractController
     ) {
 
     }
+
     #[Route(
         "/api/user/me",
         methods: ['GET']

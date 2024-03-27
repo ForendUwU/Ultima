@@ -1,9 +1,13 @@
-import {Button, Grid, Paper, Stack, Typography} from "@mui/material";
+import {Grid, Paper, Stack, Typography} from "@mui/material";
 import {PageTitle, ReviewInputField} from "../../Components";
 import React from "react";
 import Cookies from "universal-cookie";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import {Button as JoyButton} from "@mui/joy";
+import {Button} from "@mui/material";
 
-export default function Reviews({handleCreateOrUpdateReview, handleDelete, reviews,  currentUserReview}) {
+export default function Reviews({handleCreateOrUpdateReview, handleDelete, reviews,  currentUserReview, handleRate}) {
     const [inputData, setInputData] = React.useState();
 
     const cookies = new Cookies();
@@ -11,8 +15,16 @@ export default function Reviews({handleCreateOrUpdateReview, handleDelete, revie
     return (
     <>
         {cookies.get('token') &&
-            <Stack sx={{marginBottom:"3%"}}>
+            <Stack>
                 <ReviewInputField setter={setInputData} defaultValue={currentUserReview.reviewContent} />
+                <Grid item sx={{ marginBottom: "3%", height: "100%" }}>
+                    <Button variant={currentUserReview.rating === 1 ? 'contained' : 'outlined'} onClick={() => {handleRate(1)}} color="success" sx={{ height: "100%" }}>
+                        <ThumbUpIcon />
+                    </Button>
+                    <Button variant={currentUserReview.rating === 2 ? 'contained' : 'outlined'} onClick={() => {handleRate(2)}} color="error" sx={{ height: "100%" }}>
+                        <ThumbDownIcon />
+                    </Button>
+                </Grid>
                 <Grid>
                     <Button
                         variant="outlined"
@@ -39,6 +51,7 @@ export default function Reviews({handleCreateOrUpdateReview, handleDelete, revie
         <Stack spacing={2}>
             {reviews.length !== 0 ?
                 reviews.map((item) => (
+                    item.isFull &&
                     <Paper key={item.id} sx={{ backgroundColor: "#e9cda2", padding: "1%" }}>
                         <Grid container justifyContent="space-between">
                             <Grid item>
